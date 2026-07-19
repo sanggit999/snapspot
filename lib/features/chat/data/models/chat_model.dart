@@ -1,78 +1,37 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:snapspot/features/auth/data/models/user_model.dart';
-import 'package:snapspot/features/chat/domain/entities/chat_entity.dart';
 
-/// Lớp Model đóng gói dữ liệu của Tin nhắn.
-class MessageModel extends MessageEntity {
-  const MessageModel({
-    required super.id,
-    required super.senderId,
-    required super.content,
-    required super.createdAt,
-    super.imageUrl,
-  });
+part 'chat_model.freezed.dart';
+part 'chat_model.g.dart';
 
-  factory MessageModel.fromJson(Map<String, dynamic> json) {
-    return MessageModel(
-      id: json['id'] as String,
-      senderId:
-          json['sender_id'] as String? ?? json['senderId'] as String? ?? '',
-      content: json['content'] as String? ?? '',
-      createdAt: DateTime.parse(
-        json['created_at'] as String? ??
-            json['createdAt'] as String? ??
-            DateTime.now().toIso8601String(),
-      ),
-      imageUrl: json['image_url'] as String? ?? json['imageUrl'] as String?,
-    );
-  }
+/// Model dữ liệu của Tin nhắn (Data Layer).
+/// Trách nhiệm duy nhất: ánh xạ JSON ↔ Dart object.
+@freezed
+abstract class MessageModel with _$MessageModel {
+  const factory MessageModel({
+    required String id,
+    @JsonKey(name: 'sender_id') required String senderId,
+    required String content,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'image_url') String? imageUrl,
+  }) = _MessageModel;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'sender_id': senderId,
-      'content': content,
-      'created_at': createdAt.toIso8601String(),
-      'image_url': imageUrl,
-    };
-  }
+  factory MessageModel.fromJson(Map<String, dynamic> json) =>
+      _$MessageModelFromJson(json);
 }
 
-/// Lớp Model đóng gói dữ liệu của Phòng Chat.
-class ChatRoomModel extends ChatRoomEntity {
-  const ChatRoomModel({
-    required super.id,
-    required super.partner,
-    required super.lastMessage,
-    required super.unreadCount,
-    required super.messages,
-  });
+/// Model dữ liệu của Phòng chat (Data Layer).
+/// Trách nhiệm duy nhất: ánh xạ JSON ↔ Dart object.
+@freezed
+abstract class ChatRoomModel with _$ChatRoomModel {
+  const factory ChatRoomModel({
+    required String id,
+    required UserModel partner,
+    @JsonKey(name: 'last_message') MessageModel? lastMessage,
+    @JsonKey(name: 'unread_count') required int unreadCount,
+    required List<MessageModel> messages,
+  }) = _ChatRoomModel;
 
-  factory ChatRoomModel.fromJson(Map<String, dynamic> json) {
-    final messagesList = (json['messages'] as List? ?? [])
-        .map((m) => MessageModel.fromJson(m as Map<String, dynamic>))
-        .toList();
-
-    return ChatRoomModel(
-      id: json['id'] as String,
-      partner: UserModel.fromJson(json['partner'] as Map<String, dynamic>),
-      lastMessage: json['last_message'] != null
-          ? MessageModel.fromJson(json['last_message'] as Map<String, dynamic>)
-          : (messagesList.isNotEmpty ? messagesList.last : null),
-      unreadCount:
-          json['unread_count'] as int? ?? json['unreadCount'] as int? ?? 0,
-      messages: messagesList,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'partner': (partner as UserModel).toJson(),
-      'last_message': lastMessage != null
-          ? (lastMessage as MessageModel).toJson()
-          : null,
-      'unread_count': unreadCount,
-      'messages': messages.map((m) => (m as MessageModel).toJson()).toList(),
-    };
-  }
+  factory ChatRoomModel.fromJson(Map<String, dynamic> json) =>
+      _$ChatRoomModelFromJson(json);
 }

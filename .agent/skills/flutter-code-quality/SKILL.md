@@ -46,6 +46,97 @@ This skill guides the development and auditing of Dart and Flutter codebase. It 
 - **Either Rules (fpdart)**:
   - All operations prone to failure (API requests, database operations, file storage, auth logic) must return `Either<Failure, Success>` instead of throwing raw exceptions or returning implicit error values like `null`, `false`, `-1`, or empty objects.
 
+### 3.1. Mapper Rules (Model ↔ Entity Conversion)
+- **Layer Isolation**: The Data Layer and Domain Layer must be strictly separated. **Mappers** are the exclusive bridge between them.
+  - `Model → Entity`: The **Mapper** converts a Data Model into a pure Domain Entity.
+  - `Entity → Model`: The **Mapper** converts a Domain Entity back into a Data Model for persistence or outbound transmission.
+  - The **Repository** is the **only place** that calls the Mapper and returns results to the Domain layer.
+  - **Presentation** and **Domain** layers must never import or manipulate Model classes directly.
+  - **Data** layer must never use Entities for reading/writing JSON or interacting with API/Database.
+
+- **Mapper Location Rule** (Single Responsibility Principle):
+  - ❌ **Do NOT** define `toEntity()` or `toModel()` as methods inside the Model or Entity class.
+  - ❌ **Do NOT** place mapping logic inside Repository implementation methods.
+  - ✅ **Always** create a dedicated **Mapper** in `data/mappers/<feature_name>_mapper.dart`.
+  - Mapper can be implemented as either a **Dart Extension** (preferred for simplicity) or a **Mapper Class** (preferred when mapping logic is complex or requires injection).
+
+- **Standard directory structure**:
+  ```text
+  features/
+    auth/
+      data/
+        models/
+          user_model.dart       # Only: @freezed, fromJson(), toJson()
+        mappers/
+          user_mapper.dart      # Only: Model ↔ Entity conversion logic
+        repositories/
+          auth_repository_impl.dart
+      domain/
+        entities/
+          user_entity.dart      # Only: pure business fields, no JSON, no fromJson
+        repositories/
+          auth_repository.dart
+  ```
+
+- **Model** (pure data representation, NO mapping logic):
+  ```dart
+  // data/models/user_model.dart
+  @freezed
+  abstract class UserModel with _$UserModel {
+    const factory UserModel({
+      required String id,
+      required String email,
+      @JsonKey(name: 'full_name') required String fullName,
+    }) = _UserModel;
+
+    factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+    // ❌ NO toEntity() here — that belongs in the Mapper
+  }
+  ```
+
+- **Mapper** (Extension preferred — isolated in `data/mappers/`):
+  ```dart
+  // data/mappers/user_mapper.dart
+  import 'package:snapspot/features/auth/data/models/user_model.dart';
+  import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
+
+  extension UserModelMapper on UserModel {
+    /// Model → Entity (Data → Domain)
+    UserEntity toEntity() => UserEntity(
+          id: id,
+          email: email,
+          fullName: fullName,
+        );
+  }
+
+  extension UserEntityMapper on UserEntity {
+    /// Entity → Model (Domain → Data)
+    UserModel toModel() => UserModel(
+          id: id,
+          email: email,
+          fullName: fullName,
+        );
+  }
+  ```
+
+- **Repository** calls Mapper — the only layer that touches both Model and Entity:
+  ```dart
+  // data/repositories/auth_repository_impl.dart
+  import 'package:snapspot/features/auth/data/mappers/user_mapper.dart';
+
+  Future<Either<Failure, UserEntity>> getUserById(String id) async {
+    try {
+      final model = await remoteDataSource.fetchUser(id);
+      return Right(model.toEntity()); // Extension from user_mapper.dart
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    }
+  }
+  ```
+
+
+
+
 
 ### 5. Dependency Injection (get_it) Rules
 - **Use get_it as the Central Service Locator**: Use a global `getIt` instance (usually in a file named `injection_container.dart` or `service_locator.dart`) to register and retrieve dependencies.

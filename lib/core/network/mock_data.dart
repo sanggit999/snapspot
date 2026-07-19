@@ -1,13 +1,12 @@
-import 'package:snapspot/features/auth/data/models/user_model.dart';
-import 'package:snapspot/features/feed/data/models/post_model.dart';
+import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
-import 'package:snapspot/features/chat/data/models/chat_model.dart';
+import 'package:snapspot/features/chat/domain/entities/chat_entity.dart';
 
 /// Dữ liệu giả lập chất lượng cao phục vụ cho phát triển Frontend của SnapSpot.
 class MockData {
   // 1. Danh sách Users giả lập
-  static final List<UserModel> mockUsers = [
-    const UserModel(
+  static final List<UserEntity> mockUsers = [
+    const UserEntity(
       id: 'usr_1',
       email: 'sangnguyen@example.com',
       username: 'sangnguyen',
@@ -21,7 +20,7 @@ class MockData {
       followersCount: 1450,
       followingCount: 382,
     ),
-    const UserModel(
+    const UserEntity(
       id: 'usr_2',
       email: 'lananh@example.com',
       username: 'lananh_traveler',
@@ -35,7 +34,7 @@ class MockData {
       followersCount: 5200,
       followingCount: 890,
     ),
-    const UserModel(
+    const UserEntity(
       id: 'usr_3',
       email: 'minhquan@example.com',
       username: 'quan_explorer',
@@ -49,7 +48,7 @@ class MockData {
       followersCount: 240,
       followingCount: 420,
     ),
-    const UserModel(
+    const UserEntity(
       id: 'usr_4',
       email: 'hoangnam@example.com',
       username: 'nam_outdoor',
@@ -62,7 +61,7 @@ class MockData {
       followersCount: 8400,
       followingCount: 512,
     ),
-    const UserModel(
+    const UserEntity(
       id: 'usr_5',
       email: 'thuychi@example.com',
       username: 'thuychi_art',
@@ -79,7 +78,7 @@ class MockData {
 
   // 2. Danh sách Posts giả lập kèm toạ độ GPS tại Việt Nam
   static final List<PostEntity> mockPosts = [
-    PostModel(
+    PostEntity(
       id: 'post_1',
       caption:
           'Buổi sáng trong lành tại Hồ Hoàn Kiếm, ngắm Tháp Rùa cổ kính mờ sương. Yêu Hà Nội những ngày thu dịu mát! #hanoi #hoankiem #autumn #photography',
@@ -97,7 +96,7 @@ class MockData {
       isLiked: true,
       createdAt: DateTime.now().subtract(const Duration(hours: 3)),
       comments: [
-        CommentModel(
+        CommentEntity(
           id: 'c_1',
           postId: 'post_1',
           user: mockUsers[0], // Nguyễn Văn Sang
@@ -107,14 +106,14 @@ class MockData {
             const Duration(hours: 2, minutes: 30),
           ),
         ),
-        CommentModel(
+        CommentEntity(
           id: 'c_2',
           postId: 'post_1',
           user: mockUsers[2], // Lê Minh Quân
           content: 'Góc chụp từ hướng Bưu điện Hà Nội đúng không ta? Đẹp thật!',
           createdAt: DateTime.now().subtract(const Duration(hours: 2)),
         ),
-        CommentModel(
+        CommentEntity(
           id: 'c_3',
           postId: 'post_1',
           user: mockUsers[4], // Nguyễn Thùy Chi
@@ -123,7 +122,7 @@ class MockData {
         ),
       ],
     ),
-    PostModel(
+    PostEntity(
       id: 'post_2',
       caption:
           'Nhà thờ Đức Bà Sài Gòn chiều cuối tuần. Dù đang trùng tu nhưng vẫn mang đậm nét kiến trúc Gothic tráng lệ giữa lòng thành phố. #saigon #district1 #nhathoducba #citylife',
@@ -140,14 +139,14 @@ class MockData {
       isLiked: false,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       comments: [
-        CommentModel(
+        CommentEntity(
           id: 'c_4',
           postId: 'post_2',
           user: mockUsers[1],
           content: 'Tuyệt quá anh! Hy vọng công trình sớm hoàn thành trùng tu.',
           createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 2)),
         ),
-        CommentModel(
+        CommentEntity(
           id: 'c_5',
           postId: 'post_2',
           user: mockUsers[0],
@@ -156,7 +155,7 @@ class MockData {
         ),
       ],
     ),
-    PostModel(
+    PostEntity(
       id: 'post_3',
       caption:
           'Phố cổ Hội An lung linh sắc màu lồng đèn khi màn đêm buông xuống. Đi thuyền trên sông Hoài thả hoa đăng cầu bình an. #hoian_oldtown & #danang #travelvietnam',
@@ -174,7 +173,7 @@ class MockData {
       isLiked: false,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
       comments: [
-        CommentModel(
+        CommentEntity(
           id: 'c_6',
           postId: 'post_3',
           user: mockUsers[4],
@@ -185,7 +184,7 @@ class MockData {
         ),
       ],
     ),
-    PostModel(
+    PostEntity(
       id: 'post_4',
       caption:
           'Săn mây thành công tại đỉnh đồi chè Cầu Đất, Đà Lạt! Nhiệt độ lúc 5h sáng chỉ 14 độ C, buốt giá nhưng bù lại là khung cảnh tiên cảnh. ☁️🌲 #dalat #travel #caudat #sanamay',
@@ -202,7 +201,7 @@ class MockData {
       isLiked: true,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       comments: [
-        CommentModel(
+        CommentEntity(
           id: 'c_7',
           postId: 'post_4',
           user: mockUsers[1],
@@ -211,7 +210,7 @@ class MockData {
             const Duration(days: 2, hours: 20),
           ),
         ),
-        CommentModel(
+        CommentEntity(
           id: 'c_8',
           postId: 'post_4',
           user: mockUsers[3],
@@ -222,7 +221,7 @@ class MockData {
         ),
       ],
     ),
-    PostModel(
+    PostEntity(
       id: 'post_5',
       caption:
           'Thung lũng Mường Hoa, Sa Pa mùa lúa chín vàng óng ả trải dài trên những thửa ruộng bậc thang. Một vẻ đẹp kỳ vĩ của thiên nhiên Tây Bắc! #sapa #ruongbacthang #taybac #vietnam',
@@ -243,11 +242,11 @@ class MockData {
   ];
 
   // 3. Danh sách cuộc hội thoại và tin nhắn giả lập
-  static final List<ChatRoomModel> mockChatRooms = [
-    ChatRoomModel(
+  static final List<ChatRoomEntity> mockChatRooms = [
+    ChatRoomEntity(
       id: 'room_1',
       partner: mockUsers[1], // Trần Lan Anh
-      lastMessage: MessageModel(
+      lastMessage: MessageEntity(
         id: 'msg_3',
         senderId: 'usr_2',
         content: 'Tuyệt quá, vậy hẹn cuối tuần này nhé!',
@@ -255,20 +254,20 @@ class MockData {
       ),
       unreadCount: 2,
       messages: [
-        MessageModel(
+        MessageEntity(
           id: 'msg_1',
           senderId: 'usr_1',
           content: 'Chào Lan Anh, mình rất thích các bộ ảnh du lịch của bạn!',
           createdAt: DateTime.now().subtract(const Duration(hours: 1)),
         ),
-        MessageModel(
+        MessageEntity(
           id: 'msg_2',
           senderId: 'usr_2',
           content:
               'Cảm ơn Sang nhé! Mình cũng thấy bạn chụp phong cảnh rất đẹp.',
           createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
         ),
-        MessageModel(
+        MessageEntity(
           id: 'msg_3',
           senderId: 'usr_2',
           content: 'Tuyệt quá, vậy hẹn cuối tuần này nhé!',
@@ -276,10 +275,10 @@ class MockData {
         ),
       ],
     ),
-    ChatRoomModel(
+    ChatRoomEntity(
       id: 'room_2',
       partner: mockUsers[3], // Phạm Hoàng Nam
-      lastMessage: MessageModel(
+      lastMessage: MessageEntity(
         id: 'msg_5',
         senderId: 'usr_3',
         content:
@@ -288,13 +287,13 @@ class MockData {
       ),
       unreadCount: 0,
       messages: [
-        MessageModel(
+        MessageEntity(
           id: 'msg_4',
           senderId: 'usr_1',
           content: 'Hi Nam! Bức ảnh Sài Gòn hôm qua bạn chụp ở góc nào thế?',
           createdAt: DateTime.now().subtract(const Duration(hours: 5)),
         ),
-        MessageModel(
+        MessageEntity(
           id: 'msg_5',
           senderId: 'usr_3',
           content:

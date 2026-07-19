@@ -244,6 +244,93 @@ Kỹ năng này định hướng cấu trúc thư mục và thiết kế hệ th
               return order
   ```
 
+### 8. Phân tách Serializer (DTO) và Domain Object thông qua Mapper
+- **Nguyên tắc**: Trong DRF, **Serializer** đóng vai trò như một **DTO (Data Transfer Object)** – đại diện cho cấu trúc dữ liệu giao tiếp bên ngoài (HTTP request/response). **Service / Business Logic** nên làm việc với **Domain Object** (Python dataclass, TypedDict, hoặc Plain Object), không phải trực tiếp với ORM Model hoặc Serializer instance.
+  - **Tầng View**: Nhận Request → Serializer validate → gọi Service với `validated_data` (đã là dict/domain object).
+  - **Tầng Service**: Chỉ nhận và trả về Domain Object / plain dict, không import Serializer.
+  - **Tầng Repository**: Gọi **Mapper** để chuyển đổi ORM Model ↔ Domain Object. Đây là **nơi duy nhất** được phép làm việc với cả ORM Model lẫn Domain Object.
+  - **Tầng View (response)**: Nhận Domain Object trả về từ Service → đưa vào Output Serializer để serialize → trả về Response.
+
+- **Mapper Location Rule** (Single Responsibility Principle):
+  - ❌ **Không** viết logic ánh xạ trực tiếp bên trong `repositories.py` hoặc trong phương thức của Serializer.
+  - ✅ **Luôn** tạo file **`mappers.py`** riêng biệt trong thư mục của từng Django App để chứa toàn bộ logic chuyển đổi ORM Model ↔ Domain Object.
+  - Cấu trúc thư mục chuẩn:
+    ```text
+    users/                    # Django App: Users Domain
+      models.py               # Chỉ: ORM Model definition
+      serializers.py          # Chỉ: Validation và Serialization (DTO)
+      mappers.py              # Chỉ: Chuyển đổi ORM Model ↔ Domain Object
+      repositories.py         # Gọi Mapper; đóng gói queries DB
+      services.py             # Business Logic; chỉ biết Domain Object
+      views.py                # Thin View; gọi Service
+    ```
+
+- ❌ **Bad (Logic ánh xạ nằm thẳng trong Repository)**:
+  ```python
+  class UserRepository:
+      @staticmethod
+      def get_by_id(user_id: int) -> UserDomain:
+          user = User.objects.get(id=user_id)
+          # ❌ Logic ánh xạ rải rác trực tiếp trong Repository
+          return UserDomain(id=user.id, email=user.email, full_name=user.get_full_name())
+  ```
+
+- ✅ **Good (Mapper tách biệt trong `mappers.py`)**:
+  ```python
+  # users/mappers.py
+  from dataclasses import dataclass
+  from src.users.models import User
+
+  @dataclass
+  class UserDomain:
+      id: int
+      email: str
+      full_name: str
+
+  def user_to_domain(user: User) -> UserDomain:
+      """ORM Model → Domain Object"""
+      return UserDomain(id=user.id, email=user.email, full_name=user.get_full_name())
+
+  def domain_to_user_fields(domain: UserDomain) -> dict:
+      """Domain Object → dict fields dùng cho ORM update/create"""
+      return {'email': domain.email}
+
+  # users/repositories.py
+  from src.users.mappers import user_to_domain, domain_to_user_fields, UserDomain
+
+  class UserRepository:
+      @staticmethod
+      def get_by_id(user_id: int) -> UserDomain:
+          user = User.objects.get(id=user_id)
+          return user_to_domain(user)  # ✅ Mapper được gọi tại đây
+
+      @staticmethod
+      def save(domain: UserDomain) -> UserDomain:
+          user, _ = User.objects.update_or_create(
+              id=domain.id, defaults=domain_to_user_fields(domain)
+          )
+          return user_to_domain(user)  # ✅ Luôn trả về Domain Object
+
+  # users/services.py
+  from src.users.repositories import UserRepository
+  from src.users.mappers import UserDomain
+
+  class UserService:
+      @staticmethod
+      def update_email(user_id: int, new_email: str) -> UserDomain:
+          domain = UserRepository.get_by_id(user_id)
+          domain.email = new_email
+          return UserRepository.save(domain)
+
+  # users/views.py
+  class UserUpdateView(APIView):
+      def patch(self, request, user_id):
+          serializer = UserUpdateInputSerializer(data=request.data)
+          serializer.is_valid(raise_exception=True)
+          domain = UserService.update_email(user_id, serializer.validated_data['email'])
+          return Response(UserOutputSerializer(domain).data)
+  ```
+
 ---
 
 ## Hướng dẫn thực hiện cho Agent (DRF Specific Checklist)
@@ -257,10 +344,12 @@ Kỹ năng này định hướng cấu trúc thư mục và thiết kế hệ th
 3. **Kiểm tra DRF Serializer**:
    - Serializer chỉ được dùng để validate dữ liệu (`is_valid()`) và serialize/deserialize.
    - Phương thức `create()` hoặc `update()` của Serializer không được chứa logic liên kết chéo hay gửi thông báo.
-4. **Kiểm tra Truy cập Cơ sở Dữ liệu**:
+4. **Kiểm tra Truy cập Cơ sở Dữ liệu & Mapper**:
    - Đảm bảo các câu lệnh ORM phức tạp nằm trong `repositories.py` hoặc Django custom `QuerySet` / `Manager`.
    - Tránh viết ORM queries tùy tiện trong views hoặc services.
+   - **Kiểm tra ánh xạ Model ↔ Domain Object**: Repository phải là nơi duy nhất thực hiện chuyển đổi ORM Model thành Domain Object, không để Service hay View làm việc trực tiếp với ORM Model.
 5. **Kiểm tra Kiến trúc Class**:
    - Đảm bảo hạn chế kế thừa sâu. Khuyến khích sử dụng Composition.
 6. **Kiểm tra Django Signals**:
    - Kiểm tra xem có logic nghiệp vụ chính nào đang chạy ngầm trong `signals.py` hay không. Yêu cầu refactor sang gọi tường minh trong lớp Service.
+

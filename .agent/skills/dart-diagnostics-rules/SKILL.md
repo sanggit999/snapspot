@@ -134,6 +134,34 @@ analyzer:
   print(title);
   ```
 
+### 3.5. `non_abstract_class_inherits_abstract_member` (Error)
+- **Nguyên nhân**: Một class **không phải `abstract`** kế thừa hoặc `with` một mixin/class có các phương thức `abstract` mà không cung cấp triển khai cụ thể (concrete implementation) cho tất cả các phương thức đó. Dart sẽ báo lỗi biên dịch vì không thể instantiate một class còn tồn tại abstract member.
+- **Trường hợp phổ biến với `freezed`**: Khi dùng `@freezed`, macro `_$ClassName` (do `build_runner` sinh ra) chứa các abstract members. Nếu khai báo class là `class` thông thường thay vì `abstract class`, Dart Analyzer sẽ báo lỗi này vì class chưa implement đầy đủ các member từ mixin `_$ClassName`.
+- ❌ **Bad (`class` thông thường dùng với `@freezed` khi có custom method)**:
+  ```dart
+  @freezed
+  class UserModel with _$UserModel { // ❌ Lỗi: non_abstract_class_inherits_abstract_member
+    const UserModel._();
+    const factory UserModel({required String id}) = _UserModel;
+
+    UserEntity toEntity() => UserEntity(id: id); // Custom method yêu cầu abstract class
+  }
+  ```
+- ✅ **Good (Dùng `abstract class` để cho phép `freezed` mixin triển khai đầy đủ)**:
+  ```dart
+  @freezed
+  abstract class UserModel with _$UserModel { // ✅ abstract class giải quyết lỗi
+    const UserModel._(); // Bắt buộc khi thêm custom methods vào freezed class
+    const factory UserModel({required String id}) = _UserModel;
+
+    UserEntity toEntity() => UserEntity(id: id);
+  }
+  ```
+- **Quy tắc**: Với **`@freezed`**, luôn dùng `abstract class` khi:
+  1. Class có thêm các **custom methods** (như `toEntity()`, `fromEntity()`, validators).
+  2. Class sử dụng **private constructor** `const ClassName._()` để cho phép viết method body.
+  > Nếu class `@freezed` không có custom method nào, có thể dùng `class` thông thường – tuy nhiên để nhất quán, **luôn khai báo `abstract class`** cho mọi `@freezed` model.
+
 ---
 
 ## 4. Hướng dẫn thực hiện cho Agent (Static Analysis Checklist)
@@ -143,3 +171,4 @@ analyzer:
    - Chỉ sử dụng các chú thích tắt cảnh báo cục bộ (như `// ignore: argument_type_not_assignable`) khi thực sự có trường hợp bất khả kháng (như làm việc với mock data phức tạp hoặc thư viện bên ngoài bị lỗi type).
    - Khi sử dụng, bắt buộc phải viết lý do giải thích ngay phía trên.
 3. **Kiểm soát BuildContext**: Bất cứ khi nào Agent viết lệnh `await`, hãy rà soát xem phía dưới có đoạn mã nào sử dụng `BuildContext` hay không. Nếu có, bắt buộc phải thêm check `if (!context.mounted) return;`.
+4. **Kiểm tra `@freezed` class**: Khi viết hoặc review bất kỳ `@freezed` class nào, xác nhận rằng class đó được khai báo là `abstract class`. Nếu class có custom method hoặc sử dụng `const ClassName._()`, việc thiếu `abstract` sẽ gây lỗi `non_abstract_class_inherits_abstract_member` tại compile time.

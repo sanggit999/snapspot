@@ -1,11 +1,11 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:snapspot/core/error/failures.dart';
 import 'package:snapspot/core/network/mock_data.dart';
-import 'package:snapspot/features/chat/data/models/chat_model.dart';
 import 'package:snapspot/features/chat/domain/entities/chat_entity.dart';
 import 'package:snapspot/features/chat/domain/repositories/chat_repository.dart';
 
 /// Triển khai ChatRepositoryImpl sử dụng fpdart Either.
+/// MockData.mockChatRooms đã là [List<ChatRoomEntity>] nên thao tác trực tiếp.
 class ChatRepositoryImpl implements ChatRepository {
   @override
   Future<Either<Failure, List<ChatRoomEntity>>> getChatRooms() async {
@@ -26,9 +26,9 @@ class ChatRepositoryImpl implements ChatRepository {
 
       final idx = MockData.mockChatRooms.indexWhere((r) => r.id == roomId);
       if (idx != -1) {
-        final room = MockData.mockChatRooms[idx];
-        final updatedRoom = room.copyWith(unreadCount: 0);
-        MockData.mockChatRooms[idx] = updatedRoom as ChatRoomModel;
+        // Đánh dấu đã đọc -> unreadCount = 0
+        final updatedRoom = MockData.mockChatRooms[idx].copyWith(unreadCount: 0);
+        MockData.mockChatRooms[idx] = updatedRoom;
         return Right(updatedRoom);
       }
       throw Exception('Phòng chat không tồn tại');
@@ -46,7 +46,7 @@ class ChatRepositoryImpl implements ChatRepository {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
 
-      final newMessage = MessageModel(
+      final newMessage = MessageEntity(
         id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
         senderId: senderId,
         content: content.trim(),
@@ -62,7 +62,7 @@ class ChatRepositoryImpl implements ChatRepository {
           messages: updatedMessages,
           lastMessage: newMessage,
         );
-        MockData.mockChatRooms[idx] = updatedRoom as ChatRoomModel;
+        MockData.mockChatRooms[idx] = updatedRoom;
         return Right(newMessage);
       }
       throw Exception('Phòng chat không tồn tại');

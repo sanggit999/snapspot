@@ -2,11 +2,12 @@ import 'package:hive/hive.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:snapspot/core/error/failures.dart';
 import 'package:snapspot/core/network/mock_data.dart';
+import 'package:snapspot/features/auth/data/mappers/user_mapper.dart';
+import 'package:snapspot/features/auth/data/models/user_model.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 import 'package:snapspot/features/auth/domain/repositories/auth_repository.dart';
-import 'package:snapspot/features/auth/data/models/user_model.dart';
 
-/// Triển khai AuthRepositoryImpl sử dụng fpdart Either.
+/// Triển khai AuthRepositoryImpl sử dụng fpdart Either, Freezed UserModel và UserMapper.
 class AuthRepositoryImpl implements AuthRepository {
   static const String _boxName = 'settingsBox';
   static const String _tokenKey = 'accessToken';
@@ -21,6 +22,7 @@ class AuthRepositoryImpl implements AuthRepository {
         final savedUserId = box.get(_userIdKey) as String?;
 
         if (token != null && savedUserId != null) {
+          // MockData.mockUsers đã là List<UserEntity> nên dùng trực tiếp
           final matchedUser = MockData.mockUsers.firstWhere(
             (u) => u.id == savedUserId,
             orElse: () => MockData.mockUsers[0],
@@ -86,7 +88,8 @@ class AuthRepositoryImpl implements AuthRepository {
         throw Exception('Tên người dùng đã tồn tại');
       }
 
-      final newUser = UserModel(
+      // Tạo UserModel để tận dụng Freezed/json_serializable trong Data layer
+      final newUserModel = UserModel(
         id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
         email: email,
         username: username,
@@ -100,15 +103,17 @@ class AuthRepositoryImpl implements AuthRepository {
         followingCount: 0,
       );
 
-      MockData.mockUsers.add(newUser);
+      // Dùng UserMapper để chuyển Model → Entity (tách biệt theo SRP)
+      final newUserEntity = UserMapper.toEntity(newUserModel);
+      MockData.mockUsers.add(newUserEntity);
 
       if (Hive.isBoxOpen(_boxName)) {
         final box = Hive.box(_boxName);
-        await box.put(_tokenKey, 'mock_jwt_token_for_${newUser.id}');
-        await box.put(_userIdKey, newUser.id);
+        await box.put(_tokenKey, 'mock_jwt_token_for_${newUserEntity.id}');
+        await box.put(_userIdKey, newUserEntity.id);
       }
 
-      return Right(newUser);
+      return Right(newUserEntity);
     } catch (e) {
       return Left(ServerFailure(e.toString().replaceAll('Exception: ', '')));
     }

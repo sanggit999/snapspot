@@ -81,6 +81,7 @@ Mock Data (Dữ liệu giả lập) đóng vai trò cực kỳ quan trọng tron
   ```dart
   import 'package:flutter_test/flutter_test.dart';
   import 'package:mocktail/mocktail.dart';
+  import 'package:fpdart/fpdart.dart';
   import 'package:snapspot/features/users/domain/repositories/user_repository.dart';
   import 'package:snapspot/features/users/data/datasources/user_remote_datasource.dart';
   import '../../helpers/fixture_helper.dart';
@@ -101,15 +102,24 @@ Mock Data (Dữ liệu giả lập) đóng vai trò cực kỳ quan trọng tron
       // Arrange: Đọc từ JSON fixture
       final jsonMap = FixtureHelper.getJson('user_profile.json');
       final mockModel = UserModel.fromJson(jsonMap);
-      
+
       when(() => mockDataSource.getUserProfile(any()))
           .thenAnswer((_) async => mockModel);
 
       // Act
       final result = await repository.getUserProfile('usr_12345');
 
-      // Assert
-      expect(result.email, equals('testuser@example.com'));
+      // Assert: Repository phải trả về Entity (không phải Model)
+      // Mapper (Extension trong data/mappers/) được gọi bên trong Repository
+      // Model.toEntity() là Extension method từ user_mapper.dart, không nằm trong UserModel class
+      expect(result, isA<Right<Failure, UserEntity>>());
+      result.fold(
+        (failure) => fail('Expected success but got failure: $failure'),
+        (entity) {
+          expect(entity, isA<UserEntity>()); // Phải là Entity, không phải Model
+          expect(entity.email, equals('testuser@example.com'));
+        },
+      );
       verify(() => mockDataSource.getUserProfile('usr_12345')).called(1);
     });
   }

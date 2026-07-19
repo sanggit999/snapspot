@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:snapspot/features/auth/data/mappers/user_mapper.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
-import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
+import 'package:snapspot/features/feed/data/mappers/post_mapper.dart';
 import 'package:snapspot/features/feed/data/models/post_model.dart';
+import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/feed/domain/repositories/feed_repository.dart';
 
 // --- STATES ---
@@ -52,14 +54,16 @@ class PostEditorCubit extends Cubit<PostEditorState> {
         await Future.delayed(const Duration(milliseconds: 300));
       }
 
-      final newPost = PostModel(
+      // Dùng UserMapper để chuyển Entity → Model (Data Layer)
+      final userModel = UserMapper.fromEntity(currentUser);
+      final newPostModel = PostModel(
         id: 'post_${DateTime.now().millisecondsSinceEpoch}',
         caption: caption,
         imageUrls: imageUrls,
         latitude: latitude,
         longitude: longitude,
         locationName: locationName,
-        user: currentUser,
+        user: userModel,
         hashtags: hashtags,
         likesCount: 0,
         commentsCount: 0,
@@ -68,11 +72,13 @@ class PostEditorCubit extends Cubit<PostEditorState> {
         comments: const [],
       );
 
-      // Thêm vào danh sách thông qua FeedRepository được tiêm vào (fpdart Either)
-      final result = await _feedRepository.addNewPost(newPost);
+      // Dùng PostMapper để chuyển Model → Entity trước khi gửi vào Repository
+      final newPostEntity = PostMapper.toEntity(newPostModel);
+
+      final result = await _feedRepository.addNewPost(newPostEntity);
       result.fold(
         (failure) => emit(PostEditorFailure(failure.message)),
-        (_) => emit(PostEditorSuccess(newPost)),
+        (_) => emit(PostEditorSuccess(newPostEntity)),
       );
     } catch (e) {
       emit(PostEditorFailure(e.toString()));
