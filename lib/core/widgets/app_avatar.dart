@@ -1,3 +1,4 @@
+import 'dart:io' as java_io;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:snapspot/core/constants/colors.dart';
@@ -41,28 +42,35 @@ class AppAvatar extends StatelessWidget {
       decoration: const BoxDecoration(shape: BoxShape.circle),
       child: ClipOval(
         child: imageUrl.isNotEmpty
-            ? CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: theme.brightness == Brightness.light
-                      ? AppColors.borderLight
-                      : AppColors.borderDark,
-                  child: const Center(
-                    child: SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 1.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary,
+            ? (imageUrl.startsWith('http')
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: theme.brightness == Brightness.light
+                          ? AppColors.borderLight
+                          : AppColors.borderDark,
+                      child: const Center(
+                        child: SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                errorWidget: (context, url, error) => _buildPlaceholder(theme),
-              )
+                    errorWidget: (context, url, error) => _buildPlaceholder(theme),
+                  )
+                : Image.file(
+                    java_io.File(imageUrl), // Dùng File từ dart:io
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildPlaceholder(theme),
+                  ))
             : _buildPlaceholder(theme),
       ),
     );

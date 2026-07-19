@@ -81,4 +81,37 @@ class AuthCubit extends Cubit<AuthState> {
       (_) => emit(const AuthInitial()),
     );
   }
+
+  /// Cập nhật thông tin cá nhân của người dùng đang đăng nhập
+  Future<bool> updateUserProfile({
+    required String fullName,
+    required String username,
+    required String bio,
+    required bool isPrivate,
+    String? avatarUrl,
+  }) async {
+    final currentState = state;
+    if (currentState is AuthSuccess) {
+      final result = await _authRepository.updateProfile(
+        userId: currentState.currentUser.id,
+        fullName: fullName,
+        username: username,
+        bio: bio,
+        isPrivate: isPrivate,
+        avatarUrl: avatarUrl,
+      );
+
+      return result.fold(
+        (failure) {
+          // Vẫn giữ lại trạng thái cũ
+          return false;
+        },
+        (updatedUser) {
+          emit(AuthSuccess(updatedUser)); // Phát trạng thái mới chứa user mới cập nhật
+          return true;
+        },
+      );
+    }
+    return false;
+  }
 }

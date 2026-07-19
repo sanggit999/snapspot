@@ -111,6 +111,16 @@ class AppLocalizations {
       'notification_settings': 'Cài đặt thông báo',
       'help_feedback': 'Trợ giúp & Phản hồi',
       'privacy_policy': 'Chính sách bảo mật',
+
+      // Edit Profile
+      'fullname': 'Họ và tên',
+      'enter_fullname': 'Nhập họ và tên',
+      'fullname_required': 'Họ tên không được để trống',
+      'username_too_short': 'Tên người dùng quá ngắn',
+      'bio_hint': 'Nhập vài dòng giới thiệu bản thân...',
+      'private_description': 'Chỉ cho phép bạn bè xem bài viết của bạn.',
+      'save_changes': 'Lưu thay đổi',
+      'avatar_update_hint': 'Tính năng tải ảnh đại diện mới đang được phát triển.',
     },
     'en': {
       // Auth
@@ -212,6 +222,16 @@ class AppLocalizations {
       'notification_settings': 'Notification Settings',
       'help_feedback': 'Help & Feedback',
       'privacy_policy': 'Privacy Policy',
+
+      // Edit Profile
+      'fullname': 'Full Name',
+      'enter_fullname': 'Enter your full name',
+      'fullname_required': 'Full name cannot be empty',
+      'username_too_short': 'Username is too short',
+      'bio_hint': 'Tell us a bit about yourself...',
+      'private_description': 'Only allow friends to view your posts.',
+      'save_changes': 'Save changes',
+      'avatar_update_hint': 'Profile image upload feature is under development.',
     },
   };
 

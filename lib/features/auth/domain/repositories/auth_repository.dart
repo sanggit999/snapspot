@@ -19,4 +19,14 @@ abstract class AuthRepository {
 
   /// Đăng xuất khỏi hệ thống
   Future<Either<Failure, void>> logout();
+
+  /// Cập nhật thông tin cá nhân của người dùng
+  Future<Either<Failure, UserEntity>> updateProfile({
+    required String userId,
+    required String fullName,
+    required String username,
+    required String bio,
+    required bool isPrivate,
+    String? avatarUrl,
+  });
 }

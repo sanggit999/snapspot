@@ -180,6 +180,7 @@ class SettingsScreen extends StatelessWidget {
                       SettingsListTile(
                         icon: Icons.person_outline_rounded,
                         title: context.tr('edit_profile'),
+                        onTap: () => context.push('/edit-profile'),
                       ),
                       SettingsListTile(
                         icon: Icons.lock_outline_rounded,
