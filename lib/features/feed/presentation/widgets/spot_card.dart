@@ -101,7 +101,7 @@ class _SpotCardState extends State<SpotCard>
                 AppAvatar(
                   imageUrl: widget.post.user.avatarUrl,
                   size: AppAvatarSize.medium,
-                  onTap: () => context.push('/profile/${widget.post.user.id}'),
+                  onTap: () => context.push('/user/profile/${widget.post.user.id}'),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -110,7 +110,7 @@ class _SpotCardState extends State<SpotCard>
                     children: [
                       GestureDetector(
                         onTap: () =>
-                            context.push('/profile/${widget.post.user.id}'),
+                            context.push('/user/profile/${widget.post.user.id}'),
                         child: Text(
                           widget.post.user.fullName,
                           style: const TextStyle(

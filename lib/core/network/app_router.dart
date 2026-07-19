@@ -1,4 +1,4 @@
-
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/widgets/main_navigation_layout.dart';
@@ -14,9 +14,13 @@ import 'package:snapspot/features/chat/presentation/screens/chat_list_screen.dar
 import 'package:snapspot/features/chat/presentation/screens/chat_room_screen.dart';
 import 'package:snapspot/features/profile/presentation/screens/profile_screen.dart';
 
+// Key định vị Navigator ngoài cùng để điều hướng toàn màn hình (không có BottomBar)
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 /// Cấu hình cây định tuyến (Route Tree) của GoRouter cho toàn bộ ứng dụng.
 /// Sử dụng ShellRoute để duy trì thanh BottomNavigationBar giữa các tab.
 final goRouter = GoRouter(
+  navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   redirect: (context, state) {
     // 1. Kiểm tra trạng thái đăng nhập từ AuthCubit
@@ -39,10 +43,49 @@ final goRouter = GoRouter(
   },
   routes: [
     // Định tuyến cho Auth nằm ngoài ShellRoute (Không hiển thị BottomBar)
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(
+      path: '/login',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const LoginScreen(),
+    ),
     GoRoute(
       path: '/register',
+      parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const RegisterScreen(),
+    ),
+
+    // Các màn hình hiển thị toàn màn hình (Không có BottomBar) được định nghĩa ngang hàng ở ROOT level
+    GoRoute(
+      path: '/post/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final postId = state.pathParameters['id']!;
+        return PostDetailScreen(postId: postId);
+      },
+    ),
+    GoRoute(
+      path: '/camera/editor',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final imagePath = state.uri.queryParameters['imagePath'] ?? '';
+        return PostEditorScreen(imagePath: imagePath);
+      },
+    ),
+    GoRoute(
+      path: '/chat/:roomId',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final roomId = state.pathParameters['roomId']!;
+        return ChatRoomScreen(roomId: roomId);
+      },
+    ),
+    GoRoute(
+      path: '/user/profile/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final userId = state.pathParameters['id']!;
+        return ProfileScreen(userId: userId);
+      },
     ),
 
     // Tích hợp ShellRoute để chứa thanh điều hướng chính
@@ -53,16 +96,6 @@ final goRouter = GoRouter(
         GoRoute(
           path: '/',
           builder: (context, state) => const HomeScreen(),
-          routes: [
-            // Chi tiết bài đăng (nằm đè lên tab Home)
-            GoRoute(
-              path: 'post/:id',
-              builder: (context, state) {
-                final postId = state.pathParameters['id']!;
-                return PostDetailScreen(postId: postId);
-              },
-            ),
-          ],
         ),
 
         // Tab 2: Khám phá bản đồ
@@ -75,35 +108,15 @@ final goRouter = GoRouter(
         GoRoute(
           path: '/camera',
           builder: (context, state) => const CameraScreen(),
-          routes: [
-            // Màn hình biên tập bài viết sau khi chụp ảnh
-            GoRoute(
-              path: 'editor',
-              builder: (context, state) {
-                final imagePath = state.uri.queryParameters['imagePath'] ?? '';
-                return PostEditorScreen(imagePath: imagePath);
-              },
-            ),
-          ],
         ),
 
         // Tab 4: Tin nhắn / Chat
         GoRoute(
           path: '/chat',
           builder: (context, state) => const ChatListScreen(),
-          routes: [
-            // Chi tiết phòng chat
-            GoRoute(
-              path: ':roomId',
-              builder: (context, state) {
-                final roomId = state.pathParameters['roomId']!;
-                return ChatRoomScreen(roomId: roomId);
-              },
-            ),
-          ],
         ),
 
-        // Tab 5: Trang cá nhân
+        // Tab 5: Trang cá nhân của tôi (chính chủ 'me' để giữ BottomBar)
         GoRoute(
           path: '/profile/:id',
           builder: (context, state) {
