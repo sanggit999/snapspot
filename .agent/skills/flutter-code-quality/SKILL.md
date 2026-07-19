@@ -60,12 +60,95 @@ This skill guides the development and auditing of Dart and Flutter codebase. It 
   - Widgets should receive their data/controllers from state management (BLoC/Riverpod/Provider) or via constructor parameter. Do NOT call `getIt<T>()` inside a widget's build method.
   - Only use `getIt` inside the state management configuration layer, repositories, or services to inject constructors.
 
+### 6. Immutable Models, JSON Mapping, and Code Generation (freezed & json_serializable)
+- **Immutable Data Models & States**: Always design Data Layer Models (DTOs) and Presentation Layer States as immutable classes. Use **`freezed`** to automatically generate value equality (`==`), `hashCode`, `toString()`, and `copyWith` methods.
+- **Auto-generated JSON Mapping**: Integrate **`json_serializable`** with `freezed` to automate model serialization and deserialization. Avoid writing manual `fromJson`/`toJson` mappings by hand.
+- **Standard structures & Examples**:
+  
+  * **Simple Immutable Class**:
+    ```dart
+    @freezed
+    abstract class MyClass with _$MyClass {
+      factory MyClass({String? a, int? b}) = _MyClass;
+    }
+    // Usage:
+    final example = MyClass(a: '42', b: 42);
+    final cloned = example.copyWith(a: null); // MyClass(a: null, b: 42)
+    ```
+
+  * **Standard Serializable Class (json_serializable only)**:
+    For mutable or standard class objects not requiring `freezed`, use `@JsonSerializable` on its own:
+    ```dart
+    import 'package:json_annotation/json_annotation.dart';
+
+    part 'person.g.dart';
+
+    @JsonSerializable()
+    class Person {
+      final String firstName, lastName;
+      final DateTime? dateOfBirth;
+
+      Person({required this.firstName, required this.lastName, this.dateOfBirth});
+
+      factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
+      Map<String, dynamic> toJson() => _$PersonToJson(this);
+    }
+    ```
+
+  * **Union Classes (Perfect for State Management)**:
+    ```dart
+    @freezed
+    sealed class Union with _$Union {
+      const factory Union(int value) = Data;
+      const factory Union.loading() = Loading;
+      const factory Union.error([String? message]) = ErrorDetails;
+      const factory Union.complex(int a, String b) = Complex;
+
+      factory Union.fromJson(Map<String, Object?> json) => _$UnionFromJson(json);
+    }
+    ```
+
+  * **Dart 3.0 Pattern Matching (UI Rendering)**:
+    Use Dart 3.0's switch expressions instead of old `when` or `maybeWhen` callbacks for better performance and compile-time exhaustiveness checks:
+    ```dart
+    const unionExample = Union(42);
+    final display = switch (unionExample) {
+      Data(:final value) => 'Data: $value',
+      Loading _ => 'Loading...',
+      ErrorDetails(:final message) => 'Error: $message',
+      Complex(:final a, :final b) => 'Complex: $a, $b',
+    };
+    ```
+
+  * **Shared Properties in Union Classes**:
+    Declare properties with the same name across different constructors to access them directly:
+    ```dart
+    @freezed
+    abstract class SharedProperty with _$SharedProperty {
+      factory SharedProperty.person({String? name, int? age}) = SharedProperty0;
+      factory SharedProperty.city({String? name, int? population}) = SharedProperty1;
+    }
+    // Usage:
+    var example = SharedProperty.person(name: 'Remi', age: 24);
+    print(example.name); // OK: 'name' is shared
+    // print(example.age); // COMPILE ERROR: age is not shared
+    ```
+
+
+
+- **Code Generation Rules (build_runner)**:
+  - Do NOT modify generated files (ending in `.freezed.dart` or `.g.dart`) manually.
+  - To generate code, run: `dart run build_runner build --delete-conflicting-outputs`.
+  - When writing code that depends on generated files (e.g., calling generated constructors or `copyWith`), ensure you run the generator to keep files up-to-date.
+
+
 ### 4. Code Formatting
 - Always run `dart format .` to maintain a consistent spacing and line-wrap.
 - Prefer trailing commas for arguments, parameters, and collections containing more than one item to improve readability and git diff quality.
 
 ## Instructions
 1. Analyze the requested file or code snippet.
-2. Identify code quality issues (naming, structure, N+1 layout passes, mutable state leaks, or hardcoded dependencies).
-3. Apply the recommended refactoring according to clean code and dependency injection (get_it) guidelines.
+2. Identify code quality issues (naming, structure, N+1 layout passes, mutable state leaks, hardcoded dependencies, or manual JSON mapping).
+3. Apply the recommended refactoring according to clean code, dependency injection (get_it), and code generation (freezed) guidelines.
 4. Verify compiling and formatting compatibility.
+
