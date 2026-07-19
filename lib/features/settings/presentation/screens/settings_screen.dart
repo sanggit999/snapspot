@@ -185,6 +185,7 @@ class SettingsScreen extends StatelessWidget {
                       SettingsListTile(
                         icon: Icons.lock_outline_rounded,
                         title: context.tr('change_password'),
+                        onTap: () => context.push('/change-password'),
                       ),
                       SettingsListTile(
                         icon: Icons.notifications_none_rounded,

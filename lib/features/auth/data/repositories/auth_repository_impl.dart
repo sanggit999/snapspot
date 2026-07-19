@@ -177,4 +177,32 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(e.toString().replaceAll('Exception: ', '')));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> changePassword({
+    required String userId,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 1000)); // Giả lập mạng
+
+      // Giả lập mật khẩu mặc định của mọi user là 123456
+      if (oldPassword != '123456') {
+        throw Exception('Mật khẩu hiện tại không chính xác');
+      }
+
+      if (newPassword.length < 6) {
+        throw Exception('Mật khẩu mới phải từ 6 ký tự trở lên');
+      }
+
+      if (oldPassword == newPassword) {
+        throw Exception('Mật khẩu mới không được trùng mật khẩu cũ');
+      }
+
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
 }

@@ -114,4 +114,26 @@ class AuthCubit extends Cubit<AuthState> {
     }
     return false;
   }
+
+  /// Đổi mật khẩu của người dùng đang đăng nhập
+  /// Trả về null nếu thành công, hoặc trả về thông báo lỗi nếu thất bại.
+  Future<String?> changeUserPassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final currentState = state;
+    if (currentState is AuthSuccess) {
+      final result = await _authRepository.changePassword(
+        userId: currentState.currentUser.id,
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+
+      return result.fold(
+        (failure) => failure.message,
+        (_) => null,
+      );
+    }
+    return 'Bạn chưa đăng nhập';
+  }
 }

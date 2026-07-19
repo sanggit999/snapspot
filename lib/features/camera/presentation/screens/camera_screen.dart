@@ -27,7 +27,7 @@ class _CameraScreenState extends State<CameraScreen> {
     },
     {
       'url':
-          'https://images.unsplash.com/photo-1509060464153-4466739f78d0?w=800',
+          'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800',
       'location': 'Hồ Hoàn Kiếm, Hà Nội',
       'lat': 21.0285,
       'lng': 105.8542,
