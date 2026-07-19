@@ -29,36 +29,42 @@ Quy chuẩn này thiết lập luồng làm việc nhất quán với Git trong 
 
 ```mermaid
 graph TD
-    A[Bắt đầu ở develop] --> B[git pull origin develop]
-    B --> C[git checkout -b feature/xxx]
-    C --> D[Thực hiện Code]
-    D --> E[git add <files>]
-    E --> F[git commit]
-    F --> G[git fetch origin]
-    G --> H[git rebase origin/develop]
-    H -->|Có Conflict| I[Resolve Conflict & git rebase --continue]
-    H -->|Không có Conflict| J[git push -u origin feature/xxx]
-    I --> J
-    J --> K[Tạo Pull Request]
-    K --> L[Review & Approved]
-    L --> M[Merge PR vào develop]
-    M --> N[Delete Local & Remote Branch]
+    A[Bắt đầu] --> B[git checkout develop]
+    B --> C[git fetch origin]
+    C --> D[git reset --hard origin/develop]
+    D --> E[git checkout -b feature/xxx]
+    E --> F[Thực hiện Code]
+    F --> G[git add <files>]
+    G --> H[git commit]
+    H --> I[git fetch origin]
+    I --> J[git rebase origin/develop]
+    J -->|Có Conflict| K[Resolve Conflict & git rebase --continue]
+    J -->|Không có Conflict| L[git push -u origin feature/xxx]
+    K --> L
+    L --> M[Tạo Pull Request]
+    M --> N[Review & Approved]
+    N --> O[Merge PR vào develop]
+    O --> P[Delete Local & Remote Branch]
 ```
 
 ### Chi tiết các bước thực hiện
 
-#### Bước 1: Đồng bộ nhánh cơ sở local với remote
-Đứng tại nhánh `develop` và kéo các thay đổi mới nhất:
+#### Bước 1: Đồng bộ và đưa nhánh gốc local về trạng thái khớp hoàn toàn với Remote (Clean Slate)
+Trước khi tạo bất kỳ nhánh tính năng mới nào, bắt buộc phải checkout về nhánh gốc (`develop` hoặc `main`), kéo các commit mới nhất và dùng `reset --hard` để dọn dẹp các thay đổi cục bộ không mong muốn, đảm bảo điểm xuất phát của nhánh mới hoàn toàn sạch sẽ:
 ```bash
 git checkout develop
-git pull origin develop
+git fetch origin
+git reset --hard origin/develop
 ```
+> **Tại sao cần dùng `reset --hard origin/develop`?**
+> Thao tác này giúp loại bỏ hoàn toàn các thay đổi rác hoặc các commit thử nghiệm chưa được push trên nhánh gốc cục bộ, đảm bảo nhánh gốc của bạn khớp 100% với trạng thái trên server trước khi phân nhánh mới.
 
 #### Bước 2: Tạo và chuyển sang nhánh tính năng mới
 Tên nhánh nên tuân theo định dạng: `feature/<tên_tính_năng>` hoặc `bugfix/<tên_lỗi>`:
 ```bash
 git checkout -b feature/xxx
 ```
+
 
 #### Bước 3: Thực hiện code và commit cục bộ
 Thực hiện các chỉnh sửa mã nguồn, sau đó add và commit:

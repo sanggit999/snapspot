@@ -97,9 +97,20 @@ class AppLocalizations {
       'light_theme': 'Chế độ Sáng',
       'dark_theme': 'Chế độ Tối',
       'system_theme': 'Theo Hệ thống',
-      'logout': 'Đăng xuất',
       'logout_confirm': 'Bạn có chắc chắn muốn đăng xuất?',
       'cancel': 'Hủy',
+
+      // Settings Sections
+      'section_app_settings': 'CÀI ĐẶT ỨNG DỤNG',
+      'section_account_security': 'TÀI KHOẢN & BẢO MẬT',
+      'section_support_info': 'HỖ TRỢ & THÔNG TIN',
+
+      // Settings Items
+      'edit_profile': 'Chỉnh sửa thông tin',
+      'change_password': 'Đổi mật khẩu',
+      'notification_settings': 'Cài đặt thông báo',
+      'help_feedback': 'Trợ giúp & Phản hồi',
+      'privacy_policy': 'Chính sách bảo mật',
     },
     'en': {
       // Auth
@@ -189,6 +200,18 @@ class AppLocalizations {
       'logout': 'Logout',
       'logout_confirm': 'Are you sure you want to logout?',
       'cancel': 'Cancel',
+
+      // Settings Sections
+      'section_app_settings': 'APP SETTINGS',
+      'section_account_security': 'ACCOUNT & SECURITY',
+      'section_support_info': 'SUPPORT & INFO',
+
+      // Settings Items
+      'edit_profile': 'Edit Profile',
+      'change_password': 'Change Password',
+      'notification_settings': 'Notification Settings',
+      'help_feedback': 'Help & Feedback',
+      'privacy_policy': 'Privacy Policy',
     },
   };
 

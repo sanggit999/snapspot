@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 import 'package:snapspot/core/network/mock_data.dart';
 import 'package:snapspot/features/profile/presentation/widgets/profile_header_section.dart';
 import 'package:snapspot/features/profile/presentation/widgets/profile_posts_grid.dart';
-import 'package:snapspot/features/profile/presentation/widgets/profile_settings_sheet.dart';
 import 'package:snapspot/features/profile/presentation/widgets/profile_stats_section.dart';
 
 /// Màn hình Trang cá nhân (Profile Screen).
@@ -31,18 +31,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showSettingsBottomSheet(BuildContext context, bool isMe) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return ProfileSettingsSheet(isMe: isMe);
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = _getDisplayedUser(context);
@@ -57,10 +45,11 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('@${user.username}'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => _showSettingsBottomSheet(context, isMe),
-          ),
+          if (isMe)
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => context.push('/settings'),
+            ),
         ],
       ),
       body: SingleChildScrollView(
