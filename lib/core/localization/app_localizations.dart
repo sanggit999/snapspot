@@ -121,6 +121,18 @@ class AppLocalizations {
       'private_description': 'Chỉ cho phép bạn bè xem bài viết của bạn.',
       'save_changes': 'Lưu thay đổi',
       'avatar_update_hint': 'Tính năng tải ảnh đại diện mới đang được phát triển.',
+
+      // Change Password
+      'current_password_label': 'Mật khẩu hiện tại',
+      'current_password_hint': 'Nhập mật khẩu hiện tại của bạn',
+      'current_password_required': 'Vui lòng nhập mật khẩu hiện tại',
+      'new_password_label': 'Mật khẩu mới',
+      'new_password_hint': 'Nhập mật khẩu mới (từ 6 ký tự)',
+      'new_password_required': 'Vui lòng nhập mật khẩu mới',
+      'confirm_new_password_label': 'Nhập lại mật khẩu mới',
+      'confirm_new_password_hint': 'Nhập lại mật khẩu mới để xác nhận',
+      'confirm_new_password_required': 'Vui lòng xác nhận mật khẩu mới',
+      'update_password': 'Cập nhật mật khẩu',
     },
     'en': {
       // Auth
@@ -232,6 +244,18 @@ class AppLocalizations {
       'private_description': 'Only allow friends to view your posts.',
       'save_changes': 'Save changes',
       'avatar_update_hint': 'Profile image upload feature is under development.',
+
+      // Change Password
+      'current_password_label': 'Current Password',
+      'current_password_hint': 'Enter your current password',
+      'current_password_required': 'Please enter your current password',
+      'new_password_label': 'New Password',
+      'new_password_hint': 'Enter new password (min 6 chars)',
+      'new_password_required': 'Please enter your new password',
+      'confirm_new_password_label': 'Confirm New Password',
+      'confirm_new_password_hint': 'Re-enter your new password to confirm',
+      'confirm_new_password_required': 'Please confirm your new password',
+      'update_password': 'Update Password',
     },
   };
 

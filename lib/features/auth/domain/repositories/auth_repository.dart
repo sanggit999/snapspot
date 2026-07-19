@@ -29,4 +29,11 @@ abstract class AuthRepository {
     required bool isPrivate,
     String? avatarUrl,
   });
+
+  /// Thay đổi mật khẩu người dùng
+  Future<Either<Failure, void>> changePassword({
+    required String userId,
+    required String oldPassword,
+    required String newPassword,
+  });
 }
