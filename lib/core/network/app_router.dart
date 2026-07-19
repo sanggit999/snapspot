@@ -13,6 +13,7 @@ import 'package:snapspot/features/camera/presentation/screens/post_editor_screen
 import 'package:snapspot/features/chat/presentation/screens/chat_list_screen.dart';
 import 'package:snapspot/features/chat/presentation/screens/chat_room_screen.dart';
 import 'package:snapspot/features/profile/presentation/screens/profile_screen.dart';
+import 'package:snapspot/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:snapspot/features/settings/presentation/screens/settings_screen.dart';
 
 // Key định vị Navigator ngoài cùng để điều hướng toàn màn hình (không có BottomBar)
@@ -92,6 +93,11 @@ final goRouter = GoRouter(
       path: '/settings',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/edit-profile',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const EditProfileScreen(),
     ),
 
     // Tích hợp ShellRoute để chứa thanh điều hướng chính

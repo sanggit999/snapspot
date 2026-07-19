@@ -134,4 +134,47 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(CacheFailure('Không thể xoá cache đăng xuất: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, UserEntity>> updateProfile({
+    required String userId,
+    required String fullName,
+    required String username,
+    required String bio,
+    required bool isPrivate,
+    String? avatarUrl,
+  }) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 1000)); // Giả lập độ trễ lưu mạng
+
+      final idx = MockData.mockUsers.indexWhere((u) => u.id == userId);
+      if (idx != -1) {
+        final existingUser = MockData.mockUsers[idx];
+        final updatedUser = existingUser.copyWith(
+          fullName: fullName.trim(),
+          username: username.trim().toLowerCase(),
+          bio: bio.trim(),
+          isPrivate: isPrivate,
+          avatarUrl: avatarUrl ?? existingUser.avatarUrl,
+        );
+
+        // Cập nhật lại trong MockData
+        MockData.mockUsers[idx] = updatedUser;
+
+        // Cập nhật lại tất cả bài viết của User này trong MockData.mockPosts
+        for (int i = 0; i < MockData.mockPosts.length; i++) {
+          if (MockData.mockPosts[i].user.id == userId) {
+            MockData.mockPosts[i] = MockData.mockPosts[i].copyWith(
+              user: updatedUser,
+            );
+          }
+        }
+
+        return Right(updatedUser);
+      }
+      throw Exception('Người dùng không tồn tại');
+    } catch (e) {
+      return Left(ServerFailure(e.toString().replaceAll('Exception: ', '')));
+    }
+  }
 }
