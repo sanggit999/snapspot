@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
+import 'package:snapspot/features/feed/presentation/widgets/feed_nearby_empty_state.dart';
+import 'package:snapspot/features/feed/presentation/widgets/feed_shimmer_loader.dart';
 import 'package:snapspot/features/feed/presentation/widgets/spot_card.dart';
 
 /// Màn hình Trang chủ (Feed Screen).
 /// Gồm hai Tab chính: Theo dõi (Follow) và Lân cận (Nearby).
-/// Hỗ trợ Pull-to-refresh, tải vô tận và tính toán vị trí GPS giả lập để quét bán kính.
+/// Áp dụng mẫu thiết kế Widget Composition Pattern ghép nối từ các widget con chuyên biệt.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -31,19 +33,16 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
 
-    // Đăng ký listener chuyển tab để load lại feed tương ứng
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         _loadCurrentTabFeed();
       }
     });
 
-    // Gọi load lần đầu khi khởi tạo
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCurrentTabFeed();
     });
 
-    // Lắng nghe sự kiện cuộn để tạo hiệu ứng Infinite Scroll giả lập
     _followScrollController.addListener(() {
       if (_followScrollController.position.pixels ==
           _followScrollController.position.maxScrollExtent) {
@@ -69,15 +68,14 @@ class _HomeScreenState extends State<HomeScreen>
   void _loadCurrentTabFeed() {
     final isNearby = _tabController.index == 1;
     context.read<FeedCubit>().fetchFeed(
-      isNearby: isNearby,
-      userLat: isNearby ? _userLat : null,
-      userLng: isNearby ? _userLng : null,
-    );
+          isNearby: isNearby,
+          userLat: isNearby ? _userLat : null,
+          userLng: isNearby ? _userLng : null,
+        );
   }
 
   Future<void> _loadMorePosts() async {
-    // Giả lập load thêm trang tiếp theo (Infinite Scroll)
-    // Để giữ bài viết đơn giản, ta chỉ in log hoặc append
+    // Giả lập Infinite Scroll khi cuộn tới đáy trang
   }
 
   @override
@@ -153,10 +151,7 @@ class _HomeScreenState extends State<HomeScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Tab 1: Theo dõi (Following Feed)
           _buildFeedList(_followScrollController, isNearby: false),
-
-          // Tab 2: Lân cận (Nearby Feed)
           _buildFeedList(_nearbyScrollController, isNearby: true),
         ],
       ),
@@ -175,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen>
       child: BlocBuilder<FeedCubit, FeedState>(
         builder: (context, state) {
           if (state is FeedLoading) {
-            return _buildShimmerLoading();
+            return const FeedShimmerLoader();
           }
 
           if (state is FeedError) {
@@ -197,7 +192,11 @@ class _HomeScreenState extends State<HomeScreen>
                 children: [
                   SizedBox(height: MediaQuery.of(context).size.height * 0.25),
                   if (isNearby)
-                    _buildNearbyEmptyState()
+                    FeedNearbyEmptyState(
+                      userLat: _userLat,
+                      userLng: _userLng,
+                      onRefreshPressed: _loadCurrentTabFeed,
+                    )
                   else
                     Center(
                       child: Padding(
@@ -237,121 +236,6 @@ class _HomeScreenState extends State<HomeScreen>
 
           return const SizedBox.shrink();
         },
-      ),
-    );
-  }
-
-  Widget _buildShimmerLoading() {
-    final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
-    final baseColor = isLight
-        ? AppColors.shimmerBase
-        : AppColors.shimmerBaseDark;
-
-    return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      itemCount: 2,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-          height: 380,
-          decoration: BoxDecoration(
-            color: isLight ? Colors.white : AppColors.surfaceDark,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Shimmer
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    CircleAvatar(radius: 20, backgroundColor: baseColor),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(width: 120, height: 12, color: baseColor),
-                        const SizedBox(height: 6),
-                        Container(width: 80, height: 8, color: baseColor),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Image Shimmer
-              Expanded(
-                child: Container(width: double.infinity, color: baseColor),
-              ),
-              // Footer Shimmer
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(width: 150, height: 10, color: baseColor),
-                    const SizedBox(height: 6),
-                    Container(width: 250, height: 8, color: baseColor),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildNearbyEmptyState() {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.gps_fixed_rounded,
-              size: 64,
-              color: AppColors.secondary,
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Quét GPS không có bài viết lân cận',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Chúng tôi không tìm thấy bài đăng nào trong bán kính 10km quanh tọa độ của bạn (${_userLat.toStringAsFixed(4)}, ${_userLng.toStringAsFixed(4)}).',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: theme.brightness == Brightness.light
-                  ? AppColors.textLightSecondary
-                  : AppColors.textDarkSecondary,
-            ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: _loadCurrentTabFeed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            icon: const Icon(Icons.refresh),
-            label: const Text('Thử quét lại'),
-          ),
-        ],
       ),
     );
   }

@@ -28,13 +28,84 @@ This skill guides the development and auditing of Dart and Flutter codebase. It 
 - **Variables, Functions, Parameters**: Use `lowerCamelCase` (e.g., `getUserProfile`).
 - **Private members**: Prefix with an underscore `_` (e.g., `_isLoaded`).
 
-### 2. Widget Construction & Performance
+### 2. Widget Construction, Performance & Composition Pattern
 - **Split Large Widgets**: Do not create massive `build` methods. Split widgets into small, dedicated sub-widgets (`StatelessWidget` or `StatefulWidget`).
 - **Prefer Sub-widgets over Helper Methods**: 
   - ❌ Avoid: `Widget _buildHeader() { ... }` (Rebuilds everything inside, has no separate element tree context).
-  -   Avoid: Use `class HeaderWidget extends StatelessWidget { ... }` (Enables rebuild optimization and const optimization).
+  - ✅ Prefer: Use `class HeaderWidget extends StatelessWidget { ... }` (Enables rebuild optimization and const optimization).
 - **Use `const` Constructors**: Always use `const` for widgets with static content to allow Flutter to skip rebuilding them.
 - **Minimize `setState` Scope**: Avoid calling `setState` at the root of a large widget tree. Use state management or local state in smaller, leaf widgets.
+
+#### 2.1. Widget Composition Pattern
+- **Objective**: Reduce the complexity of a screen's `build()` method by breaking the UI down into multiple small, focused widgets per section. A single Screen file should **NOT** contain hundreds of lines of a nested Widget Tree.
+- **Single Responsibility Principle (SRP) for Widgets**: A widget must only have one specific responsibility.
+  - ✅ Prefer: `PostHeader`, `PostCommentItem`, `PostCommentInput` (Single responsibility).
+  - ❌ Avoid: `PostHeaderAndComment` (Violates SRP, hard to maintain and reuse).
+- **Standard Folder Structure**:
+  Organize UI code under the presentation layer by separating high-level orchestration screens from low-level section widgets:
+  ```text
+  presentation/
+  ├── screens/
+  │     post_detail_screen.dart     # Contains the orchestration layout with small component widgets
+  │
+  └── widgets/
+        post_image_carousel.dart    # Isolated child widgets
+        post_header.dart
+        post_location_section.dart
+        post_caption_section.dart
+        post_comment_section.dart
+        post_comment_item.dart
+        post_comment_input.dart
+  ```
+- **Example Pattern**:
+  - ❌ **Bad (Single screen containing the entire massive widget tree)**:
+    ```dart
+    class PostDetailScreen extends StatelessWidget {
+      @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+          body: Column(
+            children: [
+              // Image widget code (50 lines) ...
+              // Author header widget code (40 lines) ...
+              // Caption widget code (30 lines) ...
+              // Comment list widget code (100 lines) ...
+              // Input field widget code (50 lines) ...
+            ],
+          ),
+        );
+      }
+    }
+    ```
+  - ✅ **Good (Composed Screen using dedicated sub-widgets)**:
+    ```dart
+    class PostDetailScreen extends StatelessWidget {
+      @override
+      Widget build(BuildContext context) {
+        return Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      PostImageCarousel(),
+                      PostHeader(),
+                      PostLocationSection(),
+                      PostCaptionSection(),
+                      PostCommentSection(),
+                    ],
+                  ),
+                ),
+              ),
+              PostCommentInput(),
+            ],
+          ),
+        );
+      }
+    }
+    ```
+
 
 ### 3. Clean Architecture & Functional Error Handling (fpdart) Guidelines
 - **UI Layer**: Purely presentation. It only displays state and triggers events/calls. No direct DB access, API calls, or business logic.
