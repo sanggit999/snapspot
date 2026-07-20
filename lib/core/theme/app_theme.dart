@@ -26,6 +26,8 @@ class AppTheme {
         backgroundColor: AppColors.surfaceLight,
         foregroundColor: AppColors.textLightPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColors.textLightPrimary),
         titleTextStyle: TextStyle(
@@ -120,6 +122,8 @@ class AppTheme {
         backgroundColor: AppColors.surfaceDark,
         foregroundColor: AppColors.textDarkPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColors.textDarkPrimary),
         titleTextStyle: TextStyle(
