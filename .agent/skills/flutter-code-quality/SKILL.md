@@ -49,7 +49,7 @@ This skill guides the development and auditing of Dart and Flutter codebase. It 
   │     post_detail_screen.dart     # Contains the orchestration layout with small component widgets
   │
   └── widgets/
-        post_image_carousel.dart    # Isolated child widgets
+        post_image_carousel.dart    # Isolated child widgets (Feature-scoped)
         post_header.dart
         post_location_section.dart
         post_caption_section.dart
@@ -57,6 +57,12 @@ This skill guides the development and auditing of Dart and Flutter codebase. It 
         post_comment_item.dart
         post_comment_input.dart
   ```
+
+#### 2.2. Global Reusable Core Widgets (`lib/core/widgets/`)
+- **2 Features Rule**: If a UI component is used in **only 1 feature**, keep it in `lib/features/<feature>/presentation/widgets/`. If it is shared by **2 or more features**, move it to `lib/core/widgets/` (e.g., `lib/core/widgets/buttons/`, `lib/core/widgets/inputs/`).
+- **Naming Convention**: All global reusable widgets in `lib/core/widgets/` **must start with the `App` prefix** (`AppButton`, `AppTextField`, `AppCard`, `AppDialog`, `AppLoading`).
+- **Zero Hardcoding**: Reusable core widgets must strictly consume design tokens (`AppColors`, `AppTextStyles`, `AppSpacing`, `AppRadius`) and receive data exclusively via constructor parameters.
+
 - **Example Pattern**:
   - ❌ **Bad (Single screen containing the entire massive widget tree)**:
     ```dart

@@ -3,8 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 
-/// Layout chính bao bọc toàn bộ các màn hình của thanh điều hướng BottomNavigationBar.
-/// Tự động đồng bộ tab hiện tại với đường dẫn của GoRouter.
+/// Purpose: Main Shell Navigation Layout wrapping bottom navigation destinations across SnapSpot.
+///
+/// Parameters:
+/// - [child]: The active screen widget inside the ShellRoute navigator.
+///
+/// Usage:
+/// ```dart
+/// ShellRoute(
+///   builder: (context, state, child) => MainNavigationLayout(child: child),
+/// )
+/// ```
 class MainNavigationLayout extends StatelessWidget {
   final Widget child;
 
@@ -35,7 +44,6 @@ class MainNavigationLayout extends StatelessWidget {
         context.go('/chat');
         break;
       case 4:
-        // Đi tới profile của người đăng nhập hiện tại
         context.go('/profile/me');
         break;
     }

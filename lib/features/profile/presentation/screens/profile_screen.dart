@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
-import 'package:snapspot/core/network/mock_data.dart';
+import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/features/profile/presentation/widgets/profile_header_section.dart';
 import 'package:snapspot/features/profile/presentation/widgets/profile_posts_grid.dart';
 import 'package:snapspot/features/profile/presentation/widgets/profile_stats_section.dart';

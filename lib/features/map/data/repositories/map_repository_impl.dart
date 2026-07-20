@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:snapspot/core/error/failures.dart';
-import 'package:snapspot/core/network/mock_data.dart';
+import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/core/utils/geo_utils.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/map/domain/repositories/map_repository.dart';

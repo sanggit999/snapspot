@@ -6,7 +6,7 @@ import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/core/localization/language_cubit.dart';
 import 'package:snapspot/core/theme/app_theme.dart';
 import 'package:snapspot/core/theme/theme_cubit.dart';
-import 'package:snapspot/core/network/app_router.dart';
+import 'package:snapspot/core/router/app_router.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 import 'package:snapspot/features/map/presentation/blocs/map_cubit.dart';

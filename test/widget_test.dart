@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:snapspot/core/widgets/app_avatar.dart';
+import 'package:snapspot/core/widgets/images/app_avatar.dart';
 
 void main() {
   testWidgets('AppAvatar smoke test', (WidgetTester tester) async {

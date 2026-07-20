@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:hive/hive.dart';
 import 'package:snapspot/core/error/failures.dart';
-import 'package:snapspot/core/network/mock_data.dart';
+import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/core/security/secure_storage_service.dart';
 import 'package:snapspot/features/auth/data/mappers/user_mapper.dart';
 import 'package:snapspot/features/auth/data/models/user_model.dart';

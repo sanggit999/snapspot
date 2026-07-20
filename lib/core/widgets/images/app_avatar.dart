@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:snapspot/core/constants/colors.dart';
 
-/// Các kích cỡ chuẩn của Avatar.
+/// Các kích cỡ chuẩn của Avatar [AppAvatar].
 enum AppAvatarSize {
   small(24.0),
   medium(40.0),
@@ -13,8 +13,23 @@ enum AppAvatarSize {
   const AppAvatarSize(this.dimension);
 }
 
-/// Widget hiển thị ảnh đại diện bo tròn của người dùng.
-/// Hỗ trợ placeholder trong lúc tải ảnh và viền highlight màu sắc nếu có Story mới.
+/// Purpose: Reusable Avatar component supporting Network URLs, local Files and fallback placeholders.
+///
+/// Parameters:
+/// - [imageUrl]: Image URL string or local file path.
+/// - [size]: Avatar size enum ([AppAvatarSize.small], medium, large).
+/// - [hasStory]: Adds an outer ring if true.
+/// - [isStoryRead]: Mutes outer ring color if true.
+/// - [onTap]: Callback when avatar is clicked.
+///
+/// Usage:
+/// ```dart
+/// AppAvatar(
+///   imageUrl: user.avatarUrl,
+///   size: AppAvatarSize.medium,
+///   onTap: () => _viewProfile(),
+/// )
+/// ```
 class AppAvatar extends StatelessWidget {
   final String imageUrl;
   final AppAvatarSize size;
@@ -66,7 +81,7 @@ class AppAvatar extends StatelessWidget {
                     errorWidget: (context, url, error) => _buildPlaceholder(theme),
                   )
                 : Image.file(
-                    java_io.File(imageUrl), // Dùng File từ dart:io
+                    java_io.File(imageUrl),
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
                         _buildPlaceholder(theme),
@@ -75,7 +90,6 @@ class AppAvatar extends StatelessWidget {
       ),
     );
 
-    // Thêm viền màu sắc nếu có Story (NFR/Aesthetic)
     if (hasStory) {
       final Color borderColor = isStoryRead
           ? (theme.brightness == Brightness.light
