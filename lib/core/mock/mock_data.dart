@@ -13,7 +13,7 @@ class MockData {
       username: 'sangnguyen',
       fullName: 'Nguyễn Văn Sang',
       avatarUrl:
-          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       bio:
           'Đam mê nhiếp ảnh phong cảnh và du lịch trải nghiệm. Thích check-in bản đồ!',
       isPrivate: false,
@@ -27,7 +27,7 @@ class MockData {
       username: 'lananh_traveler',
       fullName: 'Trần Lan Anh',
       avatarUrl:
-          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+          'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
       bio:
           'Travel Blogger ✈️ | Chia sẻ những khoảnh khắc đẹp quanh Việt Nam 🇻🇳',
       isPrivate: false,
@@ -41,7 +41,7 @@ class MockData {
       username: 'quan_explorer',
       fullName: 'Lê Minh Quân',
       avatarUrl:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
       bio:
           'Cà phê bụi, phượt xe máy 🏍️. Thích khám phá những góc khuất Hà Nội.',
       isPrivate: true,
@@ -55,7 +55,7 @@ class MockData {
       username: 'nam_outdoor',
       fullName: 'Phạm Hoàng Nam',
       avatarUrl:
-          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
       bio: 'Nature & Adventure photographer. Hiking lover 🧗‍♂️.',
       isPrivate: false,
       postsCount: 42,
@@ -68,7 +68,7 @@ class MockData {
       username: 'thuychi_art',
       fullName: 'Nguyễn Thùy Chi',
       avatarUrl:
-          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
       bio: 'Họa sĩ tự do 🎨. Yêu thích sắc màu cuộc sống qua từng góc ảnh.',
       isPrivate: false,
       postsCount: 15,
@@ -77,15 +77,15 @@ class MockData {
     ),
   ];
 
-  // 2. Danh sách Posts giả lập kèm toạ độ GPS tại Việt Nam
+  // 2. Danh sách Posts giả lập kèm toạ độ GPS tại Việt Nam (Ảnh Unsplash HD sống động)
   static final List<PostEntity> mockPosts = [
     PostEntity(
       id: 'post_1',
       caption:
           'Buổi sáng trong lành tại Hồ Hoàn Kiếm, ngắm Tháp Rùa cổ kính mờ sương. Yêu Hà Nội những ngày thu dịu mát! #hanoi #hoankiem #autumn #photography',
       imageUrls: const [
-        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800',
-        'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800',
+        'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1000&q=80',
+        'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1000&q=80',
       ],
       latitude: 21.0285,
       longitude: 105.8542,
@@ -128,7 +128,7 @@ class MockData {
       caption:
           'Nhà thờ Đức Bà Sài Gòn chiều cuối tuần. Dù đang trùng tu nhưng vẫn mang đậm nét kiến trúc Gothic tráng lệ giữa lòng thành phố. #saigon #district1 #nhathoducba #citylife',
       imageUrls: const [
-        'https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?w=800',
+        'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&w=1000&q=80',
       ],
       latitude: 10.7769,
       longitude: 106.7009,
@@ -161,8 +161,8 @@ class MockData {
       caption:
           'Phố cổ Hội An lung linh sắc màu lồng đèn khi màn đêm buông xuống. Đi thuyền trên sông Hoài thả hoa đăng cầu bình an. #hoian_oldtown & #danang #travelvietnam',
       imageUrls: const [
-        'https://images.unsplash.com/photo-1528127269322-539801943592?w=800',
-        'https://images.unsplash.com/photo-1534008897995-27a23e859048?w=800',
+        'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1000&q=80',
+        'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1000&q=80',
       ],
       latitude: 15.8801,
       longitude: 108.3380,
@@ -190,7 +190,8 @@ class MockData {
       caption:
           'Săn mây thành công tại đỉnh đồi chè Cầu Đất, Đà Lạt! Nhiệt độ lúc 5h sáng chỉ 14 độ C, buốt giá nhưng bù lại là khung cảnh tiên cảnh. ☁️🌲 #dalat #travel #caudat #sanamay',
       imageUrls: const [
-        'https://images.unsplash.com/photo-1583244964261-7dbd01180aee?w=800',
+        'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+        'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?auto=format&fit=crop&w=1000&q=80',
       ],
       latitude: 11.9404,
       longitude: 108.4583,
@@ -227,7 +228,7 @@ class MockData {
       caption:
           'Thung lũng Mường Hoa, Sa Pa mùa lúa chín vàng óng ả trải dài trên những thửa ruộng bậc thang. Một vẻ đẹp kỳ vĩ của thiên nhiên Tây Bắc! #sapa #ruongbacthang #taybac #vietnam',
       imageUrls: const [
-        'https://images.unsplash.com/photo-1508873696983-2df519f0397e?w=800',
+        'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80',
       ],
       latitude: 22.3364,
       longitude: 103.8438,

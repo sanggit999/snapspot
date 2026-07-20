@@ -7,10 +7,11 @@ import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 import 'package:snapspot/features/feed/presentation/widgets/feed_nearby_empty_state.dart';
 import 'package:snapspot/features/feed/presentation/widgets/feed_shimmer_loader.dart';
 import 'package:snapspot/features/feed/presentation/widgets/spot_card.dart';
+import 'package:snapspot/features/feed/presentation/widgets/story_bar_section.dart';
 
 /// Màn hình Trang chủ (Feed Screen).
 /// Gồm hai Tab chính: Theo dõi (Follow) và Lân cận (Nearby).
-/// Áp dụng mẫu thiết kế Widget Composition Pattern ghép nối từ các widget con chuyên biệt.
+/// Nâng cấp giao diện với Story Bar Tray và Top Bar sang trọng 2026.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -81,40 +82,80 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'SnapSpot',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -0.5,
-          ),
-        ),
-        leading: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+        elevation: 0,
+        backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.primary, Color(0xFF833AB4)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.camera_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
-            child: const Icon(
-              Icons.photo_camera_back_rounded,
-              color: AppColors.primary,
-              size: 20,
+            const SizedBox(width: 10),
+            Text(
+              'SnapSpot',
+              style: TextStyle(
+                color: isLight
+                    ? AppColors.textLightPrimary
+                    : AppColors.textDarkPrimary,
+                fontWeight: FontWeight.w900,
+                fontSize: 22,
+                letterSpacing: -0.5,
+              ),
             ),
-          ),
+          ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(
+              Icons.search_rounded,
+              color: isLight
+                  ? AppColors.textLightPrimary
+                  : AppColors.textDarkPrimary,
+            ),
             onPressed: () => context.go('/explore'),
           ),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline),
-            onPressed: () => context.go('/chat'),
+          Stack(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: isLight
+                      ? AppColors.textLightPrimary
+                      : AppColors.textDarkPrimary,
+                ),
+                onPressed: () => context.go('/chat'),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  width: 9,
+                  height: 9,
+                  decoration: const BoxDecoration(
+                    color: Colors.redAccent,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(width: 6),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
@@ -122,23 +163,23 @@ class _HomeScreenState extends State<HomeScreen>
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: theme.brightness == Brightness.light
-                      ? AppColors.borderLight
-                      : AppColors.borderDark,
+                  color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                  width: 1,
                 ),
               ),
             ),
             child: TabBar(
               controller: _tabController,
               indicatorColor: AppColors.primary,
+              indicatorWeight: 3,
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: AppColors.primary,
-              unselectedLabelColor: theme.brightness == Brightness.light
+              unselectedLabelColor: isLight
                   ? AppColors.textLightSecondary
                   : AppColors.textDarkSecondary,
               labelStyle: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 14.5,
               ),
               tabs: [
                 Tab(text: context.tr('tab_follow')),
@@ -177,7 +218,8 @@ class _HomeScreenState extends State<HomeScreen>
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                const StoryBarSection(),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                 Center(child: Text(state.message)),
               ],
             );
@@ -190,7 +232,8 @@ class _HomeScreenState extends State<HomeScreen>
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                  const StoryBarSection(),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                   if (isNearby)
                     FeedNearbyEmptyState(
                       userLat: _userLat,
@@ -218,10 +261,14 @@ class _HomeScreenState extends State<HomeScreen>
             return ListView.builder(
               controller: scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(top: 12),
-              itemCount: posts.length,
+              padding: const EdgeInsets.only(bottom: 24),
+              itemCount: posts.length + 1, // +1 cho StoryBarSection ở vị trí 0
               itemBuilder: (context, index) {
-                final post = posts[index];
+                if (index == 0) {
+                  return const StoryBarSection();
+                }
+
+                final post = posts[index - 1];
                 return SpotCard(
                   post: post,
                   userLat: _userLat,
