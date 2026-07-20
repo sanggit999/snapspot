@@ -6,6 +6,11 @@ class CommentEntity {
   final String postId;
   final UserEntity user;
   final String content;
+  final String? mediaUrl;
+  final String? parentId;
+  final List<CommentEntity> replies;
+  final int likesCount;
+  final bool isLiked;
   final DateTime createdAt;
 
   const CommentEntity({
@@ -13,8 +18,39 @@ class CommentEntity {
     required this.postId,
     required this.user,
     required this.content,
+    this.mediaUrl,
+    this.parentId,
+    this.replies = const [],
+    this.likesCount = 0,
+    this.isLiked = false,
     required this.createdAt,
   });
+
+  CommentEntity copyWith({
+    String? id,
+    String? postId,
+    UserEntity? user,
+    String? content,
+    String? mediaUrl,
+    String? parentId,
+    List<CommentEntity>? replies,
+    int? likesCount,
+    bool? isLiked,
+    DateTime? createdAt,
+  }) {
+    return CommentEntity(
+      id: id ?? this.id,
+      postId: postId ?? this.postId,
+      user: user ?? this.user,
+      content: content ?? this.content,
+      mediaUrl: mediaUrl ?? this.mediaUrl,
+      parentId: parentId ?? this.parentId,
+      replies: replies ?? this.replies,
+      likesCount: likesCount ?? this.likesCount,
+      isLiked: isLiked ?? this.isLiked,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 /// Lớp thực thể đại diện cho một bài viết (Post) địa điểm check-in.
