@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:snapspot/core/widgets/main_navigation_layout.dart';
+import 'package:snapspot/core/widgets/navigation/main_navigation_layout.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/features/auth/presentation/screens/login_screen.dart';
 import 'package:snapspot/features/auth/presentation/screens/register_screen.dart';
@@ -20,8 +20,8 @@ import 'package:snapspot/features/settings/presentation/screens/settings_screen.
 // Key định vị Navigator ngoài cùng để điều hướng toàn màn hình (không có BottomBar)
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-/// Cấu hình cây định tuyến (Route Tree) của GoRouter cho toàn bộ ứng dụng.
-/// Sử dụng ShellRoute để duy trì thanh BottomNavigationBar giữa các tab.
+/// Cấu hình cây định tuyến (Route Tree) của GoRouter cho toàn bộ ứng dụng SnapSpot.
+/// Đặt đúng chuẩn Clean Architecture tại lib/core/router/app_router.dart.
 final goRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',

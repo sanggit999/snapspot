@@ -1,18 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:snapspot/core/constants/colors.dart';
 
-/// Các kiểu biến thể của nút bấm.
+/// Các kiểu biến thể của nút bấm [AppButton].
 enum AppButtonVariant { primary, secondary, outline, text }
 
-/// Nút bấm dùng chung trên toàn ứng dụng.
-/// Hỗ trợ hiển thị trạng thái đang tải (Loading) để tránh việc người dùng bấm nhiều lần.
+/// Purpose: Reusable primary/secondary/outline button component across SnapSpot.
+///
+/// Parameters:
+/// - [label]: The text title displayed on the button.
+/// - [onPressed]: Callback function when the button is clicked. If null or [isLoading] is true, the button is disabled.
+/// - [isLoading]: Displays a circular progress indicator instead of label if true.
+/// - [variant]: Visual style variant ([AppButtonVariant.primary], secondary, outline, text).
+/// - [icon]: Optional leading icon.
+/// - [width]: Optional button width. Defaults to full width ([double.infinity]).
+/// - [height]: Height of the button. Defaults to 48.0.
+/// - [borderRadius]: Corner radius. Defaults to 12.0.
+///
+/// Usage:
+/// ```dart
+/// AppButton(
+///   label: 'Submit',
+///   onPressed: () => _handleSubmit(),
+///   isLoading: state.isSubmitting,
+/// )
+/// ```
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
   final AppButtonVariant variant;
+  final IconData? icon;
   final double? width;
   final double height;
+  final double borderRadius;
 
   const AppButton({
     super.key,
@@ -20,8 +40,10 @@ class AppButton extends StatelessWidget {
     this.onPressed,
     this.isLoading = false,
     this.variant = AppButtonVariant.primary,
+    this.icon,
     this.width,
     this.height = 48.0,
+    this.borderRadius = 12.0,
   });
 
   @override
@@ -29,7 +51,6 @@ class AppButton extends StatelessWidget {
     final theme = Theme.of(context);
     final isDisabled = onPressed == null || isLoading;
 
-    // Định cấu hình màu nền & màu chữ dựa trên biến thể nút
     Color? backgroundColor;
     Color? foregroundColor;
     BorderSide? borderSide;
@@ -55,23 +76,16 @@ class AppButton extends StatelessWidget {
     }
 
     if (isDisabled) {
+      final isLight = theme.brightness == Brightness.light;
       if (variant == AppButtonVariant.primary ||
           variant == AppButtonVariant.secondary) {
-        backgroundColor = theme.brightness == Brightness.light
-            ? AppColors.borderLight
-            : AppColors.borderDark;
-        foregroundColor = theme.brightness == Brightness.light
-            ? AppColors.textLightSecondary
-            : AppColors.textDarkSecondary;
+        backgroundColor = isLight ? AppColors.borderLight : AppColors.borderDark;
+        foregroundColor = isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary;
       } else {
-        foregroundColor = theme.brightness == Brightness.light
-            ? AppColors.textLightSecondary
-            : AppColors.textDarkSecondary;
+        foregroundColor = isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary;
         if (borderSide != null) {
           borderSide = BorderSide(
-            color: theme.brightness == Brightness.light
-                ? AppColors.borderLight
-                : AppColors.borderDark,
+            color: isLight ? AppColors.borderLight : AppColors.borderDark,
             width: 1.5,
           );
         }
@@ -87,7 +101,9 @@ class AppButton extends StatelessWidget {
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
           side: borderSide ?? BorderSide.none,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
         child: isLoading
@@ -101,12 +117,22 @@ class AppButton extends StatelessWidget {
                   ),
                 ),
               )
-            : Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 20),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
       ),
     );

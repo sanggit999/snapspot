@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
-import 'package:snapspot/core/widgets/app_button.dart';
-import 'package:snapspot/core/widgets/app_text_field.dart';
+import 'package:snapspot/core/widgets/buttons/app_button.dart';
+import 'package:snapspot/core/widgets/inputs/app_text_field.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
 /// Màn hình đăng ký tài khoản của SnapSpot.

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/core/utils/geo_utils.dart';
-import 'package:snapspot/core/widgets/app_avatar.dart';
+import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 
 /// Thẻ hiển thị thông tin bài đăng check-in địa điểm.

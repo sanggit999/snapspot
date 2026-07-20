@@ -30,20 +30,16 @@ Kỹ năng này quy định cách thức import các file và thư viện trong 
   ```
 - ✅ Khuyến khích (Absolute Import):
   ```dart
-  import 'package:snapspot/features/auth/data/models/user.dart';
-  import 'package:snapspot/common/widgets/button.dart';
+  import 'package:snapspot/features/auth/data/models/user_model.dart';
+  import 'package:snapspot/core/widgets/buttons/app_button.dart';
   ```
 
 ### 2. Tuyệt đối không dùng relative import dạng `../` hoặc `./`
 - Không sử dụng các đường dẫn tương đối để đi ngược thư mục cha (`../`) hoặc thư mục hiện tại (`./`). Mọi tham chiếu đều phải quy về absolute package path.
 
-### 3. Không dùng `index.dart` (barrel files) cho các thành phần kiến trúc cốt lõi
-- Không tạo hoặc sử dụng file gộp `index.dart` (barrel file) để export tập hợp cho:
-  - **Model** (Ví dụ: `data/models/index.dart`)
-  - **Entity** (Ví dụ: `domain/entities/index.dart`)
-  - **Mapper** (Ví dụ: `data/mappers/index.dart`)
-  - **Repository** (Ví dụ: `domain/repositories/index.dart`)
-- Việc tránh dùng barrel files giúp theo dõi chính xác file nào được import, giảm dung lượng bundle và tăng tốc độ phân tích code của IDE.
+### 3. Tuyệt đối không dùng `index.dart` hoặc `widgets.dart` (barrel files) trên toàn bộ ứng dụng
+- Bắt buộc trỏ trực tiếp đến từng file `.dart` cụ thể để minh bạch file nguồn được import, tăng tốc độ phân tích của IDE và tránh phụ thuộc vòng.
+- Tuyệt đối KHÔNG tạo hoặc sử dụng file gộp barrel file (`index.dart`, `widgets.dart`) cho bất kỳ thành phần nào (Model, Entity, Mapper, Repository hay Reusable Widgets).
 
 ### 4. Mỗi import phải thể hiện đầy đủ Feature → Layer → Folder → File
 - Đường dẫn import phải tường minh và chỉ thẳng tới file đích chứa định nghĩa của class/hàm đó.

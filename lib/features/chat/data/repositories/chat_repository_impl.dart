@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:snapspot/core/error/failures.dart';
-import 'package:snapspot/core/network/mock_data.dart';
+import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/features/chat/domain/entities/chat_entity.dart';
 import 'package:snapspot/features/chat/domain/repositories/chat_repository.dart';
 

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
-import 'package:snapspot/core/widgets/app_avatar.dart';
+import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/chat/presentation/blocs/chat_cubit.dart';
 import 'package:intl/intl.dart';
 

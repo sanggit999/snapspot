@@ -3,6 +3,7 @@ import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/chat/domain/entities/chat_entity.dart';
 
 /// Dữ liệu giả lập chất lượng cao phục vụ cho phát triển Frontend của SnapSpot.
+/// Đặt tại thư mục chuyên biệt lib/core/mock/mock_data.dart chuẩn Clean Architecture & mock-data-rules.
 class MockData {
   // 1. Danh sách Users giả lập
   static final List<UserEntity> mockUsers = [

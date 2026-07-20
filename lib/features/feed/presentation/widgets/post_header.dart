@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:snapspot/core/widgets/app_avatar.dart';
+import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 

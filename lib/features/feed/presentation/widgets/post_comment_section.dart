@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
-import 'package:snapspot/core/widgets/app_avatar.dart';
+import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 
 class PostCommentSection extends StatelessWidget {

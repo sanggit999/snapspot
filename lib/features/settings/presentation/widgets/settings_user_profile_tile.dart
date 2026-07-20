@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:snapspot/core/constants/colors.dart';
-import 'package:snapspot/core/widgets/app_avatar.dart';
+import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 
 class SettingsUserProfileTile extends StatelessWidget {
