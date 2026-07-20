@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "SnapSpot (Development)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=API_HOST=api.snapspot.com",
+        "--dart-define=API_SSL_PIN=YOUR_PRIMARY_SSL_SHA256_PIN_HERE",
+        "--dart-define=API_SSL_BACKUP_PIN=YOUR_BACKUP_SSL_SHA256_PIN_HERE",
+        "--dart-define=CDN_HOST=images.unsplash.com",
+        "--dart-define=CDN_SSL_PIN=YOUR_CDN_SSL_SHA256_PIN_HERE"
+      ]
+    },
+    {
+      "name": "SnapSpot (Production - SSL Pinned)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=API_HOST=api.snapspot.com",
+        "--dart-define=API_SSL_PIN=YOUR_PRIMARY_SSL_SHA256_PIN_HERE",
+        "--dart-define=API_SSL_BACKUP_PIN=YOUR_BACKUP_SSL_SHA256_PIN_HERE",
+        "--dart-define=CDN_HOST=images.unsplash.com",
+        "--dart-define=CDN_SSL_PIN=YOUR_CDN_SSL_SHA256_PIN_HERE"
+      ]
+    }
+  ]
+}

@@ -1,13 +1,15 @@
-import 'package:hive/hive.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:hive/hive.dart';
 import 'package:snapspot/core/error/failures.dart';
 import 'package:snapspot/core/network/mock_data.dart';
+import 'package:snapspot/core/security/secure_storage_service.dart';
 import 'package:snapspot/features/auth/data/mappers/user_mapper.dart';
 import 'package:snapspot/features/auth/data/models/user_model.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 import 'package:snapspot/features/auth/domain/repositories/auth_repository.dart';
 
-/// Triển khai AuthRepositoryImpl sử dụng fpdart Either, Freezed UserModel và UserMapper.
+/// Triển khai AuthRepositoryImpl sử dụng fpdart Either, Freezed UserModel, UserMapper
+/// và SecureStorageService (Android Keystore / iOS Keychain) tuân thủ tiêu chuẩn bảo mật.
 class AuthRepositoryImpl implements AuthRepository {
   static const String _boxName = 'settingsBox';
   static const String _tokenKey = 'accessToken';
@@ -16,23 +18,27 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity?>> checkAuthStatus() async {
     try {
-      if (Hive.isBoxOpen(_boxName)) {
-        final box = Hive.box(_boxName);
-        final token = box.get(_tokenKey) as String?;
-        final savedUserId = box.get(_userIdKey) as String?;
+      // Đọc thông tin xác thực an toàn từ Secure Storage (Android Keystore / iOS Keychain)
+      String? token = await SecureStorageService.getAccessToken();
+      String? savedUserId = await SecureStorageService.getUserId();
 
-        if (token != null && savedUserId != null) {
-          // MockData.mockUsers đã là List<UserEntity> nên dùng trực tiếp
-          final matchedUser = MockData.mockUsers.firstWhere(
-            (u) => u.id == savedUserId,
-            orElse: () => MockData.mockUsers[0],
-          );
-          return Right(matchedUser);
-        }
+      // Hỗ trợ fallback kiểm tra từ Hive cũ (nếu chuyển đổi phiên bản)
+      if ((token == null || savedUserId == null) && Hive.isBoxOpen(_boxName)) {
+        final box = Hive.box(_boxName);
+        token ??= box.get(_tokenKey) as String?;
+        savedUserId ??= box.get(_userIdKey) as String?;
+      }
+
+      if (token != null && savedUserId != null) {
+        final matchedUser = MockData.mockUsers.firstWhere(
+          (u) => u.id == savedUserId,
+          orElse: () => MockData.mockUsers[0],
+        );
+        return Right(matchedUser);
       }
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Lỗi kiểm tra trạng thái cache: $e'));
+      return Left(CacheFailure('Lỗi kiểm tra trạng thái xác thực an toàn: $e'));
     }
   }
 
@@ -53,11 +59,10 @@ class AuthRepositoryImpl implements AuthRepository {
         throw Exception('Mật khẩu phải từ 6 ký tự trở lên');
       }
 
-      if (Hive.isBoxOpen(_boxName)) {
-        final box = Hive.box(_boxName);
-        await box.put(_tokenKey, 'mock_jwt_token_for_${user.id}');
-        await box.put(_userIdKey, user.id);
-      }
+      // Lưu trữ Access Token và User ID vào Secure Storage mã hóa phần cứng
+      final token = 'mock_jwt_token_for_${user.id}';
+      await SecureStorageService.saveAccessToken(token);
+      await SecureStorageService.saveUserId(user.id);
 
       return Right(user);
     } catch (e) {
@@ -88,7 +93,6 @@ class AuthRepositoryImpl implements AuthRepository {
         throw Exception('Tên người dùng đã tồn tại');
       }
 
-      // Tạo UserModel để tận dụng Freezed/json_serializable trong Data layer
       final newUserModel = UserModel(
         id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
         email: email,
@@ -103,15 +107,13 @@ class AuthRepositoryImpl implements AuthRepository {
         followingCount: 0,
       );
 
-      // Dùng UserMapper để chuyển Model → Entity (tách biệt theo SRP)
       final newUserEntity = UserMapper.toEntity(newUserModel);
       MockData.mockUsers.add(newUserEntity);
 
-      if (Hive.isBoxOpen(_boxName)) {
-        final box = Hive.box(_boxName);
-        await box.put(_tokenKey, 'mock_jwt_token_for_${newUserEntity.id}');
-        await box.put(_userIdKey, newUserEntity.id);
-      }
+      // Lưu trữ Access Token và User ID vào Secure Storage
+      final token = 'mock_jwt_token_for_${newUserEntity.id}';
+      await SecureStorageService.saveAccessToken(token);
+      await SecureStorageService.saveUserId(newUserEntity.id);
 
       return Right(newUserEntity);
     } catch (e) {
@@ -123,6 +125,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     try {
       await Future.delayed(const Duration(milliseconds: 500));
+
+      // Tiêu hủy sạch sẽ toàn bộ Token & thông tin xác thực ở Secure Storage
+      await SecureStorageService.clearAll();
 
       if (Hive.isBoxOpen(_boxName)) {
         final box = Hive.box(_boxName);

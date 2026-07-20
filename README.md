@@ -57,8 +57,10 @@ graph TD
 - **State Management:** `flutter_bloc` (Cubit).
 - **Service Locator / DI:** `get_it` giúp tách biệt hoàn toàn khởi tạo phụ thuộc qua Constructor Injection.
 - **Functional Programming:** `fpdart` để xử lý các lỗi hoặc luồng kết quả dạng toán tử `Either<Failure, Success>`, đảm bảo code không bị văng crash ngoài ý muốn.
+- **Hardware-backed Secure Storage:** `flutter_secure_storage` lưu trữ Access Token & Session Credentials mã hóa trực tiếp trong Android Keystore & iOS Keychain.
+- **Native SSL Pinning:** `http_certificate_pinning` & `crypto` kiểm tra SHA-256 Public Key Pinning ở tầng Native (Android/iOS) chống tấn công Man-In-The-Middle (MITM).
 - **JSON Serialization:** `freezed` & `json_serializable` tự động tạo mã nguồn Model bất biến.
-- **Local Database:** `hive` lưu trữ phiên đăng nhập và các cấu hình cục bộ của người dùng.
+- **Local Database:** `hive` lưu trữ cấu hình cục bộ của người dùng.
 
 ---
 
@@ -71,6 +73,7 @@ lib/
 │   ├── error/                  # Định nghĩa các lỗi nghiệp vụ (Failures)
 │   ├── localization/           # Đa ngôn ngữ Việt / Anh
 │   ├── network/                # Định vị, mock data, cấu hình Router
+│   ├── security/               # SecureStorageService & SslPinningService
 │   ├── theme/                  # Hệ thống Theme sáng/tối
 │   ├── utils/                  # Tiện ích tính khoảng cách, chuyển đổi toạ độ
 │   └── widgets/                # Các widget thiết kế dùng chung toàn ứng dụng
@@ -80,7 +83,8 @@ lib/
     ├── chat/                   # Tính năng Trò chuyện trực tuyến
     ├── feed/                   # Tính năng Bảng tin, Thích, Bình luận
     ├── map/                    # Tính năng Bản đồ và định vị địa lý
-    └── profile/                # Tính năng Trang cá nhân và cài đặt
+    ├── profile/                # Tính năng Trang cá nhân và đổi mật khẩu
+    └── settings/               # Tính năng Cài đặt hệ thống
 ```
 
 ---
@@ -103,24 +107,49 @@ lib/
    flutter pub get
    ```
 
-3. **Chạy trình biên dịch sinh mã tự động (Build Runner) để tạo các file Freezed & JSON Model:**
+3. **Thiết lập Cấu hình Khởi chạy Bảo mật (VS Code IDE):**
+   Tạo tệp `.vscode/launch.json` từ file mẫu `.vscode/launch.json.example`:
+   ```bash
+   cp .vscode/launch.json.example .vscode/launch.json
+   ```
+   *(Điền các thông số `API_HOST`, `API_SSL_PIN` do đội DevOps cung cấp vào tệp `.vscode/launch.json` trên máy của bạn và nhấn **F5** để chạy).*
+
+4. **Chạy trình biên dịch sinh mã tự động (Build Runner) cho Freezed Models:**
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    ```
 
-4. **Kiểm tra phân tích mã nguồn tĩnh (Static Analysis) bảo đảm không có lỗi:**
+5. **Kiểm tra phân tích mã nguồn tĩnh (Static Analysis) bảo đảm không có lỗi:**
    ```bash
    flutter analyze
    ```
 
-5. **Chạy bộ kiểm thử tự động (Unit/Widget Tests):**
+6. **Chạy bộ kiểm thử tự động (Unit/Widget Tests):**
    ```bash
    flutter test
    ```
 
-6. **Chạy ứng dụng trên thiết bị giả lập hoặc thiết bị thật:**
+7. **Chạy ứng dụng với biến môi trường mã hóa (--dart-define):**
    ```bash
-   flutter run
+   flutter run \
+     --dart-define=API_HOST=api.snapspot.com \
+     --dart-define=API_SSL_PIN=YOUR_PRIMARY_SSL_SHA256_PIN_HERE \
+     --dart-define=API_SSL_BACKUP_PIN=YOUR_BACKUP_SSL_SHA256_PIN_HERE \
+     --dart-define=CDN_HOST=images.unsplash.com \
+     --dart-define=CDN_SSL_PIN=YOUR_CDN_SSL_SHA256_PIN_HERE
+   ```
+
+8. **Đóng gói ứng dụng phát hành (Production Build):**
+   ```bash
+   # Android APK
+   flutter build apk --release \
+     --dart-define=API_HOST=api.snapspot.com \
+     --dart-define=API_SSL_PIN=YOUR_PRIMARY_SSL_SHA256_PIN_HERE
+
+   # iOS IPA
+   flutter build ipa --release \
+     --dart-define=API_HOST=api.snapspot.com \
+     --dart-define=API_SSL_PIN=YOUR_PRIMARY_SSL_SHA256_PIN_HERE
    ```
 
 ---
