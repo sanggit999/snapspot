@@ -1,5 +1,9 @@
+import 'package:equatable/equatable.dart';
+
 /// Thực thể nghiệp vụ đại diện cho một người dùng (User) trong hệ thống SnapSpot.
-class UserEntity {
+/// Kết hợp [Equatable] cho Value Equality (tránh rebuild UI lãng phí)
+/// và phương thức [copyWith] cho Immutability State Updates.
+class UserEntity extends Equatable {
   final String id;
   final String email;
   final String username;
@@ -50,4 +54,18 @@ class UserEntity {
       followingCount: followingCount ?? this.followingCount,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        email,
+        username,
+        fullName,
+        avatarUrl,
+        bio,
+        isPrivate,
+        postsCount,
+        followersCount,
+        followingCount,
+      ];
 }

@@ -1,7 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 
-/// Lớp thực thể đại diện cho một Tin nhắn (Message).
-class MessageEntity {
+/// Lớp thực thể đại diện cho một Tin nhắn (Message) (Domain Layer).
+/// Kết hợp [Equatable] cho Value Equality.
+class MessageEntity extends Equatable {
   final String id;
   final String senderId;
   final String content;
@@ -15,10 +17,20 @@ class MessageEntity {
     required this.createdAt,
     this.imageUrl,
   });
+
+  @override
+  List<Object?> get props => [
+        id,
+        senderId,
+        content,
+        createdAt,
+        imageUrl,
+      ];
 }
 
-/// Lớp thực thể đại diện cho một Phòng Chat (ChatRoom).
-class ChatRoomEntity {
+/// Lớp thực thể đại diện cho một Phòng Chat (ChatRoom) (Domain Layer).
+/// Kết hợp [Equatable] cho Value Equality và [copyWith] cho State Updates.
+class ChatRoomEntity extends Equatable {
   final String id;
   final UserEntity partner;
   final MessageEntity? lastMessage;
@@ -33,7 +45,7 @@ class ChatRoomEntity {
     required this.messages,
   });
 
-  /// Tạo bản sao phòng chat với thuộc tính mới
+  /// Tạo bản sao phòng chat với thuộc tính mới (Immutable pattern)
   ChatRoomEntity copyWith({
     String? id,
     UserEntity? partner,
@@ -49,4 +61,13 @@ class ChatRoomEntity {
       messages: messages ?? this.messages,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        partner,
+        lastMessage,
+        unreadCount,
+        messages,
+      ];
 }
