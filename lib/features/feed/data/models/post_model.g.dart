@@ -12,6 +12,22 @@ _CommentModel _$CommentModelFromJson(Map<String, dynamic> json) =>
       postId: json['post_id'] as String,
       user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
       content: json['content'] as String,
+      mediaUrl: json['media_url'] as String?,
+      parentId: json['parent_id'] as String?,
+      rootId: json['root_id'] as String?,
+      replyToUser: json['reply_to_user'] == null
+          ? null
+          : UserModel.fromJson(json['reply_to_user'] as Map<String, dynamic>),
+      replies:
+          (json['replies'] as List<dynamic>?)
+              ?.map((e) => CommentModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      likesCount: (json['likes_count'] as num?)?.toInt() ?? 0,
+      isLiked: json['is_liked'] as bool? ?? false,
+      repliesCount: (json['replies_count'] as num?)?.toInt(),
+      depth: (json['depth'] as num?)?.toInt() ?? 0,
+      isPinned: json['is_pinned'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
 
@@ -21,6 +37,16 @@ Map<String, dynamic> _$CommentModelToJson(_CommentModel instance) =>
       'post_id': instance.postId,
       'user': instance.user,
       'content': instance.content,
+      'media_url': instance.mediaUrl,
+      'parent_id': instance.parentId,
+      'root_id': instance.rootId,
+      'reply_to_user': instance.replyToUser,
+      'replies': instance.replies,
+      'likes_count': instance.likesCount,
+      'is_liked': instance.isLiked,
+      'replies_count': instance.repliesCount,
+      'depth': instance.depth,
+      'is_pinned': instance.isPinned,
       'created_at': instance.createdAt.toIso8601String(),
     };
 

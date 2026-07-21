@@ -13,6 +13,16 @@ abstract class CommentModel with _$CommentModel {
     @JsonKey(name: 'post_id') required String postId,
     required UserModel user,
     required String content,
+    @JsonKey(name: 'media_url') String? mediaUrl,
+    @JsonKey(name: 'parent_id') String? parentId,
+    @JsonKey(name: 'root_id') String? rootId,
+    @JsonKey(name: 'reply_to_user') UserModel? replyToUser,
+    @Default([]) List<CommentModel> replies,
+    @JsonKey(name: 'likes_count') @Default(0) int likesCount,
+    @JsonKey(name: 'is_liked') @Default(false) bool isLiked,
+    @JsonKey(name: 'replies_count') int? repliesCount,
+    @Default(0) int depth,
+    @JsonKey(name: 'is_pinned') @Default(false) bool isPinned,
     @JsonKey(name: 'created_at') required DateTime createdAt,
   }) = _CommentModel;
 

@@ -93,32 +93,98 @@ class MockData {
       user: mockUsers[1], // Trần Lan Anh
       hashtags: const ['hanoi', 'hoankiem', 'autumn', 'photography'],
       likesCount: 320,
-      commentsCount: 3,
+      commentsCount: 5,
       isLiked: true,
       createdAt: DateTime.now().subtract(const Duration(hours: 3)),
       comments: [
         CommentEntity(
           id: 'c_1',
           postId: 'post_1',
-          user: mockUsers[0], // Nguyễn Văn Sang
+          user: mockUsers[0], // Nguyễn Văn Sang (Root)
           content:
               'Ảnh chụp đẹp quá bạn ơi! Mùa thu Hà Nội luôn có chất riêng.',
+          likesCount: 5,
+          isLiked: true,
+          isPinned: true, // Ghim bình luận nổi bật
           createdAt: DateTime.now().subtract(
             const Duration(hours: 2, minutes: 30),
           ),
+          replies: [
+            CommentEntity(
+              id: 'c_1_1',
+              postId: 'post_1',
+              parentId: 'c_1',
+              user: mockUsers[1], // Trần Lan Anh
+              replyToUser: mockUsers[0], // Nguyễn Văn Sang
+              content:
+                  'Cảm ơn anh Sang nhiều nhé! Hà Nội mùa này thời tiết thích lắm ạ. ✨',
+              likesCount: 2,
+              isLiked: true,
+              createdAt: DateTime.now().subtract(
+                const Duration(hours: 2, minutes: 15),
+              ),
+            ),
+            CommentEntity(
+              id: 'c_1_2',
+              postId: 'post_1',
+              parentId: 'c_1_1',
+              user: mockUsers[2], // Lê Minh Quân
+              replyToUser: mockUsers[1], // Trần Lan Anh
+              content: 'Khi nào ra Hà Nội cho mình đi check-in ké với nha!',
+              likesCount: 1,
+              isLiked: false,
+              createdAt: DateTime.now().subtract(
+                const Duration(hours: 2),
+              ),
+            ),
+            CommentEntity(
+              id: 'c_1_3',
+              postId: 'post_1',
+              parentId: 'c_1',
+              user: mockUsers[3], // Phạm Hoàng Nam
+              replyToUser: mockUsers[0], // Nguyễn Văn Sang
+              content: 'Thời tiết Hà Nội mùa thu đúng là mê đắm lòng người.',
+              likesCount: 4,
+              isLiked: true,
+              createdAt: DateTime.now().subtract(
+                const Duration(hours: 1, minutes: 45),
+              ),
+            ),
+            CommentEntity(
+              id: 'c_1_4',
+              postId: 'post_1',
+              parentId: 'c_1',
+              user: mockUsers[4], // Nguyễn Thùy Chi
+              replyToUser: mockUsers[1], // Trần Lan Anh
+              content: 'Hồ Gươm sương mờ sáng sớm nhìn lãng mạn quá ạ! 🍂',
+              likesCount: 2,
+              isLiked: false,
+              createdAt: DateTime.now().subtract(
+                const Duration(hours: 1, minutes: 30),
+              ),
+            ),
+            CommentEntity(
+              id: 'c_1_5',
+              postId: 'post_1',
+              parentId: 'c_1_4',
+              user: mockUsers[1], // Trần Lan Anh
+              replyToUser: mockUsers[4], // Nguyễn Thùy Chi
+              content: 'Hôm nào có dịp mình mời mọi người cà phê trứng nhé! ☕',
+              likesCount: 6,
+              isLiked: true,
+              createdAt: DateTime.now().subtract(
+                const Duration(hours: 1, minutes: 15),
+              ),
+            ),
+          ],
         ),
         CommentEntity(
           id: 'c_2',
           postId: 'post_1',
-          user: mockUsers[2], // Lê Minh Quân
-          content: 'Góc chụp từ hướng Bưu điện Hà Nội đúng không ta? Đẹp thật!',
-          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-        CommentEntity(
-          id: 'c_3',
-          postId: 'post_1',
           user: mockUsers[4], // Nguyễn Thùy Chi
-          content: 'Thích màu ảnh nhẹ nhàng này thế!',
+          content: 'Thích màu ảnh nhẹ nhàng này thế! Chụp bằng máy gì vậy ạ?',
+          likesCount: 3,
+          isLiked: false,
           createdAt: DateTime.now().subtract(const Duration(hours: 1)),
         ),
       ],
