@@ -1,97 +1,104 @@
 ---
 name: flutter-state-management
-description: Establishes conventions and architectures for managing state in Flutter, focusing on clean separation of presentation and business logic using popular packages like Riverpod, BLoC, or Provider.
-version: 1.0.0
+description: Establishes conventions and architectures for managing state in Flutter, focusing on clean separation of presentation and business logic using BLoC/Cubit, BlocBuilder, BlocListener, BlocConsumer, and BlocSelector for performance optimization.
+version: 1.2.0
 author: Antigravity
 tags:
   - flutter
   - state-management
-  - riverpod
   - bloc
+  - cubit
+  - performance
+  - bloc-selector
 ---
 
 # Flutter State Management Skill
 
 ## Overview
-This skill defines standard patterns for state management, ensuring a clear separation between the UI presentation layer and the application state/business logic layer.
+This skill defines standard patterns for state management, ensuring a clear separation between the UI presentation layer and the application state/business logic layer using BLoC/Cubit.
 
-## When to Use
-- When introducing a new feature that requires managing dynamic state.
-- When refactoring state management in existing screens.
-- When deciding how to structure data flow within the application.
+---
 
 ## Key Principles
 
 ### 1. Separation of Concerns
 - **UI (Widgets)**: Should remain completely declarative and simple. They subscribe to state changes and render UI components accordingly.
-- **State Holders (Notifier / BLoC / Controller)**: Contain the business logic, state mutations, and call API repositories. They do NOT import `package:flutter/material.dart` or interact directly with the UI elements.
+- **State Holders (BLoC / Cubit)**: Contain business logic, state mutations, and call API repositories. They do NOT import `package:flutter/material.dart` or interact directly with UI elements.
 
-### 2. State Modeling Best Practices
-- Prefer **Immutable States**. Use packages like `freezed` or `equatable` to make states immutable.
-- Always model states explicitly using classes. For example, instead of multiple flags (`isLoading`, `isError`), use a union class or a single state object:
-  - `CounterInitial`, `CounterLoading`, `CounterSuccess`, `CounterFailure`.
+---
 
-### 3. Package-Specific Best Practices
+### 2. BLoC Widgets & Performance Optimization Rules
 
-#### Riverpod
-- Use `Notifier` or `AsyncNotifier` for complex state logic.
-- Keep providers scoped and autodisposed where appropriate (`.autoDispose`).
-- Read providers in widgets using `ref.watch` for rebuilding and `ref.read` inside callbacks (e.g., button onPressed).
+#### A. `BlocSelector` (Ưu tiên Hàng đầu cho Tối ưu Hiệu năng & Code Sạch)
+- **Tư tưởng hiện đại**: **Thay vì lạm dụng `buildWhen`** (phải viết so sánh thủ công `(prev, current) => prev.foo != current.foo`), các dự án Flutter quy mô vừa và lớn hiện nay **ưu tiên dùng `BlocSelector`** để chỉ lắng nghe đúng phần dữ liệu được chọn (ví dụ: chỉ theo dõi `user.name` hoặc `isLoading`).
+- **Ưu điểm vượt trội**: Khai báo ngắn gọn, rõ ràng (Declarative & Strongly-typed), tự động so sánh giá trị trích xuất và triệt tiêu 100% việc rebuild thừa khi các phần dữ liệu khác trong State biến đổi.
+  ```dart
+  // ✅ Ưu tiên dùng BlocSelector: Chỉ rebuild khi isLoading thay đổi!
+  BlocSelector<AuthCubit, AuthState, bool>(
+    selector: (state) => state.isLoading,
+    builder: (context, isLoading) {
+      return AppButton(
+        title: 'Đăng nhập',
+        isLoading: isLoading,
+        onPressed: () => context.read<AuthCubit>().login(...),
+      );
+    },
+  )
 
-#### BLoC / Cubit
-- Keep events and states simple.
-- Emit new states instead of mutating existing ones.
-- Use `BlocBuilder` for rebuilding widgets, `BlocListener` for side effects (e.g. navigation, showing SnackBar), and `BlocConsumer` when both are needed.
-- **No Raw Try/Catch in Cubits/BLoCs**: Avoid using try/catch blocks to intercept exceptions from Repositories/UseCases. Because Repositories return an `Either` containing the `Failure`, the Cubit should handle errors cleanly without expecting raw exceptions.
-- **Handling Either in State Management**: Always handle the `Either` result using **`fold()`** or **`match()`** to exhaustively map both `Failure` and `Success` branches to appropriate UI states.
-  - ❌ Avoid (Catching raw exceptions):
-    ```dart
-    try {
-      final user = await authRepository.login(email, password);
-      emit(AuthSuccess(user));
-    } catch (e) {
-      emit(AuthFailure(e.toString()));
-    }
-    ```
-  - ✅ Prefer (Folding Either):
-    ```dart
-    final result = await authRepository.login(email, password);
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthSuccess(user)),
-    );
-    ```
+  // ✅ BlocSelector cho thuộc tính phức tạp: Chỉ rebuild khi user.name thay đổi!
+  BlocSelector<UserCubit, UserState, String>(
+    selector: (state) => state.user.fullName,
+    builder: (context, fullName) {
+      return Text('Xin chào, $fullName!');
+    },
+  )
+  ```
 
+#### B. `BlocListener` (Thực thi Side-effects 1 lần)
+- **Mục đích**: Thực thi side-effects một lần duy nhất per state emission mà KHÔNG rebuild widget tree.
+- **Trường hợp áp dụng**: Chuyển màn hình (`context.go`, `context.push`), hiển thị `SnackBar`, hoặc mở `Dialog`/`BottomSheet`.
+- **Sử dụng `listenWhen`**: Dùng `listenWhen: (prev, current)` để chỉ kích hoạt listener khi đúng điều kiện State mục tiêu.
+  ```dart
+  BlocListener<AuthCubit, AuthState>(
+    listenWhen: (prev, current) => current is AuthFailure || current is AuthSuccess,
+    listener: (context, state) {
+      if (state is AuthSuccess) context.go('/');
+      if (state is AuthFailure) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.message)),
+        );
+      }
+    },
+    child: const LoginForm(),
+  )
+  ```
 
-### 4. Dependency Injection using get_it
-- **Constructor Injection**: Never instantiate repositories, services, or storage dependencies directly inside BLoCs, Cubits, or Notifiers. Pass them through the constructor.
-  - ❌ Avoid:
-    ```dart
-    class AuthCubit extends Cubit<AuthState> {
-      final authRepository = AuthRepositoryImpl(); // Tight coupling
-    }
-    ```
-  - ✅ Prefer:
-    ```dart
-    class AuthCubit extends Cubit<AuthState> {
-      final AuthRepository authRepository;
+#### C. `BlocConsumer` (Kết hợp Builder & Listener)
+- **Mục đích**: Kết hợp cả `BlocBuilder` và `BlocListener` cho các luồng vừa cần cập nhật UI vừa cần thực thi hành động 1 lần (Ví dụ: Form Đăng nhập).
 
-      AuthCubit(this.authRepository) : super(AuthInitial());
-    }
-    ```
-- **Instantiation using get_it**: Use `get_it` to resolve the required parameters when registering or creating the BLoC/Cubit:
-  - Inside the routes/navigation setup or widget injection layer:
-    ```dart
-    BlocProvider(
-      create: (context) => AuthCubit(getIt<AuthRepository>()),
-      child: const LoginScreen(),
-    )
-    ```
+#### D. `BlocBuilder` (Dựng lại UI Thuần túy)
+- **Quy tắc Bắt buộc**: **TUYỆT ĐỐI KHÔNG chứa Side-effects** bên trong `builder` (như `Navigator.push`, `showSnackBar`, `showDialog`).
 
-## Instructions
-1. Determine the appropriate state management solution.
-2. Structure the states, events/actions, and notifier/bloc classes.
-3. Keep the UI layer dumb and decoupled.
-4. Ensure states are immutable and easily testable.
-5. Apply Dependency Injection via get_it to decouple business logic from data sources.
+---
 
+### 3. Handling Either Result in Cubits
+- Always handle the `Either` result from Repositories using `fold()` or `match()`:
+  ```dart
+  final result = await authRepository.login(email, password);
+  result.fold(
+    (failure) => emit(AuthFailure(failure.message)),
+    (user) => emit(AuthSuccess(user)),
+  );
+  ```
+
+---
+
+### 4. Dependency Injection via `get_it`
+- Pass repositories into Cubits/BLoCs via Constructor Injection.
+- Instantiate BLoCs using `getIt`:
+  ```dart
+  BlocProvider(
+    create: (context) => AuthCubit(getIt<AuthRepository>()),
+    child: const LoginScreen(),
+  )
+  ```
