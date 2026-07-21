@@ -2,51 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
+import 'package:snapspot/core/router/app_routes.dart';
+import 'package:snapspot/core/router/routes/auth_routes.dart';
+import 'package:snapspot/core/router/routes/camera_routes.dart';
+import 'package:snapspot/core/router/routes/chat_routes.dart';
+import 'package:snapspot/core/router/routes/feed_routes.dart';
+import 'package:snapspot/core/router/routes/map_routes.dart';
+import 'package:snapspot/core/router/routes/profile_routes.dart';
 import 'package:snapspot/core/widgets/navigation/main_navigation_layout.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
-import 'package:snapspot/features/auth/presentation/screens/login_screen.dart';
-import 'package:snapspot/features/auth/presentation/screens/register_screen.dart';
-import 'package:snapspot/features/feed/presentation/screens/home_screen.dart';
-import 'package:snapspot/features/feed/presentation/screens/post_detail_screen.dart';
-import 'package:snapspot/features/map/presentation/screens/map_explore_screen.dart';
-import 'package:snapspot/features/camera/presentation/screens/camera_screen.dart';
-import 'package:snapspot/features/camera/presentation/screens/post_editor_screen.dart';
-import 'package:snapspot/features/chat/presentation/screens/chat_list_screen.dart';
-import 'package:snapspot/features/chat/presentation/screens/chat_room_screen.dart';
-import 'package:snapspot/features/profile/presentation/screens/profile_screen.dart';
-import 'package:snapspot/features/profile/presentation/screens/edit_profile_screen.dart';
-import 'package:snapspot/features/profile/presentation/screens/change_password_screen.dart';
-import 'package:snapspot/features/settings/presentation/screens/settings_screen.dart';
 
-// Key định vị Navigator ngoài cùng để điều hướng toàn màn hình (không có BottomBar)
+/// Key định vị Navigator ngoài cùng để điều hướng toàn màn hình (không hiển thị BottomBar)
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Cấu hình cây định tuyến (Route Tree) của GoRouter cho toàn bộ ứng dụng SnapSpot.
-/// Đặt đúng chuẩn Clean Architecture tại lib/core/router/app_router.dart.
+///
+/// Refactored theo chuẩn Senior Architecture:
+/// - Phân tách các tập tuyến đường (Routes) theo từng domain tính năng chuyên biệt (`lib/core/router/routes/`).
+/// - Quản lý hằng số tên đường dẫn tập trung tại `AppRoutes`.
+/// - Hỗ trợ Redirect Guard xác thực tự động và Trang 404 thân thiện.
 final goRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: AppRoutes.home,
+  
+  // ── 1. Route Guards & Auth Redirect ─────────────────────────────────────────
   redirect: (context, state) {
-    // 1. Kiểm tra trạng thái đăng nhập từ AuthCubit
     final authCubit = context.read<AuthCubit>();
     final isLoggedIn = authCubit.state is AuthSuccess;
-    final isLoggingIn = state.matchedLocation == '/login';
-    final isRegistering = state.matchedLocation == '/register';
+    final isLoggingIn = state.matchedLocation == AppRoutes.login;
+    final isRegistering = state.matchedLocation == AppRoutes.register;
 
-    // 2. Nếu chưa đăng nhập và không nằm ở màn hình đăng nhập/đăng ký -> Điều hướng về /login
+    // Chưa đăng nhập & truy cập route bảo mật -> Chuyển về màn hình Login
     if (!isLoggedIn && !isLoggingIn && !isRegistering) {
-      return '/login';
+      return AppRoutes.login;
     }
 
-    // 3. Nếu đã đăng nhập mà cố truy cập /login hoặc /register -> Điều hướng về trang chủ /
+    // Đã đăng nhập nhưng truy cập Login / Register -> Chuyển về Home
     if (isLoggedIn && (isLoggingIn || isRegistering)) {
-      return '/';
+      return AppRoutes.home;
     }
 
-    return null; // Không điều hướng, cho phép tiếp tục truy cập trang đích
+    return null;
   },
 
-  // Xử lý trang lỗi 404 thân thiện người dùng
+  // ── 2. Custom 404 Error Page ────────────────────────────────────────────────
   errorBuilder: (context, state) {
     return Scaffold(
       appBar: AppBar(title: const Text('Không tìm thấy trang')),
@@ -62,7 +61,7 @@ final goRouter = GoRouter(
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => context.go('/'),
+              onPressed: () => context.go(AppRoutes.home),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -75,138 +74,28 @@ final goRouter = GoRouter(
     );
   },
 
+  // ── 3. Route Tree Assembly ──────────────────────────────────────────────────
   routes: [
-    // Định tuyến cho Auth nằm ngoài ShellRoute (Không hiển thị BottomBar)
-    GoRoute(
-      path: '/login',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/register',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const RegisterScreen(),
-    ),
+    // A. Màn hình Auth (Fullscreen)
+    ...buildAuthRoutes(_rootNavigatorKey),
 
-    // Màn hình xem Chi tiết Bài viết (Full Screen không có BottomBar)
-    GoRoute(
-      path: '/post/:id',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final postId = state.pathParameters['id']!;
-        final focusComment = state.uri.queryParameters['focusComment'] == 'true';
-        return PostDetailScreen(
-          postId: postId,
-          focusComment: focusComment,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/p/:id',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final postId = state.pathParameters['id']!;
-        final focusComment = state.uri.queryParameters['focusComment'] == 'true';
-        return PostDetailScreen(
-          postId: postId,
-          focusComment: focusComment,
-        );
-      },
-    ),
-    GoRoute(
-      path: '/camera/editor',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final imagePath = state.uri.queryParameters['imagePath'] ?? '';
-        return PostEditorScreen(imagePath: imagePath);
-      },
-    ),
-    GoRoute(
-      path: '/chat/:roomId',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final roomId = state.pathParameters['roomId']!;
-        return ChatRoomScreen(roomId: roomId);
-      },
-    ),
-    GoRoute(
-      path: '/settings',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const SettingsScreen(),
-    ),
-    GoRoute(
-      path: '/edit-profile',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const EditProfileScreen(),
-    ),
-    GoRoute(
-      path: '/change-password',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const ChangePasswordScreen(),
-    ),
+    // B. Màn hình Chi tiết / Edior / Settings (Fullscreen)
+    ...buildFeedFullscreenRoutes(_rootNavigatorKey),
+    buildCameraEditorRoute(_rootNavigatorKey),
+    buildChatRoomRoute(_rootNavigatorKey),
+    ...buildProfileFullscreenRoutes(_rootNavigatorKey),
 
-    // Tích hợp ShellRoute để chứa thanh điều hướng chính (Bottom Navigation Bar luôn hiển thị)
+    // C. ShellRoute chứa các Tab điều hướng chính (Có Bottom Navigation Bar)
     ShellRoute(
       builder: (context, state, child) {
         return MainNavigationLayout(child: child);
       },
       routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: '/explore',
-          builder: (context, state) => const MapExploreScreen(),
-        ),
-        GoRoute(
-          path: '/camera',
-          builder: (context, state) => const CameraScreen(),
-        ),
-        GoRoute(
-          path: '/chat',
-          builder: (context, state) => const ChatListScreen(),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(userId: 'me'),
-        ),
-        GoRoute(
-          path: '/user/profile/:id',
-          builder: (context, state) {
-            final userId = state.pathParameters['id']!;
-            return ProfileScreen(userId: userId);
-          },
-        ),
-        GoRoute(
-          path: '/profile/:id',
-          builder: (context, state) {
-            final userId = state.pathParameters['id']!;
-            return ProfileScreen(userId: userId);
-          },
-        ),
-        GoRoute(
-          path: '/user/:id',
-          builder: (context, state) {
-            final userId = state.pathParameters['id']!;
-            return ProfileScreen(userId: userId);
-          },
-        ),
-        GoRoute(
-          path: '/u/:id',
-          builder: (context, state) {
-            final userId = state.pathParameters['id']!;
-            return ProfileScreen(userId: userId);
-          },
-        ),
-        GoRoute(
-          path: '/saved',
-          builder: (context, state) => const ProfileScreen(userId: 'me'),
-        ),
-        GoRoute(
-          path: '/bookmarks',
-          builder: (context, state) => const ProfileScreen(userId: 'me'),
-        ),
+        buildHomeTabRoute(),
+        buildMapTabRoute(),
+        buildCameraTabRoute(),
+        buildChatTabRoute(),
+        ...buildProfileTabRoutes(),
       ],
     ),
   ],
