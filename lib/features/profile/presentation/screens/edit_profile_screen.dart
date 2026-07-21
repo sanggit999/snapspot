@@ -142,7 +142,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(context.tr('success'))));
-        context.pop(); // Quay lại màn hình Settings
+        context.pop();
       } else {
         ScaffoldMessenger.of(
           context,
@@ -178,192 +178,201 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // 1. Avatar chọn ảnh lớn
-                  Center(
-                    child: Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.grey[850]!
-                                  : Colors.grey[200]!,
-                              width: 4,
-                            ),
-                          ),
-                          child: AppAvatar(
-                            imageUrl: _selectedAvatarPath ?? user.avatarUrl,
-                            size: AppAvatarSize.large,
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              spacing: 16.0, // Áp dụng Spacing Standard 2026 chuẩn flutter-layout-rules
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 1. Avatar chọn ảnh lớn
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.grey[850]!
+                                : Colors.grey[200]!,
+                            width: 4,
                           ),
                         ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: InkWell(
-                            onTap: _pickImage,
-                            child: CircleAvatar(
-                              radius: 18,
-                              backgroundColor: AppColors.primary,
-                              child: const Icon(
-                                Icons.camera_alt_rounded,
-                                color: Colors.white,
-                                size: 18,
+                        child: AppAvatar(
+                          imageUrl: _selectedAvatarPath ?? user.avatarUrl,
+                          size: AppAvatarSize.large,
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: InkWell(
+                          onTap: _pickImage,
+                          child: const CircleAvatar(
+                            radius: 18,
+                            backgroundColor: AppColors.primary,
+                            child: Icon(
+                              Icons.camera_alt_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 2. Ô nhập Họ và Tên
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 6.0,
+                  children: [
+                    _buildLabel(context, context.tr('fullname')),
+                    TextFormField(
+                      controller: _fullNameController,
+                      decoration: _buildInputDecoration(
+                        context,
+                        context.tr('enter_fullname'),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return context.tr('fullname_required');
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+
+                // 3. Ô nhập Tên người dùng
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 6.0,
+                  children: [
+                    _buildLabel(context, context.tr('username')),
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: _buildInputDecoration(
+                        context,
+                        context.tr('username'),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return context.tr('username_required');
+                        }
+                        if (val.trim().length < 3) {
+                          return context.tr('username_too_short');
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+
+                // 4. Ô nhập Tiểu sử (Bio)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 6.0,
+                  children: [
+                    _buildLabel(context, 'Bio'),
+                    TextFormField(
+                      controller: _bioController,
+                      maxLines: 3,
+                      maxLength: 150,
+                      decoration: _buildInputDecoration(
+                        context,
+                        context.tr('bio_hint'),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // 5. Cài đặt Quyền riêng tư
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.surfaceDark : Colors.grey[50],
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? Colors.grey[850]! : Colors.grey[200]!,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 2.0,
+                          children: [
+                            Text(
+                              context.tr('private'),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
                               ),
                             ),
-                          ),
+                            Text(
+                              context.tr('private_description'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Switch(
+                        value: _isPrivate,
+                        activeTrackColor: AppColors.primary,
+                        onChanged: (val) {
+                          setState(() {
+                            _isPrivate = val;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 32),
+                ),
 
-                  // 2. Ô nhập Họ và Tên
-                  _buildLabel(context, context.tr('fullname')),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _fullNameController,
-                    decoration: _buildInputDecoration(
-                      context,
-                      context.tr('enter_fullname'),
-                    ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return context.tr('fullname_required');
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 3. Ô nhập Tên người dùng
-                  _buildLabel(context, context.tr('username')),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: _buildInputDecoration(
-                      context,
-                      context.tr('username'),
-                    ),
-                    validator: (val) {
-                      if (val == null || val.trim().isEmpty) {
-                        return context.tr('username_required');
-                      }
-                      if (val.trim().length < 3) {
-                        return context.tr('username_too_short');
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-
-                  // 4. Ô nhập Tiểu sử (Bio)
-                  _buildLabel(context, 'Bio'),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _bioController,
-                    maxLines: 3,
-                    maxLength: 150,
-                    decoration: _buildInputDecoration(
-                      context,
-                      context.tr('bio_hint'),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // 5. Cài đặt Quyền riêng tư
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.grey[50],
+                // 6. Nút Lưu Thay Đổi
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _saveChanges,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark ? Colors.grey[850]! : Colors.grey[200]!,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                context.tr('private'),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                context.tr('private_description'),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isDark
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: _isPrivate,
-                          activeTrackColor: AppColors.primary,
-                          onChanged: (val) {
-                            setState(() {
-                              _isPrivate = val;
-                            });
-                          },
-                        ),
-                      ],
                     ),
                   ),
-                  const SizedBox(height: 36),
-
-                  // 6. Nút Lưu Thay Đổi
-                  ElevatedButton(
-                    onPressed: _isSaving ? null : _saveChanges,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: _isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            context.tr('save_changes'),
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
                             ),
                           ),
-                  ),
-                ],
-              ),
+                        )
+                      : Text(
+                          context.tr('save_changes'),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ],
             ),
           ),
         ),

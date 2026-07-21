@@ -8,7 +8,7 @@ import 'package:snapspot/core/widgets/inputs/app_text_field.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
 /// Màn hình đăng nhập của SnapSpot.
-/// Giao diện hiện đại, tối giản, hỗ trợ cả đăng nhập email và mạng xã hội.
+/// Giao diện hiện đại, tối giản, áp dụng chuẩn flutter-layout-rules (Spacing 2026 & SafeArea).
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController(
     text: 'lananh@example.com',
-  ); // Autofill for convenience
+  );
   final _passwordController = TextEditingController(text: 'password123');
   String? _errorMessage;
 
@@ -47,44 +47,31 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
-      body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthSuccess) {
-            // Chuyển hướng sang trang chủ sau khi đăng nhập thành công
-            context.go('/');
-          } else if (state is AuthFailure) {
-            setState(() {
-              _errorMessage = state.message;
-            });
-          }
-        },
-        child: SingleChildScrollView(
-          child: Container(
-            height: size.height,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: theme.brightness == Brightness.light
-                    ? [Colors.white, AppColors.backgroundLight]
-                    : [
-                        AppColors.backgroundDark,
-                        const Color(0xFF1F1212),
-                      ], // Subtle dark gradient
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+      body: SafeArea(
+        child: BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthSuccess) {
+              context.go('/');
+            } else if (state is AuthFailure) {
+              setState(() {
+                _errorMessage = state.message;
+              });
+            }
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 16.0, // Áp dụng Spacing Standard 2026 chuẩn flutter-layout-rules
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Spacer(flex: 2),
-                  // Logo & Brand Name
+                  const SizedBox(height: 20),
+
+                  // 1. Logo & Brand Name
                   Center(
                     child: Hero(
                       tag: 'logo',
@@ -102,35 +89,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Text(
-                      'SnapSpot',
-                      style: theme.textTheme.displayLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -1,
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      'Pin your moments, share the map',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.brightness == Brightness.light
-                            ? AppColors.textLightSecondary
-                            : AppColors.textDarkSecondary,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  const Spacer(flex: 1),
 
-                  // Lỗi đăng nhập
+                  Column(
+                    spacing: 4.0,
+                    children: [
+                      Center(
+                        child: Text(
+                          'SnapSpot',
+                          style: theme.textTheme.displayLarge?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Text(
+                          'Pin your moments, share the map',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isLight
+                                ? AppColors.textLightSecondary
+                                : AppColors.textDarkSecondary,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 2. Lỗi đăng nhập
                   if (_errorMessage != null)
                     Container(
                       padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
                         color: AppColors.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -159,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                  // Email
+                  // 3. Email
                   AppTextField(
                     controller: _emailController,
                     hintText: context.tr('enter_email'),
@@ -178,9 +169,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
 
-                  // Password
+                  // 4. Password
                   AppTextField(
                     controller: _passwordController,
                     hintText: context.tr('enter_password'),
@@ -200,13 +190,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
 
-                  // Quên mật khẩu
+                  // 5. Quên mật khẩu
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                        // TODO: Implement forgot password
-                      },
+                      onPressed: () {},
                       child: Text(
                         context.tr('forgot_password'),
                         style: const TextStyle(
@@ -216,9 +204,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
 
-                  // Nút Đăng nhập
+                  // 6. Nút Đăng nhập
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       return AppButton(
@@ -228,9 +215,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: 24),
 
-                  // Hoặc đăng nhập bằng MXH
+                  // 7. Hoặc đăng nhập bằng MXH
                   Row(
                     children: [
                       const Expanded(child: Divider()),
@@ -244,15 +230,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Expanded(child: Divider()),
                     ],
                   ),
-                  const SizedBox(height: 24),
 
-                  // Các nút MXH (Google & Apple)
+                  // 8. Các nút MXH (Google & Apple)
                   Row(
+                    spacing: 16.0,
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
-                            // Giả lập Đăng nhập Google
                             context.read<AuthCubit>().login(
                               'lananh@example.com',
                               'password123',
@@ -278,11 +263,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
-                            // Giả lập Đăng nhập Apple
                             context.read<AuthCubit>().login(
                               'sangnguyen@example.com',
                               'password123',
@@ -298,9 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           label: Text(
                             'Apple',
                             style: TextStyle(
-                              color: theme.brightness == Brightness.light
-                                  ? Colors.black
-                                  : Colors.white,
+                              color: isLight ? Colors.black : Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -309,9 +290,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
 
-                  const Spacer(flex: 2),
+                  const SizedBox(height: 12),
 
-                  // Link chuyển sang Đăng ký
+                  // 9. Link chuyển sang Đăng ký
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -320,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           context.tr('dont_have_account'),
                           style: TextStyle(
-                            color: theme.brightness == Brightness.light
+                            color: isLight
                                 ? AppColors.textLightSecondary
                                 : AppColors.textDarkSecondary,
                             fontWeight: FontWeight.w600,
@@ -329,7 +310,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
                 ],
               ),
             ),
