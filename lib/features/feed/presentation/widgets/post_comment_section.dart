@@ -4,25 +4,28 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/core/mock/mock_data.dart';
+import 'package:snapspot/core/utils/number_formatter.dart';
 import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/feed/presentation/widgets/comment_thread/comment_thread.dart';
 
 /// Section hiển thị danh sách Bình luận theo chuẩn giao diện Reddit / Threads.
 ///
-/// Chịu trách nhiệm duy nhất:
-/// - Quản lý state danh sách bình luận (like, reply, submit).
-/// - Dựng khung layout tổng thể (header, list, input bar).
-/// - Delegate toàn bộ UI thread cho [CommentThread].
+/// Hỗ trợ [headerWidget] để nhúng nguyên vẹn bài viết (SpotCard) lên đầu danh sách chi tiết,
+/// và [autoFocusInput] tự động bật bàn phím khi bấm vào nút Bình luận từ Feed.
 class PostCommentSection extends StatefulWidget {
   final List<CommentEntity> comments;
   final String? postAuthorId;
+  final Widget? headerWidget;
+  final bool autoFocusInput;
   final void Function(String content)? onCommentSubmitted;
 
   const PostCommentSection({
     super.key,
     required this.comments,
     this.postAuthorId,
+    this.headerWidget,
+    this.autoFocusInput = false,
     this.onCommentSubmitted,
   });
 
@@ -45,7 +48,7 @@ class _PostCommentSectionState extends State<PostCommentSection> {
   /// GIF mẫu dùng trong GIF picker. static const: không đổi giữa các instance.
   static const List<String> _mockGifs = [
     'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hndnp0MWszcmUyd3JodXU1dndmNmFvdTJ1anR3azRtZXc0eHl5eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l41K3o5TKS79ht83S/giphy.gif',
-    'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNndicmVldmUybHZ1dzN4bGt3eHdtNGlyOGZ3azNvaWRoOTdrMWd1ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26u4b45b8KXYCUsU0/giphy.gif',
+    'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3hndnp0MWszcmUyd3JodXU1dndmNmFvdTJ1anR3azRtZXc0eHl5eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26u4b45b8KXYCUsU0/giphy.gif',
     'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjlza3g1Z3J5cnNmYnNxbWhsNWNsdHFoenNmN2gxdjlyZXNudjlnMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjeiVyM/giphy.gif',
     'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGZtbXU2Mmxwd3VqNWFndnlndXBnaW1sbnAwOHdqamk1aWZvZXZxeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT0xezQGU5xCDJuCPe/giphy.gif',
   ];
@@ -55,6 +58,12 @@ class _PostCommentSectionState extends State<PostCommentSection> {
     super.initState();
     _comments = List.from(widget.comments);
     _sortComments();
+
+    if (widget.autoFocusInput) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _inputFocusNode.requestFocus();
+      });
+    }
   }
 
   void _sortComments() {
@@ -456,29 +465,76 @@ class _PostCommentSectionState extends State<PostCommentSection> {
     final isLight = theme.brightness == Brightness.light;
     final currentUser = MockData.mockUsers[0];
 
+    final hasHeader = widget.headerWidget != null;
+    final totalItemCount = _comments.length + (hasHeader ? 1 : 0);
+
     return Column(
       children: [
-        // 1. Header Đếm số lượng bình luận
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            children: [
-              Text(
-                '${context.tr('comments')} (${_getTotalCount()})',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Divider(height: 1),
-
-        // 2. Danh sách Bình luận dạng Threaded Comment
+        // Danh sách nội dung (Header bài viết + Bình luận dạng Threaded Comment)
         Expanded(
-          child: _comments.isEmpty
-              ? Center(
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.only(bottom: 16),
+            itemCount: totalItemCount,
+            itemBuilder: (context, index) {
+              // Item 0 render headerWidget (SpotCard bài viết) nếu có
+              if (hasHeader) {
+                if (index == 0) {
+                  return Column(
+                    children: [
+                      widget.headerWidget!,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              '${context.tr('comments')} (${NumberFormatter.formatCompact(_getTotalCount())})',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      const SizedBox(height: 8),
+                    ],
+                  );
+                }
+                index = index - 1;
+              } else if (index == 0 && !hasHeader) {
+                // Trường hợp không có header thì hiển thị tiêu đề đếm comment
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${context.tr('comments')} (${NumberFormatter.formatCompact(_getTotalCount())})',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    const SizedBox(height: 8),
+                  ],
+                );
+              }
+
+              if (_comments.isEmpty) {
+                return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Text(
@@ -490,47 +546,44 @@ class _PostCommentSectionState extends State<PostCommentSection> {
                       ),
                     ),
                   ),
-                )
-              : ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  itemCount: _comments.length,
-                  itemBuilder: (context, index) {
-                    final rootComment = _comments[index];
-                    return RepaintBoundary(
-                      child: CommentThread(
-                        rootComment: rootComment,
-                        isLight: isLight,
-                        postAuthorId: widget.postAuthorId ?? 'usr_2',
-                        onReplyToRoot: () => _initiateReply(
-                          rootComment: rootComment,
-                          targetComment: rootComment,
-                        ),
-                        onLikeRoot: () => _toggleLikeComment(rootComment),
-                        onOptionsTapRoot: () => _showCommentOptionsMenu(
-                          comment: rootComment,
-                          isLight: isLight,
-                        ),
-                        onReplyToReply: (i) => _initiateReply(
-                          rootComment: rootComment,
-                          targetComment: rootComment.replies[i],
-                        ),
-                        onLikeReply: (i) => _toggleLikeComment(
-                          rootComment.replies[i],
-                          parentId: rootComment.id,
-                        ),
-                        onOptionsTapReply: (i) => _showCommentOptionsMenu(
-                          comment: rootComment.replies[i],
-                          isLight: isLight,
-                          parentId: rootComment.id,
-                        ),
-                      ),
-                    );
-                  },
+                );
+              }
+
+              final rootComment = _comments[index];
+              return RepaintBoundary(
+                child: CommentThread(
+                  rootComment: rootComment,
+                  isLight: isLight,
+                  postAuthorId: widget.postAuthorId ?? 'usr_2',
+                  onReplyToRoot: () => _initiateReply(
+                    rootComment: rootComment,
+                    targetComment: rootComment,
+                  ),
+                  onLikeRoot: () => _toggleLikeComment(rootComment),
+                  onOptionsTapRoot: () => _showCommentOptionsMenu(
+                    comment: rootComment,
+                    isLight: isLight,
+                  ),
+                  onReplyToReply: (i) => _initiateReply(
+                    rootComment: rootComment,
+                    targetComment: rootComment.replies[i],
+                  ),
+                  onLikeReply: (i) => _toggleLikeComment(
+                    rootComment.replies[i],
+                    parentId: rootComment.id,
+                  ),
+                  onOptionsTapReply: (i) => _showCommentOptionsMenu(
+                    comment: rootComment.replies[i],
+                    isLight: isLight,
+                    parentId: rootComment.id,
+                  ),
                 ),
+              );
+            },
+          ),
         ),
 
-        // 3. Banner Hiển thị Trạng thái "Đang trả lời @user..."
+        // Banner Hiển thị Trạng thái "Đang trả lời @user..."
         if (_replyTarget != null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -561,7 +614,7 @@ class _PostCommentSectionState extends State<PostCommentSection> {
             ),
           ),
 
-        // 4. Khung Xem trước Ảnh/GIF đính kèm
+        // Khung Xem trước Ảnh/GIF đính kèm
         if (_selectedMediaUrl != null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -598,7 +651,7 @@ class _PostCommentSectionState extends State<PostCommentSection> {
             ),
           ),
 
-        // 5. Ô nhập liệu bình luận mới
+        // Ô nhập liệu bình luận mới
         Container(
           padding: EdgeInsets.only(
             left: 12,

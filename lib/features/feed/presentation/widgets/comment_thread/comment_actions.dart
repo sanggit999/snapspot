@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:snapspot/core/utils/number_formatter.dart';
 
 /// Render thanh tương tác bên dưới bình luận: thời gian, nút Trả lời, nút Tim, nút 3 chấm Tùy chọn.
 class CommentActions extends StatelessWidget {
@@ -49,7 +50,7 @@ class CommentActions extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        // Nút Tim tương tác
+        // Nút Tim tương tác với định dạng số mượt (Compact: 1.2K, 15M)
         GestureDetector(
           onTap: onLike,
           child: Row(
@@ -62,7 +63,7 @@ class CommentActions extends StatelessWidget {
               if (likesCount > 0) ...[
                 const SizedBox(width: 3),
                 Text(
-                  '$likesCount',
+                  NumberFormatter.formatCompact(likesCount),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,

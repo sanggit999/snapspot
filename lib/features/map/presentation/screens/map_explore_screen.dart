@@ -253,7 +253,7 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                   ],
                 ),
               ),
-              // Nút đĩ tới chi tiết
+              // Nút đi tới chi tiết
               IconButton(
                 icon: const Icon(
                   Icons.arrow_forward_ios_rounded,

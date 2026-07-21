@@ -65,7 +65,11 @@ _PostModel _$PostModelFromJson(Map<String, dynamic> json) => _PostModel(
       .toList(),
   likesCount: (json['likes_count'] as num).toInt(),
   commentsCount: (json['comments_count'] as num).toInt(),
+  sharesCount: (json['shares_count'] as num?)?.toInt() ?? 0,
   isLiked: json['is_liked'] as bool,
+  userReaction: json['user_reaction'] as String?,
+  isBookmarked: json['is_bookmarked'] as bool? ?? false,
+  savedCollectionName: json['saved_collection_name'] as String?,
   createdAt: DateTime.parse(json['created_at'] as String),
   comments: (json['comments'] as List<dynamic>)
       .map((e) => CommentModel.fromJson(e as Map<String, dynamic>))
@@ -84,7 +88,11 @@ Map<String, dynamic> _$PostModelToJson(_PostModel instance) =>
       'hashtags': instance.hashtags,
       'likes_count': instance.likesCount,
       'comments_count': instance.commentsCount,
+      'shares_count': instance.sharesCount,
       'is_liked': instance.isLiked,
+      'user_reaction': instance.userReaction,
+      'is_bookmarked': instance.isBookmarked,
+      'saved_collection_name': instance.savedCollectionName,
       'created_at': instance.createdAt.toIso8601String(),
       'comments': instance.comments,
     };

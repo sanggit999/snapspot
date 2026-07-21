@@ -63,7 +63,11 @@ final goRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final postId = state.pathParameters['id']!;
-        return PostDetailScreen(postId: postId);
+        final focusComment = state.uri.queryParameters['focusComment'] == 'true';
+        return PostDetailScreen(
+          postId: postId,
+          focusComment: focusComment,
+        );
       },
     ),
     GoRoute(
@@ -108,39 +112,29 @@ final goRouter = GoRouter(
 
     // Tích hợp ShellRoute để chứa thanh điều hướng chính
     ShellRoute(
-      builder: (context, state, child) => MainNavigationLayout(child: child),
+      builder: (context, state, child) {
+        return MainNavigationLayout(child: child);
+      },
       routes: [
-        // Tab 1: Trang chủ / Bảng tin
         GoRoute(
           path: '/',
           builder: (context, state) => const HomeScreen(),
         ),
-
-        // Tab 2: Khám phá bản đồ
         GoRoute(
           path: '/explore',
           builder: (context, state) => const MapExploreScreen(),
         ),
-
-        // Tab 3: Camera & Đăng bài
         GoRoute(
           path: '/camera',
           builder: (context, state) => const CameraScreen(),
         ),
-
-        // Tab 4: Tin nhắn / Chat
         GoRoute(
           path: '/chat',
           builder: (context, state) => const ChatListScreen(),
         ),
-
-        // Tab 5: Trang cá nhân của tôi (chính chủ 'me' để giữ BottomBar)
         GoRoute(
-          path: '/profile/:id',
-          builder: (context, state) {
-            final userId = state.pathParameters['id']!;
-            return ProfileScreen(userId: userId);
-          },
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(userId: 'me'),
         ),
       ],
     ),

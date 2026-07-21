@@ -33,7 +33,7 @@ class FeedCubit extends Cubit<FeedState> {
 
   FeedCubit(this._feedRepository) : super(const FeedInitial());
 
-  // Lưu trữ danh sách bài viết hiện tại trong memory để dễ dàng thao tác Like/Comment
+  // Lưu trữ danh sách bài viết hiện tại trong memory để dễ dàng thao tác Like/Comment/Share
   List<PostEntity> _currentPosts = [];
 
   /// Tải danh sách bài viết.
@@ -88,6 +88,39 @@ class FeedCubit extends Cubit<FeedState> {
         emit(FeedLoaded(List.from(_currentPosts)));
       },
     );
+  }
+
+  /// Bày tỏ cảm xúc nhanh bằng Emoji (❤️, 🔥, 😍, 👏, 📍)
+  void reactToPost(String postId, String emoji) {
+    if (state is! FeedLoaded) return;
+
+    _currentPosts = _currentPosts.map((post) {
+      if (post.id == postId) {
+        final isAlreadyLiked = post.isLiked;
+        return post.copyWith(
+          userReaction: emoji,
+          isLiked: true,
+          likesCount: isAlreadyLiked ? post.likesCount : post.likesCount + 1,
+        );
+      }
+      return post;
+    }).toList();
+
+    emit(FeedLoaded(List.from(_currentPosts)));
+  }
+
+  /// Tăng số lượt chia sẻ khi người dùng gửi tin nhắn / copy link / chia sẻ ra ngoài
+  void incrementShareCount(String postId) {
+    if (state is! FeedLoaded) return;
+
+    _currentPosts = _currentPosts.map((post) {
+      if (post.id == postId) {
+        return post.copyWith(sharesCount: post.sharesCount + 1);
+      }
+      return post;
+    }).toList();
+
+    emit(FeedLoaded(List.from(_currentPosts)));
   }
 
   /// Thêm bình luận mới vào bài viết

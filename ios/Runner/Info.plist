@@ -72,5 +72,13 @@
 	<string>Ứng dụng cần quyền truy cập thư viện để chọn ảnh đại diện từ thiết bị của bạn.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Ứng dụng cần quyền truy cập micrô khi bạn quay video.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>zalo</string>
+		<string>fb-messenger</string>
+		<string>fb</string>
+		<string>https</string>
+		<string>http</string>
+	</array>
 </dict>
 </plist>
