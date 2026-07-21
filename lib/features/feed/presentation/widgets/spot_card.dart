@@ -1,30 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
+import 'package:snapspot/core/services/app_share_service.dart';
 import 'package:snapspot/core/utils/geo_utils.dart';
+import 'package:snapspot/core/utils/number_formatter.dart';
 import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/core/widgets/images/image_gallery_viewer_dialog.dart';
 import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/feed/presentation/widgets/post_header.dart';
-import 'package:snapspot/features/feed/presentation/widgets/post_comment_section.dart';
 
-/// Thẻ hiển thị bài đăng check-in với trải nghiệm tương tác (UX) đỉnh cao 2026.
-/// Hỗ trợ Xem ảnh Fullscreen, Quick Emoji Reactions, Share Sheet, Bookmark Collections và chuyển đến Bản đồ vị trí.
+/// Thẻ hiển thị bài đăng check-in với trải nghiệm tương tác (UX) đột phá 2026.
+/// Hỗ trợ Long-Press Quick Emoji Reaction, Double-Tap Haptic Pulse, và Luồng Chia sẻ 3-trong-1 trỏ trực tiếp App Android & iOS.
 class SpotCard extends StatefulWidget {
   final PostEntity post;
   final double? userLat;
   final double? userLng;
+  final bool isInDetailScreen;
   final void Function(String)? onLikePressed;
+  final void Function(String)? onSharePressed;
 
   const SpotCard({
     super.key,
     required this.post,
     this.userLat,
     this.userLng,
+    this.isInDetailScreen = false,
     this.onLikePressed,
+    this.onSharePressed,
   });
 
   @override
@@ -36,12 +42,16 @@ class _SpotCardState extends State<SpotCard>
   int _currentImageIndex = 0;
   bool _isBookmarked = false;
   String? _savedCollectionName;
+  String? _selectedReactionEmoji;
+  late int _localSharesCount;
+
   late AnimationController _heartController;
   late Animation<double> _heartScale;
 
   @override
   void initState() {
     super.initState();
+    _localSharesCount = widget.post.sharesCount;
     _heartController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -54,77 +64,137 @@ class _SpotCardState extends State<SpotCard>
   }
 
   @override
+  void didUpdateWidget(covariant SpotCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.post.sharesCount != widget.post.sharesCount) {
+      _localSharesCount = widget.post.sharesCount;
+    }
+  }
+
+  @override
   void dispose() {
     _heartController.dispose();
     super.dispose();
   }
 
   void _handleDoubleTap() {
+    HapticFeedback.mediumImpact();
     if (!widget.post.isLiked) {
       widget.onLikePressed?.call(widget.post.id);
     }
     _heartController.forward(from: 0.0);
   }
 
+  void _navigateToDetail({bool focusComment = false}) {
+    if (!widget.isInDetailScreen) {
+      final uri = focusComment
+          ? '/post/${widget.post.id}?focusComment=true'
+          : '/post/${widget.post.id}';
+      context.push(uri);
+    }
+  }
+
   void _openImageGallery() {
-    if (widget.post.imageUrls.isNotEmpty) {
+    if (widget.isInDetailScreen && widget.post.imageUrls.isNotEmpty) {
       ImageGalleryViewerDialog.show(
         context,
         imageUrls: widget.post.imageUrls,
         initialIndex: _currentImageIndex,
       );
+    } else {
+      _navigateToDetail();
     }
   }
 
-  void _openCommentsBottomSheet() {
+  void _incrementShareCount() {
+    setState(() {
+      _localSharesCount++;
+    });
+    widget.onSharePressed?.call(widget.post.id);
+  }
+
+  /// UX Đột phá: Long-Press mở Quick Reaction Bar với 5 Emoji cảm xúc bóng bẩy
+  void _openQuickReactionsBar() {
+    HapticFeedback.selectionClick();
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final emojis = ['❤️', '🔥', '😍', '👏', '📍'];
+
     showModalBottomSheet(
       context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
-        height: MediaQuery.of(context).size.height * 0.82,
+        margin: const EdgeInsets.only(bottom: 40, left: 24, right: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[400],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Expanded(
-              child: PostCommentSection(
-                comments: widget.post.comments,
-                onCommentSubmitted: (content) {
-                  setState(() {});
-                },
-              ),
+          color: isLight
+              ? Colors.white.withValues(alpha: 0.95)
+              : AppColors.surfaceDark.withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(32),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: emojis.map((emoji) {
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                setState(() {
+                  _selectedReactionEmoji = emoji;
+                  if (!widget.post.isLiked) {
+                    widget.onLikePressed?.call(widget.post.id);
+                  }
+                });
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Đã bày tỏ cảm xúc $emoji'),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              },
+              child: Transform.scale(
+                scale: _selectedReactionEmoji == emoji ? 1.3 : 1.0,
+                child: Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 30),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
   }
 
-  void _openShareBottomSheet() {
+  /// Mở Hộp thoại Chia sẻ Tối ưu Top 3 Ứng dụng Phổ biến (1. Zalo, 2. Messenger, 3. Facebook + 4. Khác...)
+  /// Trỏ trực tiếp kích hoạt App trên Android & iOS qua AppShareService
+  void _openExternalAppsDialog() {
     final isLight = Theme.of(context).brightness == Brightness.light;
+    final postUrl = 'https://snapspot.app/p/${widget.post.id}';
+    final shareTitle = 'Check-in tại ${widget.post.locationName} - SnapSpot';
+
+    final externalApps = [
+      {'key': 'zalo', 'name': 'Zalo', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFF0068FF)},
+      {'key': 'messenger', 'name': 'Messenger', 'icon': Icons.bolt_rounded, 'color': const Color(0xFF0084FF)},
+      {'key': 'facebook', 'name': 'Facebook', 'icon': Icons.facebook_rounded, 'color': const Color(0xFF1877F2)},
+      {'key': 'other', 'name': 'Khác...', 'icon': Icons.more_horiz_rounded, 'color': Colors.grey[700]!},
+    ];
 
     showModalBottomSheet(
       context: context,
       backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,79 +211,255 @@ class _SpotCardState extends State<SpotCard>
               ),
               const SizedBox(height: 16),
               const Text(
-                'Chia sẻ bài viết',
+                'Chia sẻ qua ứng dụng ngoài',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Danh sách bạn bè để gửi nhanh qua Chat
-              SizedBox(
-                height: 85,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: MockData.mockUsers.length,
-                  itemBuilder: (ctx, index) {
-                    final u = MockData.mockUsers[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Đã gửi bài viết cho ${u.fullName}'),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          children: [
-                            AppAvatar(imageUrl: u.avatarUrl, size: AppAvatarSize.medium),
-                            const SizedBox(height: 6),
-                            SizedBox(
-                              width: 55,
-                              child: Text(
-                                u.username,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                            ),
-                          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: externalApps.map((app) {
+                  final appKey = app['key'] as String;
+                  final appColor = app['color'] as Color;
+                  final appIcon = app['icon'] as IconData;
+                  final appName = app['name'] as String;
+
+                  return GestureDetector(
+                    onTap: () async {
+                      HapticFeedback.mediumImpact();
+                      _incrementShareCount();
+                      Navigator.pop(ctx);
+
+                      if (appKey == 'zalo') {
+                        await AppShareService.shareToZalo(postUrl: postUrl, title: shareTitle);
+                      } else if (appKey == 'messenger') {
+                        await AppShareService.shareToMessenger(postUrl: postUrl);
+                      } else if (appKey == 'facebook') {
+                        await AppShareService.shareToFacebook(postUrl: postUrl);
+                      } else {
+                        await AppShareService.shareToSystem(postUrl: postUrl, title: shareTitle);
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 58,
+                          height: 58,
+                          decoration: BoxDecoration(
+                            color: appColor.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(appIcon, color: appColor, size: 28),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const Divider(height: 24),
-
-              // Các hành động chia sẻ khác
-              ListTile(
-                leading: const Icon(Icons.link_rounded, color: AppColors.primary),
-                title: const Text('Sao chép liên kết bài viết'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã sao chép liên kết vào bộ nhớ tạm'),
+                        const SizedBox(height: 8),
+                        Text(
+                          appName,
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
                   );
-                },
+                }).toList(),
               ),
-              ListTile(
-                leading: const Icon(Icons.send_rounded, color: Colors.blueAccent),
-                title: const Text('Chia sẻ lên Tin của bạn (Story)'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  context.push('/camera');
-                },
-              ),
+              const SizedBox(height: 10),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// UX Đột phá 2026: Luồng Chia sẻ 3-trong-1 (Direct Chat + Quick Copy/Story + External Apps)
+  void _openShareBottomSheet() {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final Set<String> sentUserIds = {};
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 36,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[400],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Text(
+                        'Chia sẻ bài viết',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${NumberFormatter.formatCompact(_localSharesCount)} lượt chia sẻ',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: isLight
+                              ? AppColors.textLightSecondary
+                              : AppColors.textDarkSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 1. Gửi nhanh tin nhắn Direct Message cho bạn bè (SnapSpot Chat)
+                  const Text(
+                    'Gửi nhanh cho bạn bè',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 105,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: MockData.mockUsers.length,
+                      itemBuilder: (ctx, index) {
+                        final u = MockData.mockUsers[index];
+                        final isSent = sentUserIds.contains(u.id);
+
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: Column(
+                            children: [
+                              AppAvatar(imageUrl: u.avatarUrl, size: AppAvatarSize.medium),
+                              const SizedBox(height: 4),
+                              SizedBox(
+                                width: 60,
+                                child: Text(
+                                  u.username,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                height: 26,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isSent ? Colors.grey[300] : AppColors.primary,
+                                    foregroundColor: isSent ? Colors.black87 : Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    HapticFeedback.lightImpact();
+                                    setSheetState(() {
+                                      if (isSent) {
+                                        sentUserIds.remove(u.id);
+                                      } else {
+                                        sentUserIds.add(u.id);
+                                        _incrementShareCount();
+                                      }
+                                    });
+                                  },
+                                  child: Text(
+                                    isSent ? 'Đã gửi ✓' : 'Gửi',
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const Divider(height: 20),
+
+                  // 2. Lưới Các Hành Động Chia Sẻ Nhanh (Copy link, Story, App khác)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.link_rounded, color: AppColors.primary),
+                    ),
+                    title: const Text('Sao chép liên kết bài viết', style: TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text('https://snapspot.app/p/${widget.post.id}', style: const TextStyle(fontSize: 11.5)),
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      Clipboard.setData(ClipboardData(text: 'https://snapspot.app/p/${widget.post.id}'));
+                      _incrementShareCount();
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Đã sao chép liên kết vào bộ nhớ tạm!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.auto_awesome_rounded, color: Colors.purple),
+                    ),
+                    title: const Text('Chia sẻ lên Tin của bạn (Story)', style: TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: const Text('Tạo Sticker địa điểm check-in độc đáo', style: TextStyle(fontSize: 11.5)),
+                    onTap: () {
+                      _incrementShareCount();
+                      Navigator.pop(ctx);
+                      context.push('/camera');
+                    },
+                  ),
+
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.share_outlined, color: Colors.blue),
+                    ),
+                    title: const Text('Chia sẻ qua Ứng dụng khác', style: TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: const Text('Zalo, Messenger, Facebook, Khác...', style: TextStyle(fontSize: 11.5)),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _openExternalAppsDialog();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -311,10 +557,13 @@ class _SpotCardState extends State<SpotCard>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Header Người đăng
-          PostHeader(post: widget.post),
+          // 1. Header Người đăng (Bấm vào avatar/tên mở Chi tiết)
+          GestureDetector(
+            onTap: () => _navigateToDetail(),
+            child: PostHeader(post: widget.post),
+          ),
 
-          // 2. Khung Ảnh Carousel bài viết với Double-Tap to Like & Tap to View Fullscreen
+          // 2. Khung Ảnh Carousel bài viết với Double-Tap to Like & Tap to View Fullscreen / Detail
           GestureDetector(
             onTap: _openImageGallery,
             onDoubleTap: _handleDoubleTap,
@@ -442,7 +691,7 @@ class _SpotCardState extends State<SpotCard>
             ),
           ),
 
-          // 3. Location & Distance Pill (Bấm vào để mở Bản đồ khám phá / Chỉ đường)
+          // 3. Smart Location Badge với Gradient Pill sang trọng
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
             child: Row(
@@ -450,25 +699,41 @@ class _SpotCardState extends State<SpotCard>
                 Expanded(
                   child: InkWell(
                     onTap: () => context.go('/explore'),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                          colors: isLight
+                              ? [
+                                  AppColors.primary.withValues(alpha: 0.1),
+                                  const Color(0xFF833AB4).withValues(alpha: 0.08),
+                                ]
+                              : [
+                                  AppColors.primary.withValues(alpha: 0.25),
+                                  const Color(0xFF833AB4).withValues(alpha: 0.2),
+                                ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.location_on_rounded, size: 16, color: AppColors.primary),
-                          const SizedBox(width: 5),
+                          const Icon(Icons.location_on_rounded, size: 17, color: AppColors.primary),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               widget.post.locationName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
                                 color: AppColors.primary,
                               ),
                             ),
@@ -479,7 +744,7 @@ class _SpotCardState extends State<SpotCard>
                               '• $distanceText',
                               style: TextStyle(
                                 fontSize: 11.5,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: isLight
                                     ? AppColors.textLightSecondary
                                     : AppColors.textDarkSecondary,
@@ -487,7 +752,7 @@ class _SpotCardState extends State<SpotCard>
                             ),
                           ],
                           const SizedBox(width: 4),
-                          const Icon(Icons.chevron_right_rounded, size: 16, color: AppColors.primary),
+                          const Icon(Icons.chevron_right_rounded, size: 17, color: AppColors.primary),
                         ],
                       ),
                     ),
@@ -497,50 +762,62 @@ class _SpotCardState extends State<SpotCard>
             ),
           ),
 
-          // 4. Action Bar Tương tác Tối ưu Thumb-Friendly UX
+          // 4. Action Bar Tương tác Tối ưu: Tim, Bình luận, Chia sẻ (Shares count), Bookmark
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               children: [
-                // Nút Like (Tim)
-                InkWell(
-                  onTap: () => widget.onLikePressed?.call(widget.post.id),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    child: Row(
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
-                          child: Icon(
-                            widget.post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                            key: ValueKey<bool>(widget.post.isLiked),
-                            color: widget.post.isLiked
-                                ? Colors.redAccent
-                                : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
-                            size: 25,
+                // Nút Like / Bày tỏ cảm xúc (Tap = Like, Long-Press = Quick Emoji Bar)
+                GestureDetector(
+                  onLongPress: _openQuickReactionsBar,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.onLikePressed?.call(widget.post.id);
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      child: Row(
+                        children: [
+                          if (_selectedReactionEmoji != null)
+                            Text(
+                              _selectedReactionEmoji!,
+                              style: const TextStyle(fontSize: 20),
+                            )
+                          else
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+                              child: Icon(
+                                widget.post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                key: ValueKey<bool>(widget.post.isLiked),
+                                color: widget.post.isLiked
+                                    ? Colors.redAccent
+                                    : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
+                                size: 25,
+                              ),
+                            ),
+                          const SizedBox(width: 5),
+                          Text(
+                            NumberFormatter.formatCompact(widget.post.likesCount),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          '${widget.post.likesCount}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
 
                 const SizedBox(width: 10),
 
-                // Nút Comment (Bình luận)
+                // Nút Comment (Bình luận - Chuyển sang Chi tiết + Focus Bàn phím)
                 InkWell(
-                  onTap: _openCommentsBottomSheet,
+                  onTap: () => _navigateToDetail(focusComment: true),
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -553,7 +830,7 @@ class _SpotCardState extends State<SpotCard>
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          '${widget.post.commentsCount}',
+                          NumberFormatter.formatCompact(widget.post.commentsCount),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -567,16 +844,31 @@ class _SpotCardState extends State<SpotCard>
 
                 const SizedBox(width: 10),
 
-                // Nút Share (Chia sẻ - Mở Share Sheet)
+                // Nút Share (Chia sẻ - Mở Share Sheet 3-trong-1)
                 InkWell(
                   onTap: _openShareBottomSheet,
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Icon(
-                      Icons.near_me_outlined,
-                      color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
-                      size: 23,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.near_me_outlined,
+                          color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                          size: 23,
+                        ),
+                        if (_localSharesCount > 0) ...[
+                          const SizedBox(width: 5),
+                          Text(
+                            NumberFormatter.formatCompact(_localSharesCount),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
@@ -608,28 +900,31 @@ class _SpotCardState extends State<SpotCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      height: 1.35,
-                      color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: '${widget.post.user.username} ',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                GestureDetector(
+                  onTap: () => _navigateToDetail(),
+                  child: RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        height: 1.35,
+                        color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
                       ),
-                      TextSpan(text: widget.post.caption),
-                    ],
+                      children: [
+                        TextSpan(
+                          text: '${widget.post.user.username} ',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(text: widget.post.caption),
+                      ],
+                    ),
                   ),
                 ),
-                if (widget.post.commentsCount > 0) ...[
+                if (!widget.isInDetailScreen && widget.post.commentsCount > 0) ...[
                   const SizedBox(height: 6),
                   GestureDetector(
-                    onTap: _openCommentsBottomSheet,
+                    onTap: () => _navigateToDetail(focusComment: true),
                     child: Text(
-                      '${context.tr('view_all_comments')} (${widget.post.commentsCount})',
+                      '${context.tr('view_all_comments')} (${NumberFormatter.formatCompact(widget.post.commentsCount)})',
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w500,

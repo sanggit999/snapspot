@@ -4,14 +4,20 @@ import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
+import 'package:snapspot/features/feed/presentation/widgets/post_comment_section.dart';
 import 'package:snapspot/features/feed/presentation/widgets/spot_card.dart';
 
 /// Màn hình Chi tiết bài viết (Post Detail Screen).
-/// Đã được sửa lỗi Crash triệt để, hiển thị toàn bộ nội dung bài đăng mượt mà.
+/// Hiển thị tên tác giả bài viết ở AppBar Title chuẩn UI/UX cá nhân hóa (Bài viết của Trần Lan Anh).
 class PostDetailScreen extends StatefulWidget {
   final String postId;
+  final bool focusComment;
 
-  const PostDetailScreen({super.key, required this.postId});
+  const PostDetailScreen({
+    super.key,
+    required this.postId,
+    this.focusComment = false,
+  });
 
   @override
   State<PostDetailScreen> createState() => _PostDetailScreenState();
@@ -54,42 +60,41 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          context.tr('post_detail'),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          'Bài viết của ${post.user.fullName}',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16.5,
+          ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () => context.pop(),
         ),
         backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
-        elevation: 0,
+        elevation: 0.5,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: SpotCard(
+        child: PostCommentSection(
+          autoFocusInput: widget.focusComment,
+          headerWidget: SpotCard(
             post: post,
+            isInDetailScreen: true,
             onLikePressed: (postId) {
               setState(() {
                 final isLiked = !post.isLiked;
-                _post = PostEntity(
-                  id: post.id,
-                  caption: post.caption,
-                  imageUrls: post.imageUrls,
-                  latitude: post.latitude,
-                  longitude: post.longitude,
-                  locationName: post.locationName,
-                  user: post.user,
-                  hashtags: post.hashtags,
-                  likesCount: isLiked ? post.likesCount + 1 : post.likesCount - 1,
-                  commentsCount: post.commentsCount,
+                _post = post.copyWith(
                   isLiked: isLiked,
-                  createdAt: post.createdAt,
-                  comments: post.comments,
+                  likesCount:
+                      isLiked ? post.likesCount + 1 : post.likesCount - 1,
                 );
               });
             },
           ),
+          comments: post.comments,
+          postAuthorId: post.user.id,
+          onCommentSubmitted: (content) {
+            setState(() {});
+          },
         ),
       ),
     );

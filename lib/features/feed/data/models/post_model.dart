@@ -45,7 +45,11 @@ abstract class PostModel with _$PostModel {
     required List<String> hashtags,
     @JsonKey(name: 'likes_count') required int likesCount,
     @JsonKey(name: 'comments_count') required int commentsCount,
+    @JsonKey(name: 'shares_count') @Default(0) int sharesCount,
     @JsonKey(name: 'is_liked') required bool isLiked,
+    @JsonKey(name: 'user_reaction') String? userReaction,
+    @JsonKey(name: 'is_bookmarked') @Default(false) bool isBookmarked,
+    @JsonKey(name: 'saved_collection_name') String? savedCollectionName,
     @JsonKey(name: 'created_at') required DateTime createdAt,
     required List<CommentModel> comments,
   }) = _PostModel;

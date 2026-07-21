@@ -276,6 +276,9 @@ class _HomeScreenState extends State<HomeScreen>
                   onLikePressed: (postId) {
                     context.read<FeedCubit>().toggleLike(postId);
                   },
+                  onSharePressed: (postId) {
+                    context.read<FeedCubit>().incrementShareCount(postId);
+                  },
                 );
               },
             );

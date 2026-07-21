@@ -23,7 +23,11 @@ class PostMapper {
       hashtags: model.hashtags,
       likesCount: model.likesCount,
       commentsCount: model.commentsCount,
+      sharesCount: model.sharesCount,
       isLiked: model.isLiked,
+      userReaction: model.userReaction,
+      isBookmarked: model.isBookmarked,
+      savedCollectionName: model.savedCollectionName,
       createdAt: model.createdAt,
       comments: model.comments.map(CommentMapper.toEntity).toList(),
     );
@@ -42,7 +46,11 @@ class PostMapper {
       hashtags: entity.hashtags,
       likesCount: entity.likesCount,
       commentsCount: entity.commentsCount,
+      sharesCount: entity.sharesCount,
       isLiked: entity.isLiked,
+      userReaction: entity.userReaction,
+      isBookmarked: entity.isBookmarked,
+      savedCollectionName: entity.savedCollectionName,
       createdAt: entity.createdAt,
       comments: entity.comments.map(CommentMapper.fromEntity).toList(),
     );

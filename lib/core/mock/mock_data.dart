@@ -92,9 +92,13 @@ class MockData {
       locationName: 'Hồ Hoàn Kiếm, Hà Nội',
       user: mockUsers[1], // Trần Lan Anh
       hashtags: const ['hanoi', 'hoankiem', 'autumn', 'photography'],
-      likesCount: 320,
-      commentsCount: 5,
+      likesCount: 15400, // 15.4K Likes
+      commentsCount: 1250, // 1.3K Comments
+      sharesCount: 3200, // 3.2K Shares
       isLiked: true,
+      userReaction: '🔥',
+      isBookmarked: true,
+      savedCollectionName: 'Địa điểm muốn đến',
       createdAt: DateTime.now().subtract(const Duration(hours: 3)),
       comments: [
         CommentEntity(
@@ -103,7 +107,7 @@ class MockData {
           user: mockUsers[0], // Nguyễn Văn Sang (Root)
           content:
               'Ảnh chụp đẹp quá bạn ơi! Mùa thu Hà Nội luôn có chất riêng.',
-          likesCount: 5,
+          likesCount: 520, // 520 Likes
           isLiked: true,
           isPinned: true, // Ghim bình luận nổi bật
           createdAt: DateTime.now().subtract(
@@ -118,7 +122,7 @@ class MockData {
               replyToUser: mockUsers[0], // Nguyễn Văn Sang
               content:
                   'Cảm ơn anh Sang nhiều nhé! Hà Nội mùa này thời tiết thích lắm ạ. ✨',
-              likesCount: 2,
+              likesCount: 142,
               isLiked: true,
               createdAt: DateTime.now().subtract(
                 const Duration(hours: 2, minutes: 15),
@@ -131,7 +135,7 @@ class MockData {
               user: mockUsers[2], // Lê Minh Quân
               replyToUser: mockUsers[1], // Trần Lan Anh
               content: 'Khi nào ra Hà Nội cho mình đi check-in ké với nha!',
-              likesCount: 1,
+              likesCount: 18,
               isLiked: false,
               createdAt: DateTime.now().subtract(
                 const Duration(hours: 2),
@@ -144,7 +148,7 @@ class MockData {
               user: mockUsers[3], // Phạm Hoàng Nam
               replyToUser: mockUsers[0], // Nguyễn Văn Sang
               content: 'Thời tiết Hà Nội mùa thu đúng là mê đắm lòng người.',
-              likesCount: 4,
+              likesCount: 89,
               isLiked: true,
               createdAt: DateTime.now().subtract(
                 const Duration(hours: 1, minutes: 45),
@@ -157,7 +161,7 @@ class MockData {
               user: mockUsers[4], // Nguyễn Thùy Chi
               replyToUser: mockUsers[1], // Trần Lan Anh
               content: 'Hồ Gươm sương mờ sáng sớm nhìn lãng mạn quá ạ! 🍂',
-              likesCount: 2,
+              likesCount: 34,
               isLiked: false,
               createdAt: DateTime.now().subtract(
                 const Duration(hours: 1, minutes: 30),
@@ -170,7 +174,7 @@ class MockData {
               user: mockUsers[1], // Trần Lan Anh
               replyToUser: mockUsers[4], // Nguyễn Thùy Chi
               content: 'Hôm nào có dịp mình mời mọi người cà phê trứng nhé! ☕',
-              likesCount: 6,
+              likesCount: 205,
               isLiked: true,
               createdAt: DateTime.now().subtract(
                 const Duration(hours: 1, minutes: 15),
@@ -183,7 +187,7 @@ class MockData {
           postId: 'post_1',
           user: mockUsers[4], // Nguyễn Thùy Chi
           content: 'Thích màu ảnh nhẹ nhàng này thế! Chụp bằng máy gì vậy ạ?',
-          likesCount: 3,
+          likesCount: 78,
           isLiked: false,
           createdAt: DateTime.now().subtract(const Duration(hours: 1)),
         ),
@@ -201,9 +205,13 @@ class MockData {
       locationName: 'Nhà thờ Đức Bà, Quận 1, TP. HCM',
       user: mockUsers[3], // Phạm Hoàng Nam
       hashtags: const ['saigon', 'district1', 'nhathoducba', 'citylife'],
-      likesCount: 189,
-      commentsCount: 2,
-      isLiked: false,
+      likesCount: 1200000, // 1.2M Likes
+      commentsCount: 34500, // 34.5K Comments
+      sharesCount: 15400, // 15.4K Shares
+      isLiked: true,
+      userReaction: '😍',
+      isBookmarked: true,
+      savedCollectionName: 'Quán cà phê đẹp',
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       comments: [
         CommentEntity(
@@ -211,6 +219,7 @@ class MockData {
           postId: 'post_2',
           user: mockUsers[1],
           content: 'Tuyệt quá anh! Hy vọng công trình sớm hoàn thành trùng tu.',
+          likesCount: 1500,
           createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 2)),
         ),
         CommentEntity(
@@ -218,6 +227,7 @@ class MockData {
           postId: 'post_2',
           user: mockUsers[0],
           content: 'Góc chụp rất rộng và hùng vĩ!',
+          likesCount: 840,
           createdAt: DateTime.now().subtract(const Duration(days: 1, hours: 1)),
         ),
       ],
@@ -237,6 +247,7 @@ class MockData {
       hashtags: const ['hoian_oldtown', 'danang', 'travelvietnam'],
       likesCount: 450,
       commentsCount: 1,
+      sharesCount: 45,
       isLiked: false,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
       comments: [
@@ -264,9 +275,11 @@ class MockData {
       locationName: 'Đồi chè Cầu Đất, Đà Lạt',
       user: mockUsers[4], // Nguyễn Thùy Chi
       hashtags: const ['dalat', 'travel', 'caudat', 'sanamay'],
-      likesCount: 512,
-      commentsCount: 2,
+      likesCount: 42500, // 42.5K Likes
+      commentsCount: 890,
+      sharesCount: 890,
       isLiked: true,
+      userReaction: '📍',
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       comments: [
         CommentEntity(
@@ -301,8 +314,9 @@ class MockData {
       locationName: 'Thung lũng Mường Hoa, Sa Pa, Lào Cai',
       user: mockUsers[2], // Lê Minh Quân
       hashtags: const ['sapa', 'ruongbacthang', 'taybac', 'vietnam'],
-      likesCount: 275,
-      commentsCount: 0,
+      likesCount: 2300000000, // 2.3B Likes
+      commentsCount: 15600, // 15.6K Comments
+      sharesCount: 520000, // 520K Shares
       isLiked: false,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       comments: const [],

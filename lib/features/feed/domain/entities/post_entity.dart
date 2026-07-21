@@ -17,7 +17,11 @@ class PostEntity extends Equatable {
   final List<String> hashtags;
   final int likesCount;
   final int commentsCount;
+  final int sharesCount; // Số lượt chia sẻ bài viết
   final bool isLiked;
+  final String? userReaction; // Emoji cảm xúc người dùng đã thả (❤️, 🔥, 😍, 👏, 📍)
+  final bool isBookmarked; // Đã lưu vào bộ sưu tập hay chưa
+  final String? savedCollectionName; // Tên bộ sưu tập đã lưu bài viết
   final DateTime createdAt;
   final List<CommentEntity> comments;
 
@@ -32,10 +36,17 @@ class PostEntity extends Equatable {
     required this.hashtags,
     required this.likesCount,
     required this.commentsCount,
+    this.sharesCount = 0,
     required this.isLiked,
+    this.userReaction,
+    this.isBookmarked = false,
+    this.savedCollectionName,
     required this.createdAt,
     required this.comments,
   });
+
+  /// Getter tiện ích lấy biểu tượng cảm xúc hiển thị của bài viết
+  String get displayReaction => userReaction ?? (isLiked ? '❤️' : '');
 
   /// Tạo bản sao với một số thuộc tính được thay đổi (Immutable pattern)
   PostEntity copyWith({
@@ -49,7 +60,11 @@ class PostEntity extends Equatable {
     List<String>? hashtags,
     int? likesCount,
     int? commentsCount,
+    int? sharesCount,
     bool? isLiked,
+    String? userReaction,
+    bool? isBookmarked,
+    String? savedCollectionName,
     DateTime? createdAt,
     List<CommentEntity>? comments,
   }) {
@@ -64,7 +79,11 @@ class PostEntity extends Equatable {
       hashtags: hashtags ?? this.hashtags,
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
+      sharesCount: sharesCount ?? this.sharesCount,
       isLiked: isLiked ?? this.isLiked,
+      userReaction: userReaction ?? this.userReaction,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
+      savedCollectionName: savedCollectionName ?? this.savedCollectionName,
       createdAt: createdAt ?? this.createdAt,
       comments: comments ?? this.comments,
     );
@@ -82,7 +101,11 @@ class PostEntity extends Equatable {
         hashtags,
         likesCount,
         commentsCount,
+        sharesCount,
         isLiked,
+        userReaction,
+        isBookmarked,
+        savedCollectionName,
         createdAt,
         comments,
       ];
