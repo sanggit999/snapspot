@@ -9,7 +9,7 @@ import 'package:snapspot/features/map/presentation/widgets/spot_map_widget.dart'
 import 'package:cached_network_image/cached_network_image.dart';
 
 /// Màn hình Bản đồ Khám phá (Map Explore Screen).
-/// Chứa thanh tìm kiếm ở trên đầu, SpotMapWidget ở trung tâm, và Spot Preview Card trượt ở cạnh dưới.
+/// Áp dụng [BlocSelector] chuẩn theo skill flutter-state-management để tối ưu hiệu năng.
 class MapExploreScreen extends StatefulWidget {
   const MapExploreScreen({super.key});
 
@@ -25,8 +25,8 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
     super.initState();
     // Load lại toàn bộ địa điểm
     context.read<MapCubit>().loadSpots(
-      newRadius: 2000.0,
-    ); // Bán kính lớn 2000km để quét toàn quốc
+          newRadius: 2000.0,
+        ); // Bán kính lớn 2000km để quét toàn quốc
   }
 
   @override
@@ -127,26 +127,27 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
             ),
           ),
 
-          // 3. Spot Preview Card trượt ở cạnh dưới
-          BlocBuilder<MapCubit, MapState>(
-            builder: (context, state) {
-              if (state.selectedSpot == null) return const SizedBox.shrink();
-
-              final spot = state.selectedSpot!;
+          // 3. Spot Preview Card trượt ở cạnh dưới - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi selectedSpot đổi)
+          BlocSelector<MapCubit, MapState, PostEntity?>(
+            selector: (state) => state.selectedSpot,
+            builder: (context, selectedSpot) {
+              if (selectedSpot == null) return const SizedBox.shrink();
 
               return Positioned(
                 bottom: 16,
                 left: 16,
                 right: 16,
-                child: _buildSpotPreviewCard(spot, theme),
+                child: _buildSpotPreviewCard(selectedSpot, theme),
               );
             },
           ),
 
-          // Chỉ báo loading mờ
-          BlocBuilder<MapCubit, MapState>(
-            builder: (context, state) {
-              if (!state.isLoading) return const SizedBox.shrink();
+          // 4. Chỉ báo loading mờ - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi isLoading đổi)
+          BlocSelector<MapCubit, MapState, bool>(
+            selector: (state) => state.isLoading,
+            builder: (context, isLoading) {
+              if (!isLoading) return const SizedBox.shrink();
+
               return const Positioned(
                 top: 100,
                 left: 0,
@@ -249,52 +250,19 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 8,
-                          backgroundImage: NetworkImage(spot.user.avatarUrl),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '@${spot.user.username}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              // Nút Xem chi tiết
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 18),
-                    onPressed: () {
-                      context.read<MapCubit>().deselectSpot();
-                    },
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: AppColors.primary,
-                      size: 14,
-                    ),
-                  ),
-                ],
+              // Nút đĩ tới chi tiết
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+                onPressed: () {
+                  context.push('/post/${spot.id}');
+                },
               ),
             ],
           ),

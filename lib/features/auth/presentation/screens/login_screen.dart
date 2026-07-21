@@ -8,7 +8,7 @@ import 'package:snapspot/core/widgets/inputs/app_text_field.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
 /// Màn hình đăng nhập của SnapSpot.
-/// Giao diện hiện đại, tối giản, áp dụng chuẩn flutter-layout-rules (Spacing 2026 & SafeArea).
+/// Giao diện hiện đại, tối giản, áp dụng chuẩn flutter-layout-rules và flutter-state-management (BlocSelector).
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -38,9 +38,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().login(
-        _emailController.text,
-        _passwordController.text,
-      );
+            _emailController.text,
+            _passwordController.text,
+          );
     }
   }
 
@@ -118,31 +118,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // 2. Lỗi đăng nhập
+                  // 2. Banner Thông báo Lỗi Đăng nhập (nếu có)
                   if (_errorMessage != null)
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.redAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppColors.error.withValues(alpha: 0.3),
+                          color: Colors.redAccent.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: AppColors.error,
-                            size: 20,
-                          ),
+                          const Icon(Icons.error_outline,
+                              color: Colors.redAccent, size: 20),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               _errorMessage!,
                               style: const TextStyle(
-                                color: AppColors.error,
-                                fontSize: 14,
+                                color: Colors.redAccent,
+                                fontSize: 13,
                               ),
                             ),
                           ),
@@ -150,33 +147,32 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                  // 3. Email
+                  // 3. Email Input
                   AppTextField(
                     controller: _emailController,
                     hintText: context.tr('enter_email'),
                     labelText: context.tr('email'),
-                    prefixIcon: const Icon(Icons.email_outlined, size: 20),
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    prefixIcon: const Icon(Icons.email_outlined),
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
+                      if (value == null || value.isEmpty) {
                         return context.tr('email_required');
                       }
-                      if (!RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      ).hasMatch(value.trim())) {
+                      if (!value.contains('@')) {
                         return context.tr('email_invalid');
                       }
                       return null;
                     },
                   ),
 
-                  // 4. Password
+                  // 4. Password Input
                   AppTextField(
                     controller: _passwordController,
                     hintText: context.tr('enter_password'),
                     labelText: context.tr('password'),
-                    prefixIcon: const Icon(Icons.lock_outlined, size: 20),
                     obscureText: true,
+                    prefixIcon: const Icon(Icons.lock_outline),
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _onLoginPressed(),
                     validator: (value) {
@@ -205,12 +201,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  // 6. Nút Đăng nhập
-                  BlocBuilder<AuthCubit, AuthState>(
-                    builder: (context, state) {
+                  // 6. Nút Đăng nhập - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi isLoading đổi)
+                  BlocSelector<AuthCubit, AuthState, bool>(
+                    selector: (state) => state is AuthLoading,
+                    builder: (context, isLoading) {
                       return AppButton(
                         label: context.tr('login'),
-                        isLoading: state is AuthLoading,
+                        isLoading: isLoading,
                         onPressed: _onLoginPressed,
                       );
                     },
@@ -231,34 +228,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
 
-                  // 8. Các nút MXH (Google & Apple)
+                  // Social login buttons
                   Row(
-                    spacing: 16.0,
+                    spacing: 12.0,
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
                             context.read<AuthCubit>().login(
-                              'lananh@example.com',
-                              'password123',
-                            );
+                                  'lananh@example.com',
+                                  'password123',
+                                );
                           },
+                          icon: const Icon(Icons.g_mobiledata, size: 28),
+                          label: const Text('Google'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          icon: const Icon(
-                            Icons.g_mobiledata,
-                            size: 28,
-                            color: Colors.red,
-                          ),
-                          label: const Text(
-                            'Google',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
@@ -267,22 +254,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             context.read<AuthCubit>().login(
-                              'sangnguyen@example.com',
-                              'password123',
-                            );
+                                  'minhquan@example.com',
+                                  'password123',
+                                );
                           },
+                          icon: const Icon(Icons.apple, size: 22),
+                          label: const Text('Apple'),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          icon: const Icon(Icons.apple, size: 24),
-                          label: Text(
-                            'Apple',
-                            style: TextStyle(
-                              color: isLight ? Colors.black : Colors.white,
-                              fontWeight: FontWeight.w600,
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
@@ -292,19 +273,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 12),
 
-                  // 9. Link chuyển sang Đăng ký
+                  // 8. Chuyển sang Đăng ký
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      GestureDetector(
-                        onTap: () => context.push('/register'),
+                      Text(
+                        context.tr('dont_have_account'),
+                        style: TextStyle(
+                          color: isLight
+                              ? AppColors.textLightSecondary
+                              : AppColors.textDarkSecondary,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          context.push('/register');
+                        },
                         child: Text(
-                          context.tr('dont_have_account'),
-                          style: TextStyle(
-                            color: isLight
-                                ? AppColors.textLightSecondary
-                                : AppColors.textDarkSecondary,
-                            fontWeight: FontWeight.w600,
+                          context.tr('register'),
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

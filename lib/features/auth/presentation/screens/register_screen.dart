@@ -7,7 +7,8 @@ import 'package:snapspot/core/widgets/buttons/app_button.dart';
 import 'package:snapspot/core/widgets/inputs/app_text_field.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
-/// Màn hình đăng ký tài khoản của SnapSpot.
+/// Màn hình đăng ký tài khoản mới của SnapSpot.
+/// Áp dụng chuẩn BlocSelector theo skill flutter-state-management để tối ưu hiệu năng.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -17,6 +18,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _fullNameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -25,6 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -39,10 +42,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().register(
-        _usernameController.text,
-        _emailController.text,
-        _passwordController.text,
-      );
+            _usernameController.text,
+            _emailController.text,
+            _passwordController.text,
+          );
     }
   }
 
@@ -52,99 +55,93 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: theme.brightness == Brightness.light
-            ? Colors.black
-            : Colors.white,
+        title: Text(context.tr('register')),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => context.pop(),
+        ),
       ),
-      body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthSuccess) {
-            // Đăng ký xong tự động đăng nhập và vào trang chủ
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(context.tr('check_email_to_verify')),
-                backgroundColor: AppColors.success,
-              ),
-            );
-            context.go('/');
-          } else if (state is AuthFailure) {
-            setState(() {
-              _errorMessage = state.message;
-            });
-          }
-        },
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+      body: SafeArea(
+        child: BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthSuccess) {
+              context.go('/');
+            } else if (state is AuthFailure) {
+              setState(() {
+                _errorMessage = state.message;
+              });
+            }
+          },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 16),
-                  Hero(
-                    tag: 'logo',
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.photo_camera_back_rounded,
-                          size: 48,
-                          color: AppColors.primary,
-                        ),
-                      ),
+                  Text(
+                    context.tr('create_account'),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Text(
-                      context.tr('register'),
-                      style: theme.textTheme.displayLarge?.copyWith(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Đăng ký để khám phá các địa điểm check-in hấp dẫn',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.brightness == Brightness.light
+                          ? AppColors.textLightSecondary
+                          : AppColors.textDarkSecondary,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
-                  // Lỗi đăng ký
-                  if (_errorMessage != null)
+                  // Banner báo lỗi
+                  if (_errorMessage != null) ...[
                     Container(
                       padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.redAccent.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: AppColors.error.withValues(alpha: 0.3),
+                          color: Colors.redAccent.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.error_outline,
-                            color: AppColors.error,
-                            size: 20,
-                          ),
+                          const Icon(Icons.error_outline,
+                              color: Colors.redAccent, size: 20),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               _errorMessage!,
                               style: const TextStyle(
-                                color: AppColors.error,
-                                fontSize: 14,
+                                color: Colors.redAccent,
+                                fontSize: 13,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Họ & Tên
+                  AppTextField(
+                    controller: _fullNameController,
+                    hintText: context.tr('full_name'),
+                    labelText: context.tr('full_name'),
+                    prefixIcon: const Icon(Icons.badge_outlined, size: 20),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return context.tr('full_name_required');
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
 
                   // Username
                   AppTextField(
@@ -219,12 +216,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Nút đăng ký
-                  BlocBuilder<AuthCubit, AuthState>(
-                    builder: (context, state) {
+                  // Nút đăng ký - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi isLoading đổi)
+                  BlocSelector<AuthCubit, AuthState, bool>(
+                    selector: (state) => state is AuthLoading,
+                    builder: (context, isLoading) {
                       return AppButton(
                         label: context.tr('register'),
-                        isLoading: state is AuthLoading,
+                        isLoading: isLoading,
                         onPressed: _onRegisterPressed,
                       );
                     },
@@ -249,7 +247,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
                 ],
               ),
             ),
