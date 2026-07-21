@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/map/domain/repositories/map_repository.dart';
 
 // --- STATES ---
-class MapState {
+class MapState extends Equatable {
   final List<PostEntity> visibleSpots; // Các spots đang hiện trên khu vực map
   final PostEntity? selectedSpot; // Spot đang được chọn để xem preview card
   final double centerLat; // Toạ độ vĩ độ tâm bản đồ
@@ -39,6 +40,16 @@ class MapState {
       isLoading: isLoading ?? this.isLoading,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        visibleSpots,
+        selectedSpot,
+        centerLat,
+        centerLng,
+        radiusKm,
+        isLoading,
+      ];
 }
 
 // --- CUBIT ---
@@ -57,56 +68,56 @@ class MapCubit extends Cubit<MapState> {
     loadSpots();
   }
 
-  /// Tải danh sách địa điểm (spots) nằm trong bán kính [radiusKm] so với vị trí trung tâm bản đồ.
+  /// Tải danh sách địa điểm (spots) nằm trong bán kính [newRadius] (hoặc [radiusKm])
   Future<void> loadSpots({
     double? newLat,
     double? newLng,
     double? newRadius,
+    double? radiusKm,
   }) async {
-    emit(state.copyWith(isLoading: true));
+    final targetLat = newLat ?? state.centerLat;
+    final targetLng = newLng ?? state.centerLng;
+    final targetRadius = newRadius ?? radiusKm ?? state.radiusKm;
 
-    final double lat = newLat ?? state.centerLat;
-    final double lng = newLng ?? state.centerLng;
-    final double rad = newRadius ?? state.radiusKm;
+    emit(state.copyWith(
+      isLoading: true,
+      centerLat: targetLat,
+      centerLng: targetLng,
+      radiusKm: targetRadius,
+    ));
 
-    final result = await _mapRepository.loadSpotsInRadius(lat, lng, rad);
+    final result = await _mapRepository.loadSpotsInRadius(
+      targetLat,
+      targetLng,
+      targetRadius,
+    );
+
     result.fold(
       (failure) => emit(state.copyWith(isLoading: false)),
-      (visible) {
-        emit(
-          MapState(
-            visibleSpots: visible,
-            selectedSpot: visible.isNotEmpty ? visible[0] : null,
-            centerLat: lat,
-            centerLng: lng,
-            radiusKm: rad,
-            isLoading: false,
-          ),
-        );
-      },
+      (spots) => emit(state.copyWith(
+        visibleSpots: spots,
+        isLoading: false,
+      )),
     );
   }
 
-  /// Chọn một Spot cụ thể để hiển thị Preview Card ở dưới cùng
+  /// Cập nhật danh sách spots đã được lọc (dành cho tìm kiếm).
+  void updateFilteredSpots(List<PostEntity> spots) {
+    emit(state.copyWith(visibleSpots: spots));
+  }
+
+  /// Chọn một spot cụ thể để hiển thị card preview trên bản đồ.
   void selectSpot(PostEntity spot) {
     emit(state.copyWith(selectedSpot: spot));
   }
 
-  /// Bỏ chọn Spot (Đóng Preview Card)
+  /// Bỏ chọn spot card.
   void deselectSpot() {
     emit(state.copyWith(clearSelectedSpot: true));
   }
 
-  /// Cập nhật tâm bản đồ khi kéo thả
-  void updateCenter(double lat, double lng) {
-    loadSpots(newLat: lat, newLng: lng);
-  }
-
-  /// Cập nhật danh sách spots đã lọc (phục vụ tính năng tìm kiếm trên UI)
-  void updateFilteredSpots(List<PostEntity> filtered) {
-    emit(state.copyWith(
-      visibleSpots: filtered,
-      selectedSpot: filtered.isNotEmpty ? filtered[0] : null,
-    ));
+  /// Đóng card preview spot (tương thích alias).
+  void clearSelection() {
+    deselectSpot();
   }
 }
