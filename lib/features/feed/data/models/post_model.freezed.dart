@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CommentModel {
 
- String get id;@JsonKey(name: 'post_id') String get postId; UserModel get user; String get content;@JsonKey(name: 'created_at') DateTime get createdAt;
+ String get id;@JsonKey(name: 'post_id') String get postId; UserModel get user; String get content;@JsonKey(name: 'media_url') String? get mediaUrl;@JsonKey(name: 'parent_id') String? get parentId;@JsonKey(name: 'root_id') String? get rootId;@JsonKey(name: 'reply_to_user') UserModel? get replyToUser; List<CommentModel> get replies;@JsonKey(name: 'likes_count') int get likesCount;@JsonKey(name: 'is_liked') bool get isLiked;@JsonKey(name: 'replies_count') int? get repliesCount; int get depth;@JsonKey(name: 'is_pinned') bool get isPinned;@JsonKey(name: 'created_at') DateTime get createdAt;
 /// Create a copy of CommentModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $CommentModelCopyWith<CommentModel> get copyWith => _$CommentModelCopyWithImpl<C
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CommentModel&&(identical(other.id, id) || other.id == id)&&(identical(other.postId, postId) || other.postId == postId)&&(identical(other.user, user) || other.user == user)&&(identical(other.content, content) || other.content == content)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CommentModel&&(identical(other.id, id) || other.id == id)&&(identical(other.postId, postId) || other.postId == postId)&&(identical(other.user, user) || other.user == user)&&(identical(other.content, content) || other.content == content)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.parentId, parentId) || other.parentId == parentId)&&(identical(other.rootId, rootId) || other.rootId == rootId)&&(identical(other.replyToUser, replyToUser) || other.replyToUser == replyToUser)&&const DeepCollectionEquality().equals(other.replies, replies)&&(identical(other.likesCount, likesCount) || other.likesCount == likesCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.repliesCount, repliesCount) || other.repliesCount == repliesCount)&&(identical(other.depth, depth) || other.depth == depth)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,postId,user,content,createdAt);
+int get hashCode => Object.hash(runtimeType,id,postId,user,content,mediaUrl,parentId,rootId,replyToUser,const DeepCollectionEquality().hash(replies),likesCount,isLiked,repliesCount,depth,isPinned,createdAt);
 
 @override
 String toString() {
-  return 'CommentModel(id: $id, postId: $postId, user: $user, content: $content, createdAt: $createdAt)';
+  return 'CommentModel(id: $id, postId: $postId, user: $user, content: $content, mediaUrl: $mediaUrl, parentId: $parentId, rootId: $rootId, replyToUser: $replyToUser, replies: $replies, likesCount: $likesCount, isLiked: $isLiked, repliesCount: $repliesCount, depth: $depth, isPinned: $isPinned, createdAt: $createdAt)';
 }
 
 
@@ -49,11 +49,11 @@ abstract mixin class $CommentModelCopyWith<$Res>  {
   factory $CommentModelCopyWith(CommentModel value, $Res Function(CommentModel) _then) = _$CommentModelCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'post_id') String postId, UserModel user, String content,@JsonKey(name: 'created_at') DateTime createdAt
+ String id,@JsonKey(name: 'post_id') String postId, UserModel user, String content,@JsonKey(name: 'media_url') String? mediaUrl,@JsonKey(name: 'parent_id') String? parentId,@JsonKey(name: 'root_id') String? rootId,@JsonKey(name: 'reply_to_user') UserModel? replyToUser, List<CommentModel> replies,@JsonKey(name: 'likes_count') int likesCount,@JsonKey(name: 'is_liked') bool isLiked,@JsonKey(name: 'replies_count') int? repliesCount, int depth,@JsonKey(name: 'is_pinned') bool isPinned,@JsonKey(name: 'created_at') DateTime createdAt
 });
 
 
-$UserModelCopyWith<$Res> get user;
+$UserModelCopyWith<$Res> get user;$UserModelCopyWith<$Res>? get replyToUser;
 
 }
 /// @nodoc
@@ -66,13 +66,23 @@ class _$CommentModelCopyWithImpl<$Res>
 
 /// Create a copy of CommentModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? postId = null,Object? user = null,Object? content = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? postId = null,Object? user = null,Object? content = null,Object? mediaUrl = freezed,Object? parentId = freezed,Object? rootId = freezed,Object? replyToUser = freezed,Object? replies = null,Object? likesCount = null,Object? isLiked = null,Object? repliesCount = freezed,Object? depth = null,Object? isPinned = null,Object? createdAt = null,}) {
   return _then(CommentModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,postId: null == postId ? _self.postId : postId // ignore: cast_nullable_to_non_nullable
 as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as UserModel,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,mediaUrl: freezed == mediaUrl ? _self.mediaUrl : mediaUrl // ignore: cast_nullable_to_non_nullable
+as String?,parentId: freezed == parentId ? _self.parentId : parentId // ignore: cast_nullable_to_non_nullable
+as String?,rootId: freezed == rootId ? _self.rootId : rootId // ignore: cast_nullable_to_non_nullable
+as String?,replyToUser: freezed == replyToUser ? _self.replyToUser : replyToUser // ignore: cast_nullable_to_non_nullable
+as UserModel?,replies: null == replies ? _self.replies : replies // ignore: cast_nullable_to_non_nullable
+as List<CommentModel>,likesCount: null == likesCount ? _self.likesCount : likesCount // ignore: cast_nullable_to_non_nullable
+as int,isLiked: null == isLiked ? _self.isLiked : isLiked // ignore: cast_nullable_to_non_nullable
+as bool,repliesCount: freezed == repliesCount ? _self.repliesCount : repliesCount // ignore: cast_nullable_to_non_nullable
+as int?,depth: null == depth ? _self.depth : depth // ignore: cast_nullable_to_non_nullable
+as int,isPinned: null == isPinned ? _self.isPinned : isPinned // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -84,6 +94,18 @@ $UserModelCopyWith<$Res> get user {
   
   return $UserModelCopyWith<$Res>(_self.user, (value) {
     return _then(_self.copyWith(user: value));
+  });
+}/// Create a copy of CommentModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserModelCopyWith<$Res>? get replyToUser {
+    if (_self.replyToUser == null) {
+    return null;
+  }
+
+  return $UserModelCopyWith<$Res>(_self.replyToUser!, (value) {
+    return _then(_self.copyWith(replyToUser: value));
   });
 }
 }
@@ -167,10 +189,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'post_id')  String postId,  UserModel user,  String content, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'post_id')  String postId,  UserModel user,  String content, @JsonKey(name: 'media_url')  String? mediaUrl, @JsonKey(name: 'parent_id')  String? parentId, @JsonKey(name: 'root_id')  String? rootId, @JsonKey(name: 'reply_to_user')  UserModel? replyToUser,  List<CommentModel> replies, @JsonKey(name: 'likes_count')  int likesCount, @JsonKey(name: 'is_liked')  bool isLiked, @JsonKey(name: 'replies_count')  int? repliesCount,  int depth, @JsonKey(name: 'is_pinned')  bool isPinned, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CommentModel() when $default != null:
-return $default(_that.id,_that.postId,_that.user,_that.content,_that.createdAt);case _:
+return $default(_that.id,_that.postId,_that.user,_that.content,_that.mediaUrl,_that.parentId,_that.rootId,_that.replyToUser,_that.replies,_that.likesCount,_that.isLiked,_that.repliesCount,_that.depth,_that.isPinned,_that.createdAt);case _:
   return orElse();
 
 }
@@ -188,10 +210,10 @@ return $default(_that.id,_that.postId,_that.user,_that.content,_that.createdAt);
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'post_id')  String postId,  UserModel user,  String content, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'post_id')  String postId,  UserModel user,  String content, @JsonKey(name: 'media_url')  String? mediaUrl, @JsonKey(name: 'parent_id')  String? parentId, @JsonKey(name: 'root_id')  String? rootId, @JsonKey(name: 'reply_to_user')  UserModel? replyToUser,  List<CommentModel> replies, @JsonKey(name: 'likes_count')  int likesCount, @JsonKey(name: 'is_liked')  bool isLiked, @JsonKey(name: 'replies_count')  int? repliesCount,  int depth, @JsonKey(name: 'is_pinned')  bool isPinned, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _CommentModel():
-return $default(_that.id,_that.postId,_that.user,_that.content,_that.createdAt);case _:
+return $default(_that.id,_that.postId,_that.user,_that.content,_that.mediaUrl,_that.parentId,_that.rootId,_that.replyToUser,_that.replies,_that.likesCount,_that.isLiked,_that.repliesCount,_that.depth,_that.isPinned,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +230,10 @@ return $default(_that.id,_that.postId,_that.user,_that.content,_that.createdAt);
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'post_id')  String postId,  UserModel user,  String content, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'post_id')  String postId,  UserModel user,  String content, @JsonKey(name: 'media_url')  String? mediaUrl, @JsonKey(name: 'parent_id')  String? parentId, @JsonKey(name: 'root_id')  String? rootId, @JsonKey(name: 'reply_to_user')  UserModel? replyToUser,  List<CommentModel> replies, @JsonKey(name: 'likes_count')  int likesCount, @JsonKey(name: 'is_liked')  bool isLiked, @JsonKey(name: 'replies_count')  int? repliesCount,  int depth, @JsonKey(name: 'is_pinned')  bool isPinned, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _CommentModel() when $default != null:
-return $default(_that.id,_that.postId,_that.user,_that.content,_that.createdAt);case _:
+return $default(_that.id,_that.postId,_that.user,_that.content,_that.mediaUrl,_that.parentId,_that.rootId,_that.replyToUser,_that.replies,_that.likesCount,_that.isLiked,_that.repliesCount,_that.depth,_that.isPinned,_that.createdAt);case _:
   return null;
 
 }
@@ -223,13 +245,29 @@ return $default(_that.id,_that.postId,_that.user,_that.content,_that.createdAt);
 @JsonSerializable()
 
 class _CommentModel implements CommentModel {
-  const _CommentModel({required this.id, @JsonKey(name: 'post_id') required this.postId, required this.user, required this.content, @JsonKey(name: 'created_at') required this.createdAt});
+  const _CommentModel({required this.id, @JsonKey(name: 'post_id') required this.postId, required this.user, required this.content, @JsonKey(name: 'media_url') this.mediaUrl, @JsonKey(name: 'parent_id') this.parentId, @JsonKey(name: 'root_id') this.rootId, @JsonKey(name: 'reply_to_user') this.replyToUser,  List<CommentModel> replies = const [], @JsonKey(name: 'likes_count') this.likesCount = 0, @JsonKey(name: 'is_liked') this.isLiked = false, @JsonKey(name: 'replies_count') this.repliesCount, this.depth = 0, @JsonKey(name: 'is_pinned') this.isPinned = false, @JsonKey(name: 'created_at') required this.createdAt}): _replies = replies;
   factory _CommentModel.fromJson(Map<String, dynamic> json) => _$CommentModelFromJson(json);
 
 @override final  String id;
 @override@JsonKey(name: 'post_id') final  String postId;
 @override final  UserModel user;
 @override final  String content;
+@override@JsonKey(name: 'media_url') final  String? mediaUrl;
+@override@JsonKey(name: 'parent_id') final  String? parentId;
+@override@JsonKey(name: 'root_id') final  String? rootId;
+@override@JsonKey(name: 'reply_to_user') final  UserModel? replyToUser;
+ final  List<CommentModel> _replies;
+@override@JsonKey() List<CommentModel> get replies {
+  if (_replies is EqualUnmodifiableListView) return _replies;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_replies);
+}
+
+@override@JsonKey(name: 'likes_count') final  int likesCount;
+@override@JsonKey(name: 'is_liked') final  bool isLiked;
+@override@JsonKey(name: 'replies_count') final  int? repliesCount;
+@override@JsonKey() final  int depth;
+@override@JsonKey(name: 'is_pinned') final  bool isPinned;
 @override@JsonKey(name: 'created_at') final  DateTime createdAt;
 
 /// Create a copy of CommentModel
@@ -245,16 +283,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CommentModel&&(identical(other.id, id) || other.id == id)&&(identical(other.postId, postId) || other.postId == postId)&&(identical(other.user, user) || other.user == user)&&(identical(other.content, content) || other.content == content)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CommentModel&&(identical(other.id, id) || other.id == id)&&(identical(other.postId, postId) || other.postId == postId)&&(identical(other.user, user) || other.user == user)&&(identical(other.content, content) || other.content == content)&&(identical(other.mediaUrl, mediaUrl) || other.mediaUrl == mediaUrl)&&(identical(other.parentId, parentId) || other.parentId == parentId)&&(identical(other.rootId, rootId) || other.rootId == rootId)&&(identical(other.replyToUser, replyToUser) || other.replyToUser == replyToUser)&&const DeepCollectionEquality().equals(other._replies, _replies)&&(identical(other.likesCount, likesCount) || other.likesCount == likesCount)&&(identical(other.isLiked, isLiked) || other.isLiked == isLiked)&&(identical(other.repliesCount, repliesCount) || other.repliesCount == repliesCount)&&(identical(other.depth, depth) || other.depth == depth)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,postId,user,content,createdAt);
+int get hashCode => Object.hash(runtimeType,id,postId,user,content,mediaUrl,parentId,rootId,replyToUser,const DeepCollectionEquality().hash(_replies),likesCount,isLiked,repliesCount,depth,isPinned,createdAt);
 
 @override
 String toString() {
-  return 'CommentModel(id: $id, postId: $postId, user: $user, content: $content, createdAt: $createdAt)';
+  return 'CommentModel(id: $id, postId: $postId, user: $user, content: $content, mediaUrl: $mediaUrl, parentId: $parentId, rootId: $rootId, replyToUser: $replyToUser, replies: $replies, likesCount: $likesCount, isLiked: $isLiked, repliesCount: $repliesCount, depth: $depth, isPinned: $isPinned, createdAt: $createdAt)';
 }
 
 
@@ -265,11 +303,11 @@ abstract mixin class _$CommentModelCopyWith<$Res> implements $CommentModelCopyWi
   factory _$CommentModelCopyWith(_CommentModel value, $Res Function(_CommentModel) _then) = __$CommentModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'post_id') String postId, UserModel user, String content,@JsonKey(name: 'created_at') DateTime createdAt
+ String id,@JsonKey(name: 'post_id') String postId, UserModel user, String content,@JsonKey(name: 'media_url') String? mediaUrl,@JsonKey(name: 'parent_id') String? parentId,@JsonKey(name: 'root_id') String? rootId,@JsonKey(name: 'reply_to_user') UserModel? replyToUser, List<CommentModel> replies,@JsonKey(name: 'likes_count') int likesCount,@JsonKey(name: 'is_liked') bool isLiked,@JsonKey(name: 'replies_count') int? repliesCount, int depth,@JsonKey(name: 'is_pinned') bool isPinned,@JsonKey(name: 'created_at') DateTime createdAt
 });
 
 
-@override $UserModelCopyWith<$Res> get user;
+@override $UserModelCopyWith<$Res> get user;@override $UserModelCopyWith<$Res>? get replyToUser;
 
 }
 /// @nodoc
@@ -282,13 +320,23 @@ class __$CommentModelCopyWithImpl<$Res>
 
 /// Create a copy of CommentModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? postId = null,Object? user = null,Object? content = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? postId = null,Object? user = null,Object? content = null,Object? mediaUrl = freezed,Object? parentId = freezed,Object? rootId = freezed,Object? replyToUser = freezed,Object? replies = null,Object? likesCount = null,Object? isLiked = null,Object? repliesCount = freezed,Object? depth = null,Object? isPinned = null,Object? createdAt = null,}) {
   return _then(_CommentModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,postId: null == postId ? _self.postId : postId // ignore: cast_nullable_to_non_nullable
 as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as UserModel,content: null == content ? _self.content : content // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,mediaUrl: freezed == mediaUrl ? _self.mediaUrl : mediaUrl // ignore: cast_nullable_to_non_nullable
+as String?,parentId: freezed == parentId ? _self.parentId : parentId // ignore: cast_nullable_to_non_nullable
+as String?,rootId: freezed == rootId ? _self.rootId : rootId // ignore: cast_nullable_to_non_nullable
+as String?,replyToUser: freezed == replyToUser ? _self.replyToUser : replyToUser // ignore: cast_nullable_to_non_nullable
+as UserModel?,replies: null == replies ? _self._replies : replies // ignore: cast_nullable_to_non_nullable
+as List<CommentModel>,likesCount: null == likesCount ? _self.likesCount : likesCount // ignore: cast_nullable_to_non_nullable
+as int,isLiked: null == isLiked ? _self.isLiked : isLiked // ignore: cast_nullable_to_non_nullable
+as bool,repliesCount: freezed == repliesCount ? _self.repliesCount : repliesCount // ignore: cast_nullable_to_non_nullable
+as int?,depth: null == depth ? _self.depth : depth // ignore: cast_nullable_to_non_nullable
+as int,isPinned: null == isPinned ? _self.isPinned : isPinned // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
   ));
 }
@@ -301,6 +349,18 @@ $UserModelCopyWith<$Res> get user {
   
   return $UserModelCopyWith<$Res>(_self.user, (value) {
     return _then(_self.copyWith(user: value));
+  });
+}/// Create a copy of CommentModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserModelCopyWith<$Res>? get replyToUser {
+    if (_self.replyToUser == null) {
+    return null;
+  }
+
+  return $UserModelCopyWith<$Res>(_self.replyToUser!, (value) {
+    return _then(_self.copyWith(replyToUser: value));
   });
 }
 }

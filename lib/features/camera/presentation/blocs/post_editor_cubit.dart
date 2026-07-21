@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:snapspot/features/auth/data/mappers/user_mapper.dart';
+import 'package:snapspot/mappers/auth/user_mapper.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
-import 'package:snapspot/features/feed/data/mappers/post_mapper.dart';
+import 'package:snapspot/mappers/feed/post_mapper.dart';
 import 'package:snapspot/features/feed/data/models/post_model.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/feed/domain/repositories/feed_repository.dart';
