@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/widgets/navigation/main_navigation_layout.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/features/auth/presentation/screens/login_screen.dart';
@@ -44,6 +45,36 @@ final goRouter = GoRouter(
 
     return null; // Không điều hướng, cho phép tiếp tục truy cập trang đích
   },
+
+  // Xử lý trang lỗi 404 thân thiện người dùng
+  errorBuilder: (context, state) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Không tìm thấy trang')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 64, color: AppColors.primary),
+            const SizedBox(height: 16),
+            const Text(
+              'Trang bạn tìm kiếm không tồn tại hoặc đã thay đổi',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => context.go('/'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Về Trang Chủ'),
+            ),
+          ],
+        ),
+      ),
+    );
+  },
+
   routes: [
     // Định tuyến cho Auth nằm ngoài ShellRoute (Không hiển thị BottomBar)
     GoRoute(
@@ -57,9 +88,21 @@ final goRouter = GoRouter(
       builder: (context, state) => const RegisterScreen(),
     ),
 
-    // Các màn hình hiển thị toàn màn hình (Không có BottomBar) được định nghĩa ngang hàng ở ROOT level
+    // Màn hình xem Chi tiết Bài viết (Full Screen không có BottomBar)
     GoRoute(
       path: '/post/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final postId = state.pathParameters['id']!;
+        final focusComment = state.uri.queryParameters['focusComment'] == 'true';
+        return PostDetailScreen(
+          postId: postId,
+          focusComment: focusComment,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/p/:id',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final postId = state.pathParameters['id']!;
@@ -87,14 +130,6 @@ final goRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/user/profile/:id',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final userId = state.pathParameters['id']!;
-        return ProfileScreen(userId: userId);
-      },
-    ),
-    GoRoute(
       path: '/settings',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const SettingsScreen(),
@@ -110,7 +145,7 @@ final goRouter = GoRouter(
       builder: (context, state) => const ChangePasswordScreen(),
     ),
 
-    // Tích hợp ShellRoute để chứa thanh điều hướng chính
+    // Tích hợp ShellRoute để chứa thanh điều hướng chính (Bottom Navigation Bar luôn hiển thị)
     ShellRoute(
       builder: (context, state, child) {
         return MainNavigationLayout(child: child);
@@ -134,6 +169,42 @@ final goRouter = GoRouter(
         ),
         GoRoute(
           path: '/profile',
+          builder: (context, state) => const ProfileScreen(userId: 'me'),
+        ),
+        GoRoute(
+          path: '/user/profile/:id',
+          builder: (context, state) {
+            final userId = state.pathParameters['id']!;
+            return ProfileScreen(userId: userId);
+          },
+        ),
+        GoRoute(
+          path: '/profile/:id',
+          builder: (context, state) {
+            final userId = state.pathParameters['id']!;
+            return ProfileScreen(userId: userId);
+          },
+        ),
+        GoRoute(
+          path: '/user/:id',
+          builder: (context, state) {
+            final userId = state.pathParameters['id']!;
+            return ProfileScreen(userId: userId);
+          },
+        ),
+        GoRoute(
+          path: '/u/:id',
+          builder: (context, state) {
+            final userId = state.pathParameters['id']!;
+            return ProfileScreen(userId: userId);
+          },
+        ),
+        GoRoute(
+          path: '/saved',
+          builder: (context, state) => const ProfileScreen(userId: 'me'),
+        ),
+        GoRoute(
+          path: '/bookmarks',
           builder: (context, state) => const ProfileScreen(userId: 'me'),
         ),
       ],

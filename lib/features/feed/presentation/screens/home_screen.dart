@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
@@ -11,7 +12,7 @@ import 'package:snapspot/features/feed/presentation/widgets/story_bar_section.da
 
 /// Màn hình Trang chủ (Feed Screen).
 /// Gồm hai Tab chính: Theo dõi (Follow) và Lân cận (Nearby).
-/// Nâng cấp giao diện với Story Bar Tray và Top Bar sang trọng 2026.
+/// Nâng cấp giao diện với Story Bar Tray, Top Bar và Thanh Lọc Chủ Đề Nhanh 2026.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -24,6 +25,16 @@ class _HomeScreenState extends State<HomeScreen>
   late TabController _tabController;
   final ScrollController _followScrollController = ScrollController();
   final ScrollController _nearbyScrollController = ScrollController();
+
+  String _selectedCategory = '✨ Tất cả';
+  final List<String> _categories = [
+    '✨ Tất cả',
+    '☕ Cafe đẹp',
+    '🏖️ Du lịch',
+    '🍜 Ăn uống',
+    '📸 Sống ảo',
+    '🏞️ Khám phá',
+  ];
 
   // Vị trí GPS giả lập của người dùng hiện tại (Nhà thờ Đức Bà Sài Gòn làm gốc tọa độ)
   final double _userLat = 10.7769;
@@ -77,6 +88,65 @@ class _HomeScreenState extends State<HomeScreen>
 
   Future<void> _loadMorePosts() async {
     // Giả lập Infinite Scroll khi cuộn tới đáy trang
+  }
+
+  Widget _buildTopicFilterBar(bool isLight) {
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      color: isLight ? Colors.white : AppColors.surfaceDark,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: _categories.length,
+        itemBuilder: (context, index) {
+          final cat = _categories[index];
+          final isSelected = _selectedCategory == cat;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                setState(() {
+                  _selectedCategory = cat;
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primary
+                      : (isLight ? Colors.grey[100] : Colors.grey[850]),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : (isLight ? Colors.grey[300]! : Colors.grey[700]!),
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    cat,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected
+                          ? Colors.white
+                          : (isLight
+                              ? AppColors.textLightPrimary
+                              : AppColors.textDarkPrimary),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -203,6 +273,8 @@ class _HomeScreenState extends State<HomeScreen>
     ScrollController scrollController, {
     required bool isNearby,
   }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     return RefreshIndicator(
       onRefresh: () async {
         _loadCurrentTabFeed();
@@ -219,6 +291,7 @@ class _HomeScreenState extends State<HomeScreen>
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 const StoryBarSection(),
+                _buildTopicFilterBar(isLight),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                 Center(child: Text(state.message)),
               ],
@@ -233,6 +306,7 @@ class _HomeScreenState extends State<HomeScreen>
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   const StoryBarSection(),
+                  _buildTopicFilterBar(isLight),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                   if (isNearby)
                     FeedNearbyEmptyState(
@@ -262,13 +336,17 @@ class _HomeScreenState extends State<HomeScreen>
               controller: scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 24),
-              itemCount: posts.length + 1, // +1 cho StoryBarSection ở vị trí 0
+              itemCount: posts.length + 2, // +1 StoryBarSection, +1 TopicFilterBar
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return const StoryBarSection();
                 }
 
-                final post = posts[index - 1];
+                if (index == 1) {
+                  return _buildTopicFilterBar(isLight);
+                }
+
+                final post = posts[index - 2];
                 return SpotCard(
                   post: post,
                   userLat: _userLat,
