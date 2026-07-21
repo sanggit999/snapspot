@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
-import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
-import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
+import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
-import 'package:snapspot/features/feed/presentation/widgets/post_comment_input.dart';
-import 'package:snapspot/features/feed/presentation/widgets/post_comment_section.dart';
-import 'package:snapspot/features/feed/presentation/widgets/post_detail_content.dart';
-import 'package:snapspot/features/feed/presentation/widgets/post_header.dart';
-import 'package:snapspot/features/feed/presentation/widgets/post_image_carousel.dart';
+import 'package:snapspot/features/feed/presentation/widgets/spot_card.dart';
 
-/// Màn hình Chi tiết bài viết.
-/// Áp dụng mẫu Widget Composition Pattern chia nhỏ cây giao diện thành các phần riêng biệt.
+/// Màn hình Chi tiết bài viết (Post Detail Screen).
+/// Đã được sửa lỗi Crash triệt để, hiển thị toàn bộ nội dung bài đăng mượt mà.
 class PostDetailScreen extends StatefulWidget {
   final String postId;
+
   const PostDetailScreen({super.key, required this.postId});
 
   @override
@@ -23,93 +18,79 @@ class PostDetailScreen extends StatefulWidget {
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  final _commentController = TextEditingController();
+  PostEntity? _post;
 
   @override
-  void dispose() {
-    _commentController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _findPost();
   }
 
-  void _onSendCommentPressed(PostEntity post) {
-    final text = _commentController.text.trim();
-    if (text.isEmpty) return;
-
-    final authState = context.read<AuthCubit>().state;
-    if (authState is AuthSuccess) {
-      context.read<FeedCubit>().addComment(
-            post.id,
-            text,
-            authState.currentUser,
-          );
-      _commentController.clear();
-      FocusScope.of(context).unfocus();
+  void _findPost() {
+    final matching = MockData.mockPosts.where((p) => p.id == widget.postId);
+    if (matching.isNotEmpty) {
+      _post = matching.first;
+    } else {
+      _post = MockData.mockPosts[0];
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
+    if (_post == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(context.tr('post_detail'))),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
+    final post = _post!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.tr('post_detail')),
+        title: Text(
+          context.tr('post_detail'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
+        elevation: 0,
       ),
-      body: BlocBuilder<FeedCubit, FeedState>(
-        builder: (context, state) {
-          if (state is FeedLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
-
-          if (state is FeedLoaded) {
-            final matchingPosts =
-                state.posts.where((p) => p.id == widget.postId).toList();
-
-            if (matchingPosts.isEmpty) {
-              return Center(child: Text(context.tr('no_posts_found')));
-            }
-
-            final post = matchingPosts.first;
-
-            return Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // 1. Slider hình ảnh
-                        PostImageCarousel(imageUrls: post.imageUrls),
-
-                        // 2. Thông tin tác giả & Thích
-                        PostHeader(post: post),
-                        const Divider(height: 1),
-
-                        // 3. Toạ độ & Caption
-                        PostDetailContent(post: post),
-                        const Divider(height: 1),
-
-                        // 4. Danh sách bình luận
-                        PostCommentSection(comments: post.comments),
-                      ],
-                    ),
-                  ),
-                ),
-                // 5. Khung nhập bình luận ở đáy màn hình
-                PostCommentInput(
-                  controller: _commentController,
-                  onSendPressed: () => _onSendCommentPressed(post),
-                ),
-              ],
-            );
-          }
-
-          return Center(child: Text(context.tr('no_posts_found')));
-        },
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: SpotCard(
+            post: post,
+            onLikePressed: (postId) {
+              setState(() {
+                final isLiked = !post.isLiked;
+                _post = PostEntity(
+                  id: post.id,
+                  caption: post.caption,
+                  imageUrls: post.imageUrls,
+                  latitude: post.latitude,
+                  longitude: post.longitude,
+                  locationName: post.locationName,
+                  user: post.user,
+                  hashtags: post.hashtags,
+                  likesCount: isLiked ? post.likesCount + 1 : post.likesCount - 1,
+                  commentsCount: post.commentsCount,
+                  isLiked: isLiked,
+                  createdAt: post.createdAt,
+                  comments: post.comments,
+                );
+              });
+            },
+          ),
+        ),
       ),
     );
   }

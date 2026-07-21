@@ -49,6 +49,28 @@ Cơ chế layout trong Flutter dựa trên luồng truyền dữ liệu kích th
   - `SliverPadding` để tạo khoảng trống giữa các sliver.
 - Tránh lồng `SingleChildScrollView` trực tiếp bên ngoài `CustomScrollView` vì sẽ làm mất đi tính năng cuộn mượt mà và cơ chế lazy loading của các sliver con.
 
+### 5. Quy chuẩn Lựa chọn Widget Tạo Khoảng Cách & Bố Cục (Modern Spacing Standard 2026)
+
+Để mã nguồn rõ ràng, dễ bảo trì và tối ưu hóa số lượng node trên cây Widget Tree, áp dụng đúng chuẩn lựa chọn widget tạo khoảng cách như sau:
+
+#### Bảng tra cứu mục đích ↔ Widget nên dùng:
+| Mục đích | Widget / Thuộc tính nên dùng |
+| :--- | :--- |
+| Khoảng cách đều giữa các child | ✅ `spacing` (thuộc tính `spacing` trong `Row`, `Column`, `Flex`, `Wrap`) |
+| Khoảng cách không đều / tùy chỉnh | ✅ `SizedBox` |
+| Khoảng cách với mép ngoài (Outer spacing) | ✅ `Padding` |
+| Đẩy widget sang hai đầu | ✅ `Spacer` hoặc `MainAxisAlignment.spaceBetween` |
+| Căn lề một widget | ✅ `Padding` |
+| Khoảng cách giữa 2 widget duy nhất | ✅ `SizedBox` hoặc `spacing` đều được |
+| Danh sách widget dài có cùng khoảng cách | ✅ `spacing` |
+
+#### Quy ước chuẩn 2026 cho dự án Flutter:
+- **`spacing`**: Dùng cho khoảng cách bên trong `Row`, `Column`, `Flex` khi tất cả các phần tử con có khoảng cách cố định bằng nhau. (Giúp loại bỏ hàng loạt các widget `SizedBox` rải rác giữa các item).
+- **`Padding`**: Dùng cho khoảng cách giữa widget với widget cha xung quanh (outer spacing) hoặc căn lề widget.
+- **`SizedBox`**: Dùng cho các khoảng cách đặc biệt, linh hoạt hoặc không đồng đều giữa 2 phần tử cụ thể.
+- **`Spacer`**: Chiếm toàn bộ phần không gian trống còn lại trong `Row`/`Column` để căn chỉnh bố cục.
+- **`MainAxisAlignment.spaceBetween / spaceAround / spaceEvenly`**: Chỉ dùng để phân phối không gian dư khả dụng của container, **không** dùng để thay thế khoảng cách cố định giữa các widget.
+
 ---
 
 ## Hướng dẫn thực hiện cho Agent (Layout Checklist)
@@ -56,3 +78,9 @@ Cơ chế layout trong Flutter dựa trên luồng truyền dữ liệu kích th
 1. **Kiểm tra Flexible/Expanded**: Đảm bảo toàn bộ chữ viết (`Text`) hoặc hình ảnh nằm trong `Row`/`Column` mà có nguy cơ bị tràn màn hình đã được bảo vệ bằng `Expanded` hoặc `Flexible`.
 2. **Kiểm tra Lazy Loading**: Xác minh tất cả các danh sách/lưới dữ liệu có dùng `ListView.builder` hay `GridView.builder` thay vì khởi tạo mảng widget tĩnh không.
 3. **Kiểm tra Unbounded Height**: Đảm bảo các danh sách cuộn nằm trong `Column` được bọc bằng `Expanded` hoặc thiết lập chiều cao cụ thể.
+4. **Kiểm tra Spacing Standard (2026)**:
+   - Ưu tiên sử dụng thuộc tính `spacing` trong `Row`/`Column` đối với danh sách phần tử có khoảng cách bằng nhau.
+   - Dùng `Padding` cho khoảng cách mép ngoài (outer spacing).
+   - Dùng `SizedBox` cho các khoảng cách không đồng đều đặc biệt.
+   - Dùng `Spacer` khi muốn đẩy các phần tử về hai biên.
+
