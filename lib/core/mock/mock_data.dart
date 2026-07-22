@@ -19,12 +19,21 @@ class MockData {
       fullName: 'Nguyễn Văn Sang',
       avatarUrl:
           'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      coverUrl:
+          'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
       bio:
           'Đam mê nhiếp ảnh phong cảnh và du lịch trải nghiệm. Thích check-in bản đồ!',
+      websiteUrl: 'https://sangnguyen.photo',
+      locationName: 'Hà Nội, Việt Nam',
       isPrivate: false,
+      isVerified: true,
+      isFollowing: false,
       postsCount: 12,
       followersCount: 1450,
       followingCount: 382,
+      checkInsCount: 28,
+      phoneNumber: '+84987654321',
+      isOnline: true,
     ),
     const UserEntity(
       id: 'usr_2',
@@ -33,12 +42,21 @@ class MockData {
       fullName: 'Trần Lan Anh',
       avatarUrl:
           'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80',
+      coverUrl:
+          'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80',
       bio:
           'Travel Blogger ✈️ | Chia sẻ những khoảnh khắc đẹp quanh Việt Nam 🇻🇳',
+      websiteUrl: 'https://lananhtravel.com',
+      locationName: 'Đà Nẵng, Việt Nam',
       isPrivate: false,
+      isVerified: true,
+      isFollowing: true,
       postsCount: 24,
       followersCount: 5200,
       followingCount: 890,
+      checkInsCount: 45,
+      phoneNumber: '+84912345678',
+      isOnline: true,
     ),
     const UserEntity(
       id: 'usr_3',
@@ -47,12 +65,21 @@ class MockData {
       fullName: 'Lê Minh Quân',
       avatarUrl:
           'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
+      coverUrl:
+          'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80',
       bio:
           'Cà phê bụi, phượt xe máy 🏍️. Thích khám phá những góc khuất Hà Nội.',
+      websiteUrl: '',
+      locationName: 'Hà Nội, Việt Nam',
       isPrivate: true,
+      isVerified: false,
+      isFollowing: false,
       postsCount: 8,
       followersCount: 240,
       followingCount: 420,
+      checkInsCount: 14,
+      phoneNumber: '+84903112233',
+      isOnline: false,
     ),
     const UserEntity(
       id: 'usr_4',
@@ -61,11 +88,20 @@ class MockData {
       fullName: 'Phạm Hoàng Nam',
       avatarUrl:
           'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
+      coverUrl:
+          'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
       bio: 'Nature & Adventure photographer. Hiking lover 🧗‍♂️.',
+      websiteUrl: 'https://namoutdoor.org',
+      locationName: 'TP. Hồ Chí Minh, Việt Nam',
       isPrivate: false,
+      isVerified: true,
+      isFollowing: true,
       postsCount: 42,
       followersCount: 8400,
       followingCount: 512,
+      checkInsCount: 62,
+      phoneNumber: '+84944556677',
+      isOnline: true,
     ),
     const UserEntity(
       id: 'usr_5',
@@ -74,11 +110,20 @@ class MockData {
       fullName: 'Nguyễn Thùy Chi',
       avatarUrl:
           'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+      coverUrl:
+          'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80',
       bio: 'Họa sĩ tự do 🎨. Yêu thích sắc màu cuộc sống qua từng góc ảnh.',
+      websiteUrl: '',
+      locationName: 'Đà Lạt, Việt Nam',
       isPrivate: false,
+      isVerified: false,
+      isFollowing: false,
       postsCount: 15,
       followersCount: 1200,
       followingCount: 290,
+      checkInsCount: 19,
+      phoneNumber: '+84977889900',
+      isOnline: false,
     ),
   ];
 

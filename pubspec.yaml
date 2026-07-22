@@ -32,6 +32,10 @@ dependencies:
   http_certificate_pinning: ^3.0.1
   url_launcher: ^6.3.1
   share_plus: ^10.1.4
+  dio: ^5.7.0
+  pretty_dio_logger: ^1.4.0
+  connectivity_plus: ^6.1.0
+  device_info_plus: ^11.1.1
 
 dev_dependencies:
   flutter_test:

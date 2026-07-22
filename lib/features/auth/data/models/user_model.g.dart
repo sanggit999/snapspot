@@ -17,6 +17,14 @@ _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   postsCount: (json['posts_count'] as num?)?.toInt() ?? 0,
   followersCount: (json['followers_count'] as num?)?.toInt() ?? 0,
   followingCount: (json['following_count'] as num?)?.toInt() ?? 0,
+  coverUrl: json['cover_url'] as String? ?? '',
+  websiteUrl: json['website_url'] as String? ?? '',
+  locationName: json['location_name'] as String? ?? '',
+  isVerified: json['is_verified'] as bool? ?? false,
+  isFollowing: json['is_following'] as bool? ?? false,
+  checkInsCount: (json['check_ins_count'] as num?)?.toInt() ?? 0,
+  phoneNumber: json['phone_number'] as String? ?? '',
+  isOnline: json['is_online'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
@@ -31,4 +39,12 @@ Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
       'posts_count': instance.postsCount,
       'followers_count': instance.followersCount,
       'following_count': instance.followingCount,
+      'cover_url': instance.coverUrl,
+      'website_url': instance.websiteUrl,
+      'location_name': instance.locationName,
+      'is_verified': instance.isVerified,
+      'is_following': instance.isFollowing,
+      'check_ins_count': instance.checkInsCount,
+      'phone_number': instance.phoneNumber,
+      'is_online': instance.isOnline,
     };
