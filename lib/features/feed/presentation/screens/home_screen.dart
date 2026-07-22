@@ -4,15 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
+import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
+import 'package:snapspot/features/feed/domain/entities/trending_hashtag_entity.dart';
 import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 import 'package:snapspot/features/feed/presentation/widgets/feed_nearby_empty_state.dart';
 import 'package:snapspot/features/feed/presentation/widgets/feed_shimmer_loader.dart';
 import 'package:snapspot/features/feed/presentation/widgets/spot_card.dart';
 import 'package:snapspot/features/feed/presentation/widgets/story_bar_section.dart';
 
-/// Màn hình Trang chủ (Feed Screen).
-/// Gồm hai Tab chính: Theo dõi (Follow) và Lân cận (Nearby).
-/// Nâng cấp giao diện với Story Bar Tray, Top Bar và Thanh Lọc Chủ Đề Nhanh 2026.
+/// Màn hình Trang chủ (Home Feed Screen).
+/// Đạt chuẩn Senior Architecture: 0% Computation ở UI Layer.
+/// Nhận trực tiếp danh sách mảng TrendingHashtagEntity từ FeedCubit (Domain/BLoC Layer)
+/// và render thanh Hashtag Chips sống động kèm hiệu ứng Shimmer khi đang tải.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -26,15 +29,7 @@ class _HomeScreenState extends State<HomeScreen>
   final ScrollController _followScrollController = ScrollController();
   final ScrollController _nearbyScrollController = ScrollController();
 
-  String _selectedCategory = '✨ Tất cả';
-  final List<String> _categories = [
-    '✨ Tất cả',
-    '☕ Cafe đẹp',
-    '🏖️ Du lịch',
-    '🍜 Ăn uống',
-    '📸 Sống ảo',
-    '🏞️ Khám phá',
-  ];
+  String _selectedTagKey = 'ALL'; // Mặc định hiển thị tất cả
 
   // Vị trí GPS giả lập của người dùng hiện tại (Nhà thờ Đức Bà Sài Gòn làm gốc tọa độ)
   final double _userLat = 10.7769;
@@ -87,21 +82,39 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _loadMorePosts() async {
-    // Giả lập Infinite Scroll khi cuộn tới đáy trang
+    // Infinite Scroll handler
   }
 
-  Widget _buildTopicFilterBar(bool isLight) {
+  /// Lọc bài viết theo Tag Key được chọn
+  List<PostEntity> _filterPostsByTag(List<PostEntity> posts) {
+    if (_selectedTagKey == 'ALL') return posts;
+
+    final targetTag = _selectedTagKey.toLowerCase();
+
+    return posts.where((p) {
+      final matchesHashtag = p.hashtags.any(
+        (h) => h.toLowerCase().replaceAll('#', '').trim() == targetTag,
+      );
+      final matchesCaption = p.caption.toLowerCase().contains(targetTag);
+      final matchesLocation = p.locationName.toLowerCase().contains(targetTag);
+
+      return matchesHashtag || matchesCaption || matchesLocation;
+    }).toList();
+  }
+
+  Widget _buildTopicFilterBar(List<TrendingHashtagEntity> hashtags, bool isLight) {
     return Container(
-      height: 44,
+      height: 46,
       padding: const EdgeInsets.symmetric(vertical: 6),
       color: isLight ? Colors.white : AppColors.surfaceDark,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: _categories.length,
+        itemCount: hashtags.length,
         itemBuilder: (context, index) {
-          final cat = _categories[index];
-          final isSelected = _selectedCategory == cat;
+          final item = hashtags[index];
+          final isSelected = _selectedTagKey == item.tagKey;
+          final isRecommended = item.isRecommended;
 
           return Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -109,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen>
               onTap: () {
                 HapticFeedback.lightImpact();
                 setState(() {
-                  _selectedCategory = cat;
+                  _selectedTagKey = item.tagKey;
                 });
               },
               child: AnimatedContainer(
@@ -118,26 +131,40 @@ class _HomeScreenState extends State<HomeScreen>
                 decoration: BoxDecoration(
                   color: isSelected
                       ? AppColors.primary
-                      : (isLight ? Colors.grey[100] : Colors.grey[850]),
+                      : (isRecommended
+                          ? (isLight ? Colors.amber.shade50 : AppColors.primary.withValues(alpha: 0.15))
+                          : (isLight ? Colors.grey[100] : Colors.grey[850])),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: isSelected
                         ? AppColors.primary
-                        : (isLight ? Colors.grey[300]! : Colors.grey[700]!),
-                    width: 1,
+                        : (isRecommended
+                            ? Colors.amber.shade600
+                            : (isLight ? Colors.grey[300]! : Colors.grey[700]!)),
+                    width: isSelected || isRecommended ? 1.5 : 1.0,
                   ),
+                  boxShadow: [
+                    if (isSelected)
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                  ],
                 ),
                 child: Center(
                   child: Text(
-                    cat,
+                    item.displayLabel,
                     style: TextStyle(
                       fontSize: 12.5,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected || isRecommended ? FontWeight.bold : FontWeight.w500,
                       color: isSelected
                           ? Colors.white
-                          : (isLight
-                              ? AppColors.textLightPrimary
-                              : AppColors.textDarkPrimary),
+                          : (isRecommended
+                              ? (isLight ? Colors.amber.shade900 : Colors.amber.shade300)
+                              : (isLight
+                                  ? AppColors.textLightPrimary
+                                  : AppColors.textDarkPrimary)),
                     ),
                   ),
                 ),
@@ -291,7 +318,10 @@ class _HomeScreenState extends State<HomeScreen>
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 const StoryBarSection(),
-                _buildTopicFilterBar(isLight),
+                _buildTopicFilterBar(
+                  const [TrendingHashtagEntity(tagKey: 'ALL', postCount: 0, displayLabel: '✨ Tất cả (0)')],
+                  isLight,
+                ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                 Center(child: Text(state.message)),
               ],
@@ -299,33 +329,64 @@ class _HomeScreenState extends State<HomeScreen>
           }
 
           if (state is FeedLoaded) {
-            final posts = state.posts;
+            final allPosts = state.posts;
+            final trendingHashtags = state.trendingHashtags;
+            final filteredPosts = _filterPostsByTag(allPosts);
 
-            if (posts.isEmpty) {
+            if (filteredPosts.isEmpty) {
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
                   const StoryBarSection(),
-                  _buildTopicFilterBar(isLight),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                  if (isNearby)
+                  _buildTopicFilterBar(trendingHashtags, isLight),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  if (isNearby && _selectedTagKey == 'ALL')
                     FeedNearbyEmptyState(
                       userLat: _userLat,
                       userLng: _userLng,
                       onRefreshPressed: _loadCurrentTabFeed,
                     )
                   else
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Text(
-                          context.tr('no_posts_found'),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.tag_rounded,
+                            size: 56,
+                            color: Colors.grey[400],
                           ),
-                        ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Chưa có bài viết nào gắn hashtag "#$_selectedTagKey"',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Hãy là người đầu tiên chụp ảnh & đính kèm hashtag này!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton.icon(
+                            onPressed: () => context.push('/camera'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.camera_alt_rounded, size: 18),
+                            label: const Text('Đăng bài check-in ngay'),
+                          ),
+                        ],
                       ),
                     ),
                 ],
@@ -336,17 +397,17 @@ class _HomeScreenState extends State<HomeScreen>
               controller: scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 24),
-              itemCount: posts.length + 2, // +1 StoryBarSection, +1 TopicFilterBar
+              itemCount: filteredPosts.length + 2, // +1 StoryBarSection, +1 TopicFilterBar
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return const StoryBarSection();
                 }
 
                 if (index == 1) {
-                  return _buildTopicFilterBar(isLight);
+                  return _buildTopicFilterBar(trendingHashtags, isLight);
                 }
 
-                final post = posts[index - 2];
+                final post = filteredPosts[index - 2];
                 return SpotCard(
                   post: post,
                   userLat: _userLat,

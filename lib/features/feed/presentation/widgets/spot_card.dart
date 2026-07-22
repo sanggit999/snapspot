@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
@@ -11,6 +12,7 @@ import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/core/widgets/images/image_gallery_viewer_dialog.dart';
 import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
+import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 import 'package:snapspot/features/feed/presentation/widgets/post_header.dart';
 
 /// Thẻ hiển thị bài đăng check-in với trải nghiệm tương tác (UX) đột phá 2026.
@@ -51,6 +53,8 @@ class _SpotCardState extends State<SpotCard>
   @override
   void initState() {
     super.initState();
+    _isBookmarked = widget.post.isBookmarked;
+    _savedCollectionName = widget.post.savedCollectionName;
     _localSharesCount = widget.post.sharesCount;
     _heartController = AnimationController(
       vsync: this,
@@ -68,6 +72,11 @@ class _SpotCardState extends State<SpotCard>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.post.sharesCount != widget.post.sharesCount) {
       _localSharesCount = widget.post.sharesCount;
+    }
+    if (oldWidget.post.isBookmarked != widget.post.isBookmarked ||
+        oldWidget.post.savedCollectionName != widget.post.savedCollectionName) {
+      _isBookmarked = widget.post.isBookmarked;
+      _savedCollectionName = widget.post.savedCollectionName;
     }
   }
 
@@ -466,7 +475,12 @@ class _SpotCardState extends State<SpotCard>
 
   void _openSaveCollectionSheet() {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final collections = ['Địa điểm muốn đến', 'Quán cà phê đẹp', 'Ảnh chụp đẹp', 'Kinh nghiệm du lịch'];
+    final collections = [
+      {'name': 'Địa điểm muốn đến', 'icon': Icons.map_outlined, 'color': AppColors.primary},
+      {'name': 'Quán cà phê đẹp', 'icon': Icons.local_cafe_outlined, 'color': Colors.amber.shade700},
+      {'name': 'Ảnh chụp đẹp', 'icon': Icons.photo_camera_outlined, 'color': Colors.purple},
+      {'name': 'Kinh nghiệm du lịch', 'icon': Icons.explore_outlined, 'color': Colors.teal},
+    ];
 
     showModalBottomSheet(
       context: context,
@@ -492,30 +506,95 @@ class _SpotCardState extends State<SpotCard>
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Lưu vào Bộ sưu tập',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Icon(Icons.bookmark_add_rounded, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Lưu vào Bộ sưu tập',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
-              ...collections.map(
-                (col) => ListTile(
-                  leading: const Icon(Icons.bookmark_add_outlined, color: AppColors.primary),
-                  title: Text(col),
-                  trailing: _savedCollectionName == col
-                      ? const Icon(Icons.check_circle, color: AppColors.primary)
-                      : null,
+              ...collections.map((colObj) {
+                final colName = colObj['name'] as String;
+                final colIcon = colObj['icon'] as IconData;
+                final colColor = colObj['color'] as Color;
+                final isSelected = _isBookmarked && _savedCollectionName == colName;
+
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  leading: Icon(colIcon, color: isSelected ? AppColors.primary : colColor, size: 24),
+                  title: Text(
+                    colName,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                      color: isSelected
+                          ? AppColors.primary
+                          : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? const Icon(Icons.check_circle_rounded, color: AppColors.primary)
+                      : const Icon(Icons.add_circle_outline_rounded, color: Colors.grey, size: 20),
                   onTap: () {
+                    HapticFeedback.lightImpact();
                     setState(() {
                       _isBookmarked = true;
-                      _savedCollectionName = col;
+                      _savedCollectionName = colName;
                     });
+                    try {
+                      context.read<FeedCubit>().toggleBookmark(
+                        postId: widget.post.id,
+                        collectionName: colName,
+                        isBookmarked: true,
+                      );
+                    } catch (_) {}
+
                     Navigator.pop(ctx);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Đã lưu bài viết vào "$col"')),
+                      SnackBar(
+                        content: Text('Đã lưu bài viết vào bộ sưu tập "$colName"'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                );
+              }),
+              if (_isBookmarked) ...[
+                const Divider(height: 16),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  leading: const Icon(Icons.bookmark_remove_rounded, color: Colors.redAccent),
+                  title: const Text(
+                    'Bỏ lưu khỏi Bộ sưu tập',
+                    style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    setState(() {
+                      _isBookmarked = false;
+                      _savedCollectionName = null;
+                    });
+                    try {
+                      context.read<FeedCubit>().toggleBookmark(
+                        postId: widget.post.id,
+                        collectionName: '',
+                        isBookmarked: false,
+                      );
+                    } catch (_) {}
+
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Đã bỏ lưu bài viết khỏi bộ sưu tập'),
+                        duration: Duration(seconds: 2),
+                      ),
                     );
                   },
                 ),
-              ),
+              ],
             ],
           ),
         ),

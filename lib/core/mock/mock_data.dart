@@ -249,6 +249,8 @@ class MockData {
       commentsCount: 1,
       sharesCount: 45,
       isLiked: false,
+      isBookmarked: true,
+      savedCollectionName: 'Địa điểm muốn đến',
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
       comments: [
         CommentEntity(
@@ -280,6 +282,8 @@ class MockData {
       sharesCount: 890,
       isLiked: true,
       userReaction: '📍',
+      isBookmarked: true,
+      savedCollectionName: 'Ảnh chụp đẹp',
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       comments: [
         CommentEntity(
@@ -318,6 +322,8 @@ class MockData {
       commentsCount: 15600, // 15.6K Comments
       sharesCount: 520000, // 520K Shares
       isLiked: false,
+      isBookmarked: true,
+      savedCollectionName: 'Kinh nghiệm du lịch',
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       comments: const [],
     ),
