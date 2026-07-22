@@ -14,6 +14,14 @@ class UserEntity extends Equatable {
   final int postsCount;
   final int followersCount;
   final int followingCount;
+  final String coverUrl;
+  final String websiteUrl;
+  final String locationName;
+  final bool isVerified;
+  final bool isFollowing;
+  final int checkInsCount;
+  final String phoneNumber;
+  final bool isOnline;
 
   const UserEntity({
     required this.id,
@@ -26,6 +34,14 @@ class UserEntity extends Equatable {
     required this.postsCount,
     required this.followersCount,
     required this.followingCount,
+    this.coverUrl = '',
+    this.websiteUrl = '',
+    this.locationName = '',
+    this.isVerified = false,
+    this.isFollowing = false,
+    this.checkInsCount = 0,
+    this.phoneNumber = '',
+    this.isOnline = false,
   });
 
   /// Tạo bản sao với một số thuộc tính được cập nhật (Immutable pattern)
@@ -40,6 +56,14 @@ class UserEntity extends Equatable {
     int? postsCount,
     int? followersCount,
     int? followingCount,
+    String? coverUrl,
+    String? websiteUrl,
+    String? locationName,
+    bool? isVerified,
+    bool? isFollowing,
+    int? checkInsCount,
+    String? phoneNumber,
+    bool? isOnline,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -52,6 +76,14 @@ class UserEntity extends Equatable {
       postsCount: postsCount ?? this.postsCount,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
+      coverUrl: coverUrl ?? this.coverUrl,
+      websiteUrl: websiteUrl ?? this.websiteUrl,
+      locationName: locationName ?? this.locationName,
+      isVerified: isVerified ?? this.isVerified,
+      isFollowing: isFollowing ?? this.isFollowing,
+      checkInsCount: checkInsCount ?? this.checkInsCount,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      isOnline: isOnline ?? this.isOnline,
     );
   }
 
@@ -67,5 +99,13 @@ class UserEntity extends Equatable {
         postsCount,
         followersCount,
         followingCount,
+        coverUrl,
+        websiteUrl,
+        locationName,
+        isVerified,
+        isFollowing,
+        checkInsCount,
+        phoneNumber,
+        isOnline,
       ];
 }

@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cảnh báo: Không commit file chứa credentials bí mật
+*.env
+*.env.local
+*.env.*.local
+!.env.example
+
+# Database & Storage
+*.sqlite3
+*.db
+media/
+staticfiles/
+
+# Logs
+*.log
+celerybeat-schedule
+celerybeat.pid

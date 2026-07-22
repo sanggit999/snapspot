@@ -1,4 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:snapspot/core/network/services/storage_service.dart';
+import 'package:snapspot/core/network/dio/dio_factory.dart';
+import 'package:snapspot/core/network/dio/dio_client.dart';
 import 'package:snapspot/features/auth/domain/repositories/auth_repository.dart';
 import 'package:snapspot/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:snapspot/features/feed/domain/repositories/feed_repository.dart';
@@ -14,7 +18,6 @@ import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 import 'package:snapspot/features/map/presentation/blocs/map_cubit.dart';
 import 'package:snapspot/features/chat/presentation/blocs/chat_cubit.dart';
 import 'package:snapspot/features/camera/presentation/blocs/post_editor_cubit.dart';
-
 import 'package:snapspot/features/profile/presentation/blocs/collections_cubit.dart';
 
 /// Khai báo Service Locator toàn cục của ứng dụng.
@@ -22,13 +25,25 @@ final GetIt getIt = GetIt.instance;
 
 /// Khởi tạo và đăng ký các Dependencies của hệ thống.
 void setupServiceLocator() {
-  // 1. Đăng ký các Repositories (Lazy Singletons)
-  getIt.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
+  // 1. Core Network & Storage Services (Singletons)
+  getIt.registerLazySingleton<StorageService>(() => StorageService());
+  getIt.registerLazySingleton<DioFactory>(() => DioFactory(getIt<StorageService>()));
+  getIt.registerLazySingleton<Dio>(() => getIt<DioFactory>().createDio());
+  getIt.registerLazySingleton<DioClient>(() => DioClient(getIt<Dio>()));
+
+  // 2. Đăng ký các Repositories (Lazy Singletons)
+  getIt.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(
+      dioClient: getIt<DioClient>(),
+      storageService: getIt<StorageService>(),
+    ),
+  );
+
   getIt.registerLazySingleton<FeedRepository>(() => FeedRepositoryImpl());
   getIt.registerLazySingleton<MapRepository>(() => MapRepositoryImpl());
   getIt.registerLazySingleton<ChatRepository>(() => ChatRepositoryImpl());
 
-  // 2. Đăng ký các Cubits
+  // 3. Đăng ký các Cubits
   getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
   getIt.registerLazySingleton<LanguageCubit>(() => LanguageCubit());
   getIt.registerLazySingleton<CollectionsCubit>(() => CollectionsCubit()..fetchCollections());
