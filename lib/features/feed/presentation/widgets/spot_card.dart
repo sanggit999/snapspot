@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
+import 'package:snapspot/core/constants/collection_icons.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/core/services/app_share_service.dart';
 import 'package:snapspot/core/utils/geo_utils.dart';
@@ -14,6 +15,10 @@ import 'package:snapspot/core/mock/mock_data.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 import 'package:snapspot/features/feed/presentation/widgets/post_header.dart';
+import 'package:snapspot/features/profile/domain/entities/collection_entity.dart';
+import 'package:snapspot/features/profile/presentation/blocs/collections_cubit.dart';
+import 'package:snapspot/features/profile/presentation/blocs/collections_state.dart';
+import 'package:snapspot/features/profile/presentation/widgets/create_collection_dialog.dart';
 
 /// Thẻ hiển thị bài đăng check-in với trải nghiệm tương tác (UX) đột phá 2026.
 /// Hỗ trợ Long-Press Quick Emoji Reaction, Double-Tap Haptic Pulse, và Luồng Chia sẻ 3-trong-1 trỏ trực tiếp App Android & iOS.
@@ -162,7 +167,7 @@ class _SpotCardState extends State<SpotCard>
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Đã bày tỏ cảm xúc $emoji'),
+                    content: Text(context.tr('reacted_emoji', args: {'emoji': emoji})),
                     duration: const Duration(seconds: 1),
                   ),
                 );
@@ -192,7 +197,7 @@ class _SpotCardState extends State<SpotCard>
       {'key': 'zalo', 'name': 'Zalo', 'icon': Icons.chat_bubble_rounded, 'color': const Color(0xFF0068FF)},
       {'key': 'messenger', 'name': 'Messenger', 'icon': Icons.bolt_rounded, 'color': const Color(0xFF0084FF)},
       {'key': 'facebook', 'name': 'Facebook', 'icon': Icons.facebook_rounded, 'color': const Color(0xFF1877F2)},
-      {'key': 'other', 'name': 'Khác...', 'icon': Icons.more_horiz_rounded, 'color': Colors.grey[700]!},
+      {'key': 'other', 'name': context.tr('other'), 'icon': Icons.more_horiz_rounded, 'color': Colors.grey[700]!},
     ];
 
     showModalBottomSheet(
@@ -219,9 +224,9 @@ class _SpotCardState extends State<SpotCard>
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Chia sẻ qua ứng dụng ngoài',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              Text(
+                context.tr('share_external'),
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
 
@@ -312,13 +317,13 @@ class _SpotCardState extends State<SpotCard>
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Text(
-                        'Chia sẻ bài viết',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        context.tr('share_post'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const Spacer(),
                       Text(
-                        '${NumberFormatter.formatCompact(_localSharesCount)} lượt chia sẻ',
+                        context.tr('shares_count', args: {'count': NumberFormatter.formatCompact(_localSharesCount)}),
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w600,
@@ -332,9 +337,9 @@ class _SpotCardState extends State<SpotCard>
                   const SizedBox(height: 16),
 
                   // 1. Gửi nhanh tin nhắn Direct Message cho bạn bè (SnapSpot Chat)
-                  const Text(
-                    'Gửi nhanh cho bạn bè',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey),
+                  Text(
+                    context.tr('quick_send_friends'),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -387,7 +392,7 @@ class _SpotCardState extends State<SpotCard>
                                     });
                                   },
                                   child: Text(
-                                    isSent ? 'Đã gửi ✓' : 'Gửi',
+                                    isSent ? context.tr('sent') : context.tr('send'),
                                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                                   ),
                                 ),
@@ -412,7 +417,7 @@ class _SpotCardState extends State<SpotCard>
                       ),
                       child: const Icon(Icons.link_rounded, color: AppColors.primary),
                     ),
-                    title: const Text('Sao chép liên kết bài viết', style: TextStyle(fontWeight: FontWeight.w600)),
+                    title: Text(context.tr('copy_link'), style: const TextStyle(fontWeight: FontWeight.w600)),
                     subtitle: Text('https://snapspot.app/p/${widget.post.id}', style: const TextStyle(fontSize: 11.5)),
                     onTap: () {
                       HapticFeedback.mediumImpact();
@@ -420,9 +425,9 @@ class _SpotCardState extends State<SpotCard>
                       _incrementShareCount();
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Đã sao chép liên kết vào bộ nhớ tạm!'),
-                          duration: Duration(seconds: 2),
+                        SnackBar(
+                          content: Text(context.tr('link_copied')),
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                     },
@@ -438,8 +443,8 @@ class _SpotCardState extends State<SpotCard>
                       ),
                       child: const Icon(Icons.auto_awesome_rounded, color: Colors.purple),
                     ),
-                    title: const Text('Chia sẻ lên Tin của bạn (Story)', style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Tạo Sticker địa điểm check-in độc đáo', style: TextStyle(fontSize: 11.5)),
+                    title: Text(context.tr('share_story_title'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(context.tr('share_story_desc'), style: const TextStyle(fontSize: 11.5)),
                     onTap: () {
                       _incrementShareCount();
                       Navigator.pop(ctx);
@@ -457,8 +462,8 @@ class _SpotCardState extends State<SpotCard>
                       ),
                       child: const Icon(Icons.share_outlined, color: Colors.blue),
                     ),
-                    title: const Text('Chia sẻ qua Ứng dụng khác', style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Zalo, Messenger, Facebook, Khác...', style: TextStyle(fontSize: 11.5)),
+                    title: Text(context.tr('share_external_title'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(context.tr('share_external_desc'), style: const TextStyle(fontSize: 11.5)),
                     onTap: () {
                       Navigator.pop(ctx);
                       _openExternalAppsDialog();
@@ -475,129 +480,264 @@ class _SpotCardState extends State<SpotCard>
 
   void _openSaveCollectionSheet() {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final collections = [
-      {'name': 'Địa điểm muốn đến', 'icon': Icons.map_outlined, 'color': AppColors.primary},
-      {'name': 'Quán cà phê đẹp', 'icon': Icons.local_cafe_outlined, 'color': Colors.amber.shade700},
-      {'name': 'Ảnh chụp đẹp', 'icon': Icons.photo_camera_outlined, 'color': Colors.purple},
-      {'name': 'Kinh nghiệm du lịch', 'icon': Icons.explore_outlined, 'color': Colors.teal},
-    ];
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true, // Phủ đè lên Bottom Navigation Bar
       backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[400],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Icon(Icons.bookmark_add_rounded, color: AppColors.primary),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Lưu vào Bộ sưu tập',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ...collections.map((colObj) {
-                final colName = colObj['name'] as String;
-                final colIcon = colObj['icon'] as IconData;
-                final colColor = colObj['color'] as Color;
-                final isSelected = _isBookmarked && _savedCollectionName == colName;
+      builder: (ctx) => BlocBuilder<CollectionsCubit, CollectionsState>(
+        builder: (context, collectionsState) {
+          List<CollectionEntity> userCollections = [];
+          if (collectionsState is CollectionsLoaded) {
+            userCollections = collectionsState.collections;
+          }
 
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  leading: Icon(colIcon, color: isSelected ? AppColors.primary : colColor, size: 24),
-                  title: Text(
-                    colName,
-                    style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                      color: isSelected
-                          ? AppColors.primary
-                          : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
+          IconData getIcon(String iconName) {
+            return AppCollectionIcons.getIcon(iconName);
+          }
+
+          Color getColor(String hex) {
+            try {
+              final clean = hex.replaceAll('#', '');
+              return Color(int.parse('FF$clean', radix: 16));
+            } catch (_) {
+              return AppColors.primary;
+            }
+          }
+
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[400],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                  ),
-                  trailing: isSelected
-                      ? const Icon(Icons.check_circle_rounded, color: AppColors.primary)
-                      : const Icon(Icons.add_circle_outline_rounded, color: Colors.grey, size: 20),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    setState(() {
-                      _isBookmarked = true;
-                      _savedCollectionName = colName;
-                    });
-                    try {
-                      context.read<FeedCubit>().toggleBookmark(
-                        postId: widget.post.id,
-                        collectionName: colName,
-                        isBookmarked: true,
-                      );
-                    } catch (_) {}
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Icon(Icons.bookmark_add_rounded, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Text(
+                          context.tr('save_to_collection'),
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
 
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Đã lưu bài viết vào bộ sưu tập "$colName"'),
-                        duration: const Duration(seconds: 2),
+                    // Nút Tạo bộ sưu tập mới trên cùng
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
                       ),
-                    );
-                  },
-                );
-              }),
-              if (_isBookmarked) ...[
-                const Divider(height: 16),
-                ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  leading: const Icon(Icons.bookmark_remove_rounded, color: Colors.redAccent),
-                  title: const Text(
-                    'Bỏ lưu khỏi Bộ sưu tập',
-                    style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
-                  ),
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    setState(() {
-                      _isBookmarked = false;
-                      _savedCollectionName = null;
-                    });
-                    try {
-                      context.read<FeedCubit>().toggleBookmark(
-                        postId: widget.post.id,
-                        collectionName: '',
-                        isBookmarked: false,
-                      );
-                    } catch (_) {}
+                      title: Text(
+                        context.tr('create_collection_title'),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      onTap: () async {
+                        HapticFeedback.mediumImpact();
+                        final feedCubit = context.read<FeedCubit>();
+                        final messenger = ScaffoldMessenger.of(context);
+                        final nav = Navigator.of(ctx);
+                        final appLoc = AppLocalizations.of(context);
 
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Đã bỏ lưu bài viết khỏi bộ sưu tập'),
-                        duration: Duration(seconds: 2),
+                        final newCol = await CreateCollectionDialog.show(context);
+                        if (newCol != null && mounted) {
+                          setState(() {
+                            _isBookmarked = true;
+                            _savedCollectionName = newCol.name;
+                          });
+                          try {
+                            feedCubit.toggleBookmark(
+                              postId: widget.post.id,
+                              collectionName: newCol.name,
+                              isBookmarked: true,
+                            );
+                          } catch (_) {}
+                          nav.pop();
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(appLoc.translate('saved_to_collection', arguments: {'name': newCol.name})),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    const Divider(height: 12),
+
+                    if (userCollections.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                        child: Text(
+                          context.tr('collection_empty_hint'),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+                          ),
+                        ),
                       ),
-                    );
-                  },
+
+                    // Danh sách Bộ sưu tập ĐỘNG của người dùng
+                    ...userCollections.map((col) {
+                      final colName = col.name;
+                      final colIcon = getIcon(col.iconName);
+                      final colColor = getColor(col.colorHex);
+                      final isSelected = _isBookmarked && _savedCollectionName == colName;
+
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        leading: Icon(colIcon, color: isSelected ? AppColors.primary : colColor, size: 24),
+                        title: Row(
+                          children: [
+                            Text(
+                              colName,
+                              style: TextStyle(
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
+                              ),
+                            ),
+                            if (col.isPrivate) ...[
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.lock_outline_rounded,
+                                size: 14,
+                                color: isLight ? Colors.grey[600] : Colors.grey[400],
+                              ),
+                            ],
+                          ],
+                        ),
+                        trailing: isSelected
+                            ? const Icon(Icons.check_circle_rounded, color: AppColors.primary)
+                            : const Icon(Icons.add_circle_outline_rounded, color: Colors.grey, size: 20),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            _isBookmarked = true;
+                            _savedCollectionName = colName;
+                          });
+                          try {
+                            context.read<FeedCubit>().toggleBookmark(
+                              postId: widget.post.id,
+                              collectionName: colName,
+                              isBookmarked: true,
+                            );
+                          } catch (_) {}
+
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(context.tr('saved_to_collection', args: {'name': colName})),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      );
+                    }),
+
+                    if (_isBookmarked) ...[
+                      const Divider(height: 16),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                        leading: const Icon(Icons.bookmark_remove_rounded, color: Colors.redAccent),
+                        title: Text(
+                          context.tr('remove_from_collection'),
+                          style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                        ),
+                        onTap: () {
+                          HapticFeedback.mediumImpact();
+                          setState(() {
+                            _isBookmarked = false;
+                            _savedCollectionName = null;
+                          });
+                          try {
+                            context.read<FeedCubit>().toggleBookmark(
+                              postId: widget.post.id,
+                              collectionName: '',
+                              isBookmarked: false,
+                            );
+                          } catch (_) {}
+
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(context.tr('removed_from_collection')),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ],
-          ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _toggleQuickBookmark() {
+    HapticFeedback.mediumImpact();
+    final newBookmarkedState = !_isBookmarked;
+    setState(() {
+      _isBookmarked = newBookmarkedState;
+      if (!newBookmarkedState) {
+        _savedCollectionName = null;
+      }
+    });
+
+    try {
+      context.read<FeedCubit>().toggleBookmark(
+        postId: widget.post.id,
+        collectionName: _savedCollectionName ?? '',
+        isBookmarked: newBookmarkedState,
+      );
+    } catch (_) {}
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          newBookmarkedState
+              ? context.tr('saved_to_collection', args: {'name': _savedCollectionName ?? context.tr('all')})
+              : context.tr('removed_from_collection'),
         ),
+        duration: const Duration(seconds: 3),
+        action: newBookmarkedState
+            ? SnackBarAction(
+                label: context.tr('collection_label'),
+                textColor: AppColors.primary,
+                onPressed: _openSaveCollectionSheet,
+              )
+            : null,
       ),
     );
   }
@@ -684,12 +824,12 @@ class _SpotCardState extends State<SpotCard>
                                 color: isLight
                                     ? AppColors.borderLight
                                     : AppColors.borderDark,
-                                child: const Column(
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.image_not_supported_outlined, size: 40),
-                                    SizedBox(height: 6),
-                                    Text('Không thể tải ảnh', style: TextStyle(fontSize: 12)),
+                                    const Icon(Icons.image_not_supported_outlined, size: 40),
+                                    const SizedBox(height: 6),
+                                    Text(context.tr('cannot_load_image'), style: const TextStyle(fontSize: 12)),
                                   ],
                                 ),
                               ),
@@ -954,18 +1094,24 @@ class _SpotCardState extends State<SpotCard>
 
                 const Spacer(),
 
-                // Nút Bookmark (Lưu bài vào Bộ sưu tập)
-                InkWell(
-                  onTap: _openSaveCollectionSheet,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Icon(
-                      _isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                      color: _isBookmarked
-                          ? AppColors.primary
-                          : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
-                      size: 24,
+                // Nút Bookmark (Lưu bài nhanh 1-Chạm / Nhấn giữ để Chọn & Tạo Bộ sưu tập)
+                GestureDetector(
+                  onLongPress: () {
+                    HapticFeedback.mediumImpact();
+                    _openSaveCollectionSheet();
+                  },
+                  child: InkWell(
+                    onTap: _toggleQuickBookmark,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Icon(
+                        _isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                        color: _isBookmarked
+                            ? AppColors.primary
+                            : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
