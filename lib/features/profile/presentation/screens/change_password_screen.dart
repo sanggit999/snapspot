@@ -5,6 +5,7 @@ import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
+/// Màn hình Đổi mật khẩu (Change Password Screen) chuẩn Type Scale & High-Contrast Light/Dark Mode.
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
 
@@ -55,7 +56,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             backgroundColor: AppColors.primary,
           ),
         );
-        context.pop(); // Quay lại màn hình Settings
+        context.pop();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -69,17 +70,30 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           context.tr('change_password'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 17.5,
+            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            letterSpacing: -0.3,
+          ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 19,
+            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
         elevation: 0,
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -99,6 +113,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   TextFormField(
                     controller: _oldPasswordController,
                     obscureText: _obscureOld,
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                    ),
                     decoration: _buildInputDecoration(
                       context: context,
                       hint: context.tr('current_password_hint'),
@@ -124,6 +142,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   TextFormField(
                     controller: _newPasswordController,
                     obscureText: _obscureNew,
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                    ),
                     decoration: _buildInputDecoration(
                       context: context,
                       hint: context.tr('new_password_hint'),
@@ -152,6 +174,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirm,
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                    ),
                     decoration: _buildInputDecoration(
                       context: context,
                       hint: context.tr('confirm_new_password_hint'),
@@ -198,8 +224,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         : Text(
                             context.tr('update_password'),
                             style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                   ),
@@ -213,9 +239,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   Widget _buildLabel(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       text,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      style: TextStyle(
+        fontSize: 14.0,
+        fontWeight: FontWeight.w600,
+        color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+      ),
     );
   }
 
@@ -228,27 +259,30 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+      hintStyle: TextStyle(
+        color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+        fontSize: 14.0,
+      ),
       filled: true,
       fillColor: isDark ? AppColors.surfaceDark : Colors.grey[50],
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       suffixIcon: IconButton(
         icon: Icon(
           obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-          color: Colors.grey,
+          color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
         ),
         onPressed: onToggleObscure,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: isDark ? Colors.grey[850]! : Colors.grey[200]!,
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: isDark ? Colors.grey[850]! : Colors.grey[200]!,
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
       focusedBorder: OutlineInputBorder(

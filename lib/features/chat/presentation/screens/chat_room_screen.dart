@@ -7,8 +7,7 @@ import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/features/chat/presentation/blocs/chat_cubit.dart';
 import 'package:intl/intl.dart';
 
-/// Màn hình Phòng chat chi tiết.
-/// Mô phỏng kết nối WebSocket thời gian thực, có typing indicator và tự động cuộn xuống.
+/// Màn hình Phòng chat chi tiết chuẩn Type Scale & High Contrast Light/Dark Mode.
 class ChatRoomScreen extends StatefulWidget {
   final String roomId;
   const ChatRoomScreen({super.key, required this.roomId});
@@ -24,7 +23,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   @override
   void initState() {
     super.initState();
-    // Đăng ký phòng chat
     context.read<ChatCubit>().enterRoom(widget.roomId);
   }
 
@@ -57,7 +55,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         authState.currentUser.id,
       );
       _messageController.clear();
-      // Cuộn xuống sau khi vẽ lại UI
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
     }
   }
@@ -65,19 +62,25 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
-          // Thoát khỏi phòng chat trong Cubit
           context.read<ChatCubit>().leaveRoom();
         }
       },
       child: Scaffold(
         appBar: AppBar(
+          elevation: 0,
+          backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 19,
+              color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+            ),
             onPressed: () {
               context.read<ChatCubit>().leaveRoom();
               Navigator.pop(context);
@@ -101,14 +104,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       children: [
                         Text(
                           partner.fullName,
-                          style: const TextStyle(fontSize: 16),
+                          style: TextStyle(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w700,
+                            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                         Text(
                           state.isTyping
                               ? 'Đang soạn tin...'
                               : context.tr('online'),
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 11.5,
                             color: state.isTyping
                                 ? AppColors.primary
                                 : AppColors.success,
@@ -124,10 +132,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.videocam_outlined),
+              icon: Icon(
+                Icons.videocam_outlined,
+                color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+              ),
               onPressed: () {},
             ),
-            IconButton(icon: const Icon(Icons.info_outline), onPressed: () {}),
+            IconButton(
+              icon: Icon(
+                Icons.info_outline_rounded,
+                color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+              ),
+              onPressed: () {},
+            ),
           ],
         ),
         body: BlocBuilder<ChatCubit, ChatState>(
@@ -144,14 +161,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 ? authState.currentUser.id
                 : '';
 
-            // Tự động cuộn xuống cuối khi có tin nhắn mới hoặc đang typing
             WidgetsBinding.instance.addPostFrameCallback(
               (_) => _scrollToBottom(),
             );
 
             return Column(
               children: [
-                // 1. Khung hiển thị tin nhắn
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
@@ -161,23 +176,22 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     ),
                     itemCount: room.messages.length + (state.isTyping ? 1 : 0),
                     itemBuilder: (context, index) {
-                      // Nếu dòng cuối là typing indicator
                       if (index == room.messages.length && state.isTyping) {
                         return _buildTypingIndicator(
                           room.partner.avatarUrl,
-                          theme,
+                          isLight,
                         );
                       }
 
                       final msg = room.messages[index];
                       final isMe = msg.senderId == currentUserId;
 
-                      return _buildMessageBubble(msg, isMe, theme);
+                      return _buildMessageBubble(msg, isMe, isLight);
                     },
                   ),
                 ),
 
-                // 2. Ô nhập văn bản dưới đáy
+                // Ô nhập tin nhắn
                 Container(
                   padding: EdgeInsets.fromLTRB(
                     12,
@@ -186,28 +200,27 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     8 + MediaQuery.of(context).viewInsets.bottom,
                   ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 5,
-                        offset: const Offset(0, -2),
+                    color: isLight ? Colors.white : AppColors.surfaceDark,
+                    border: Border(
+                      top: BorderSide(
+                        color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                        width: 1,
                       ),
-                    ],
+                    ),
                   ),
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.camera_alt_outlined,
-                          color: Colors.grey,
+                          color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
                         ),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.photo_outlined,
-                          color: Colors.grey,
+                          color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
                         ),
                         onPressed: () {},
                       ),
@@ -215,15 +228,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
-                            color: theme.brightness == Brightness.light
-                                ? Colors.grey[100]
-                                : Colors.grey[900],
+                            color: isLight ? Colors.grey[100] : Colors.grey[900],
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: TextField(
                             controller: _messageController,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                            ),
                             decoration: InputDecoration(
                               hintText: context.tr('type_message'),
+                              hintStyle: TextStyle(
+                                fontSize: 13.5,
+                                color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+                              ),
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -239,7 +258,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        icon: const Icon(Icons.send, color: AppColors.primary),
+                        icon: const Icon(Icons.send_rounded, color: AppColors.primary),
                         onPressed: _onSendPressed,
                       ),
                     ],
@@ -253,7 +272,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     );
   }
 
-  Widget _buildMessageBubble(dynamic msg, bool isMe, ThemeData theme) {
+  Widget _buildMessageBubble(dynamic msg, bool isMe, bool isLight) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -264,9 +283,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         children: [
           if (!isMe) ...[
             AppAvatar(
-              imageUrl: theme.brightness == Brightness.light
-                  ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'
-                  : '',
+              imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
               size: AppAvatarSize.small,
             ),
             const SizedBox(width: 8),
@@ -285,9 +302,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   decoration: BoxDecoration(
                     color: isMe
                         ? AppColors.primary
-                        : (theme.brightness == Brightness.light
-                              ? Colors.grey[200]
-                              : Colors.grey[850]),
+                        : (isLight ? Colors.grey[200] : Colors.grey[850]),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -304,10 +319,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     style: TextStyle(
                       color: isMe
                           ? Colors.white
-                          : (theme.brightness == Brightness.light
-                                ? Colors.black87
-                                : Colors.white),
-                      fontSize: 15,
+                          : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
+                      fontSize: 14.5,
+                      height: 1.35,
                     ),
                   ),
                 ),
@@ -316,7 +330,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     DateFormat('HH:mm').format(msg.createdAt),
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -327,7 +344,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     );
   }
 
-  Widget _buildTypingIndicator(String partnerAvatarUrl, ThemeData theme) {
+  Widget _buildTypingIndicator(String partnerAvatarUrl, bool isLight) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -338,9 +355,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: theme.brightness == Brightness.light
-                  ? Colors.grey[200]
-                  : Colors.grey[850],
+              color: isLight ? Colors.grey[200] : Colors.grey[850],
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),

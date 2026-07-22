@@ -1,20 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-/// Purpose: Full-screen interactive Image Viewer Dialog with Pinch-to-Zoom and Horizontal Swipe capabilities.
-///
-/// Parameters:
-/// - [imageUrls]: List of image URL strings to view.
-/// - [initialIndex]: Starting image index (Defaults to 0).
-///
-/// Usage:
-/// ```dart
-/// ImageGalleryViewerDialog.show(
-///   context,
-///   imageUrls: post.imageUrls,
-///   initialIndex: currentIndex,
-/// );
-/// ```
+/// Full-screen interactive Image Viewer Dialog với Pinch-to-Zoom và Horizontal Swipe chuẩn Type Scale.
 class ImageGalleryViewerDialog extends StatefulWidget {
   final List<String> imageUrls;
   final int initialIndex;
@@ -99,7 +86,7 @@ class _ImageGalleryViewerDialogState extends State<ImageGalleryViewerDialog> {
                         SizedBox(height: 8),
                         Text(
                           'Không thể tải hình ảnh',
-                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                          style: TextStyle(color: Colors.white70, fontSize: 13.0),
                         ),
                       ],
                     ),
@@ -134,7 +121,7 @@ class _ImageGalleryViewerDialogState extends State<ImageGalleryViewerDialog> {
                   ),
                 ),
 
-                // Chỉ báo số trang (Ví dụ: 1/3)
+                // Chỉ báo số trang (Ví dụ: 1 / 3)
                 if (widget.imageUrls.length > 1)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -149,8 +136,8 @@ class _ImageGalleryViewerDialogState extends State<ImageGalleryViewerDialog> {
                       '${_currentIndex + 1} / ${widget.imageUrls.length}',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

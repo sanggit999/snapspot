@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/core/widgets/images/app_avatar.dart';
 
+/// Màn hình Chỉnh sửa thông tin cá nhân (Edit Profile Screen) chuẩn Type Scale UI/UX.
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
 
@@ -54,9 +55,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -66,8 +69,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt_rounded),
-                title: Text(context.tr('capture_photo')),
+                leading: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
+                title: Text(context.tr('capture_photo'), style: const TextStyle(fontWeight: FontWeight.w600)),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   try {
@@ -83,14 +86,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   } catch (e) {
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Lỗi khi mở camera: $e')),
+                      SnackBar(content: Text('${context.tr('camera_error')}: $e')),
                     );
                   }
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library_rounded),
-                title: Text(context.tr('gallery')),
+                leading: const Icon(Icons.photo_library_rounded, color: AppColors.secondary),
+                title: Text(context.tr('gallery'), style: const TextStyle(fontWeight: FontWeight.w600)),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   try {
@@ -106,7 +109,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   } catch (e) {
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Lỗi khi mở thư viện: $e')),
+                      SnackBar(content: Text('${context.tr('gallery_error')}: $e')),
                     );
                   }
                 },
@@ -167,13 +170,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       appBar: AppBar(
         title: Text(
           context.tr('edit_profile'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 17.5,
+            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+            letterSpacing: -0.3,
+          ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 19,
+            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
         elevation: 0,
+        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -182,7 +195,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-              spacing: 16.0, // Áp dụng Spacing Standard 2026 chuẩn flutter-layout-rules
+              spacing: 16.0,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // 1. Avatar chọn ảnh lớn
@@ -194,8 +207,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isDark
-                                ? Colors.grey[850]!
-                                : Colors.grey[200]!,
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
                             width: 4,
                           ),
                         ),
@@ -232,6 +245,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     _buildLabel(context, context.tr('fullname')),
                     TextFormField(
                       controller: _fullNameController,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                      ),
                       decoration: _buildInputDecoration(
                         context,
                         context.tr('enter_fullname'),
@@ -254,6 +271,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     _buildLabel(context, context.tr('username')),
                     TextFormField(
                       controller: _usernameController,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                      ),
                       decoration: _buildInputDecoration(
                         context,
                         context.tr('username'),
@@ -281,6 +302,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: _bioController,
                       maxLines: 3,
                       maxLength: 150,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+                      ),
                       decoration: _buildInputDecoration(
                         context,
                         context.tr('bio_hint'),
@@ -293,13 +318,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 8,
+                    vertical: 10,
                   ),
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.surfaceDark : Colors.grey[50],
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isDark ? Colors.grey[850]! : Colors.grey[200]!,
+                      color: isDark ? AppColors.borderDark : AppColors.borderLight,
                     ),
                   ),
                   child: Row(
@@ -311,18 +336,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           children: [
                             Text(
                               context.tr('private'),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15.0,
+                                color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
                               ),
                             ),
                             Text(
                               context.tr('private_description'),
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 12.0,
                                 color: isDark
-                                    ? Colors.grey[400]
-                                    : Colors.grey[600],
+                                    ? AppColors.textDarkSecondary
+                                    : AppColors.textLightSecondary,
                               ),
                             ),
                           ],
@@ -367,8 +393,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       : Text(
                           context.tr('save_changes'),
                           style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                 ),
@@ -381,9 +407,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildLabel(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       text,
-      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      style: TextStyle(
+        fontSize: 14.0,
+        fontWeight: FontWeight.w600,
+        color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
+      ),
     );
   }
 
@@ -391,20 +422,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+      hintStyle: TextStyle(
+        color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
+        fontSize: 14.0,
+      ),
       filled: true,
       fillColor: isDark ? AppColors.surfaceDark : Colors.grey[50],
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: isDark ? Colors.grey[850]! : Colors.grey[200]!,
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: isDark ? Colors.grey[850]! : Colors.grey[200]!,
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
         ),
       ),
       focusedBorder: OutlineInputBorder(

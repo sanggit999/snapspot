@@ -7,8 +7,7 @@ import 'package:snapspot/core/widgets/buttons/app_button.dart';
 import 'package:snapspot/core/widgets/inputs/app_text_field.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
-/// Màn hình đăng nhập của SnapSpot.
-/// Giao diện hiện đại, tối giản, áp dụng chuẩn flutter-layout-rules và flutter-state-management (BlocSelector).
+/// Màn hình Đăng nhập SnapSpot chuẩn Type Scale & High Contrast Light/Dark Mode.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -66,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                spacing: 16.0, // Áp dụng Spacing Standard 2026 chuẩn flutter-layout-rules
+                spacing: 16.0,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 20),
@@ -96,21 +95,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       Center(
                         child: Text(
                           'SnapSpot',
-                          style: theme.textTheme.displayLarge?.copyWith(
+                          style: TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: -1,
+                            fontSize: 32.0,
+                            letterSpacing: -1.0,
                           ),
                         ),
                       ),
                       Center(
                         child: Text(
                           'Pin your moments, share the map',
-                          style: theme.textTheme.bodyMedium?.copyWith(
+                          style: TextStyle(
                             color: isLight
                                 ? AppColors.textLightSecondary
                                 : AppColors.textDarkSecondary,
-                            fontSize: 15,
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -139,7 +140,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               _errorMessage!,
                               style: const TextStyle(
                                 color: Colors.redAccent,
-                                fontSize: 13,
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -196,12 +198,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 13.5,
                         ),
                       ),
                     ),
                   ),
 
-                  // 6. Nút Đăng nhập - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi isLoading đổi)
+                  // 6. Nút Đăng nhập
                   BlocSelector<AuthCubit, AuthState, bool>(
                     selector: (state) => state is AuthLoading,
                     builder: (context, isLoading) {
@@ -221,7 +224,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           context.tr('or_continue_with'),
-                          style: theme.textTheme.labelSmall,
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w500,
+                            color: isLight
+                                ? AppColors.textLightSecondary
+                                : AppColors.textDarkSecondary,
+                          ),
                         ),
                       ),
                       const Expanded(child: Divider()),
@@ -241,8 +250,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                           },
                           icon: const Icon(Icons.g_mobiledata, size: 28),
-                          label: const Text('Google'),
+                          label: const Text(
+                            'Google',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                          ),
                           style: OutlinedButton.styleFrom(
+                            foregroundColor: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                            side: BorderSide(
+                              color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -259,8 +275,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                           },
                           icon: const Icon(Icons.apple, size: 22),
-                          label: const Text('Apple'),
+                          label: const Text(
+                            'Apple',
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                          ),
                           style: OutlinedButton.styleFrom(
+                            foregroundColor: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                            side: BorderSide(
+                              color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -280,6 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         context.tr('dont_have_account'),
                         style: TextStyle(
+                          fontSize: 14.0,
                           color: isLight
                               ? AppColors.textLightSecondary
                               : AppColors.textDarkSecondary,
@@ -293,7 +317,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           context.tr('register'),
                           style: const TextStyle(
                             color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14.0,
                           ),
                         ),
                       ),

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 
-/// Widget SliverGrid hiển thị danh sách ảnh bài đăng thumbnail với Lazy Loading mượt mà.
+/// Widget SliverGrid hiển thị danh sách ảnh bài đăng thumbnail với Lazy Loading mượt mà chuẩn Type Scale.
 class ProfileGridSliver extends StatelessWidget {
   final List<PostEntity> posts;
   final bool isLight;
@@ -31,12 +31,14 @@ class ProfileGridSliver extends StatelessWidget {
                 Icon(
                   emptyIcon,
                   size: 48,
-                  color: Colors.grey[400],
+                  color: isLight ? Colors.grey[400] : Colors.grey[600],
                 ),
                 const SizedBox(height: 12),
                 Text(
                   emptyMessage,
                   style: TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w500,
                     color: isLight
                         ? AppColors.textLightSecondary
                         : AppColors.textDarkSecondary,

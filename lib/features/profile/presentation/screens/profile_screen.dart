@@ -12,8 +12,7 @@ import 'package:snapspot/features/profile/presentation/widgets/profile_header_se
 import 'package:snapspot/features/profile/presentation/widgets/profile_stats_section.dart';
 import 'package:snapspot/features/profile/presentation/widgets/profile_tab_bar.dart';
 
-/// Màn hình Trang cá nhân (Profile Screen).
-/// Tích hợp Bộ lọc bài viết Đã lưu theo Thư mục Bộ sưu tập (Collections Filter) mượt mà.
+/// Màn hình Trang cá nhân (Profile Screen) chuẩn Type Scale & Multi-Language UI/UX.
 class ProfileScreen extends StatefulWidget {
   final String userId;
 
@@ -25,7 +24,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   int _selectedTabIndex = 0; // 0: Bài viết, 1: Đã lưu (Tôi) / Điểm check-in (User khác)
-  String _selectedCollectionName = 'Tất cả'; // Thư mục bộ sưu tập đang được chọn để lọc
+  String _selectedCollectionName = 'ALL'; // Mặc định 'ALL' để dùng l10n context.tr('all')
 
   UserEntity _getDisplayedUser(BuildContext context) {
     if (widget.userId == 'me' || widget.userId.isEmpty) {
@@ -66,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .toList();
 
     // 3. Lọc danh sách bài viết đã lưu theo Thư mục được chọn
-    final filteredBookmarkedPosts = _selectedCollectionName == 'Tất cả'
+    final filteredBookmarkedPosts = (_selectedCollectionName == 'ALL' || _selectedCollectionName == 'Tất cả')
         ? bookmarkedPosts
         : bookmarkedPosts
             .where((p) => p.savedCollectionName == _selectedCollectionName)
@@ -79,6 +78,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final secondaryList = isMe ? filteredBookmarkedPosts : checkInPosts;
     final currentPosts = _selectedTabIndex == 0 ? userPosts : secondaryList;
+
+    // Xác định câu thông báo trống đa ngôn ngữ
+    String getEmptyMessage() {
+      if (_selectedTabIndex == 0) {
+        return isMe
+            ? context.tr('no_posts_me')
+            : context.tr('no_posts_user', args: {'username': user.username});
+      } else {
+        if (isMe) {
+          if (_selectedCollectionName == 'ALL' || _selectedCollectionName == 'Tất cả') {
+            return context.tr('no_saved_posts');
+          } else {
+            return context.tr('no_saved_in_collection', args: {'name': _selectedCollectionName});
+          }
+        } else {
+          return context.tr('no_checkin_user', args: {'username': user.username});
+        }
+      }
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -125,7 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Tùy chọn cho tài khoản @${user.username}'),
+                          content: Text('@${user.username}'),
                           duration: const Duration(seconds: 1),
                         ),
                       );
@@ -176,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   selectedCollection: _selectedCollectionName,
                   onCollectionSelected: (colName) {
                     setState(() {
-                      _selectedCollectionName = colName ?? 'Tất cả';
+                      _selectedCollectionName = colName ?? 'ALL';
                     });
                   },
                   isLight: isLight,
@@ -187,15 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ProfileGridSliver(
               posts: currentPosts,
               isLight: isLight,
-              emptyMessage: _selectedTabIndex == 0
-                  ? (isMe
-                      ? 'Bạn chưa có bài đăng nào.'
-                      : '@${user.username} chưa có bài đăng nào.')
-                  : (isMe
-                      ? (_selectedCollectionName == 'Tất cả'
-                          ? 'Chưa có bài viết nào được lưu'
-                          : 'Chưa có bài viết nào trong thư mục "$_selectedCollectionName"')
-                      : '@${user.username} chưa check-in địa điểm nào.'),
+              emptyMessage: getEmptyMessage(),
               emptyIcon: _selectedTabIndex == 0
                   ? Icons.photo_library_outlined
                   : (isMe ? Icons.bookmark_border_rounded : Icons.location_off_outlined),

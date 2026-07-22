@@ -9,7 +9,7 @@ import 'package:snapspot/features/map/presentation/widgets/spot_map_widget.dart'
 import 'package:cached_network_image/cached_network_image.dart';
 
 /// Màn hình Bản đồ Khám phá (Map Explore Screen).
-/// Áp dụng [BlocSelector] chuẩn theo skill flutter-state-management để tối ưu hiệu năng.
+/// Chuẩn hóa Type Scale & Glassmorphic Search Bar cho cả Light & Dark Mode.
 class MapExploreScreen extends StatefulWidget {
   const MapExploreScreen({super.key});
 
@@ -23,10 +23,7 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
   @override
   void initState() {
     super.initState();
-    // Load lại toàn bộ địa điểm
-    context.read<MapCubit>().loadSpots(
-          newRadius: 2000.0,
-        ); // Bán kính lớn 2000km để quét toàn quốc
+    context.read<MapCubit>().loadSpots(newRadius: 2000.0);
   }
 
   @override
@@ -41,7 +38,6 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
       return;
     }
 
-    // Lọc các spots theo từ khóa trong caption, tên địa điểm, hoặc tag
     final mapCubit = context.read<MapCubit>();
     mapCubit.loadSpots(newRadius: 2000.0).then((_) {
       final currentState = mapCubit.state;
@@ -52,7 +48,6 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
             spot.hashtags.any((tag) => tag.toLowerCase().contains(q));
       }).toList();
 
-      // Cập nhật trạng thái thông qua Cubit
       mapCubit.updateFilteredSpots(filtered);
     });
   }
@@ -60,6 +55,7 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       body: Stack(
@@ -84,8 +80,14 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
             right: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withValues(alpha: 0.9),
+                color: isLight
+                    ? Colors.white.withValues(alpha: 0.92)
+                    : AppColors.surfaceDark.withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                  width: 1,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.08),
@@ -99,15 +101,27 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                 child: TextField(
                   controller: _searchController,
                   onSubmitted: _onSearchSubmitted,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    color: isLight
+                        ? AppColors.textLightPrimary
+                        : AppColors.textDarkPrimary,
+                  ),
                   decoration: InputDecoration(
                     hintText: context.tr('search_places_or_tags'),
+                    hintStyle: TextStyle(
+                      fontSize: 13.5,
+                      color: isLight
+                          ? AppColors.textLightSecondary
+                          : AppColors.textDarkSecondary,
+                    ),
                     prefixIcon: const Icon(
-                      Icons.search,
+                      Icons.search_rounded,
                       color: AppColors.primary,
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
+                            icon: const Icon(Icons.clear_rounded, size: 18),
                             onPressed: () {
                               _searchController.clear();
                               _onSearchSubmitted('');
@@ -127,7 +141,7 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
             ),
           ),
 
-          // 3. Spot Preview Card trượt ở cạnh dưới - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi selectedSpot đổi)
+          // 3. Spot Preview Card trượt ở cạnh dưới - Tối ưu bằng BlocSelector
           BlocSelector<MapCubit, MapState, PostEntity?>(
             selector: (state) => state.selectedSpot,
             builder: (context, selectedSpot) {
@@ -137,33 +151,34 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                 bottom: 16,
                 left: 16,
                 right: 16,
-                child: _buildSpotPreviewCard(selectedSpot, theme),
+                child: _buildSpotPreviewCard(selectedSpot, isLight),
               );
             },
           ),
 
-          // 4. Chỉ báo loading mờ - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi isLoading đổi)
+          // 4. Chỉ báo loading mờ
           BlocSelector<MapCubit, MapState, bool>(
             selector: (state) => state.isLoading,
             builder: (context, isLoading) {
               if (!isLoading) return const SizedBox.shrink();
 
-              return const Positioned(
+              return Positioned(
                 top: 100,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: Card(
                     elevation: 4,
+                    color: isLight ? Colors.white : AppColors.surfaceDark,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 14,
                             height: 14,
                             child: CircularProgressIndicator(
@@ -171,10 +186,16 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                               color: AppColors.primary,
                             ),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
                             'Quét toạ độ...',
-                            style: TextStyle(fontSize: 12),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: isLight
+                                  ? AppColors.textLightPrimary
+                                  : AppColors.textDarkPrimary,
+                            ),
                           ),
                         ],
                       ),
@@ -189,7 +210,7 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
     );
   }
 
-  Widget _buildSpotPreviewCard(PostEntity spot, ThemeData theme) {
+  Widget _buildSpotPreviewCard(PostEntity spot, bool isLight) {
     return Dismissible(
       key: Key('preview_${spot.id}'),
       direction: DismissDirection.down,
@@ -198,15 +219,18 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
       },
       child: GestureDetector(
         onTap: () {
-          // Đi thẳng vào trang chi tiết bài viết
           context.push('/post/${spot.id}');
         },
         child: Container(
           height: 110,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: isLight ? Colors.white : AppColors.surfaceDark,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isLight ? AppColors.borderLight : AppColors.borderDark,
+              width: 1,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.12),
@@ -217,7 +241,6 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
           ),
           child: Row(
             children: [
-              // Ảnh thu nhỏ của spot
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: CachedNetworkImage(
@@ -228,7 +251,6 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              // Thông tin mô tả
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,9 +258,13 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                   children: [
                     Text(
                       spot.locationName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.0,
+                        color: isLight
+                            ? AppColors.textLightPrimary
+                            : AppColors.textDarkPrimary,
+                        letterSpacing: -0.2,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -246,14 +272,19 @@ class _MapExploreScreenState extends State<MapExploreScreen> {
                     const SizedBox(height: 4),
                     Text(
                       spot.caption,
-                      style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+                      style: TextStyle(
+                        fontSize: 13.0,
+                        height: 1.35,
+                        color: isLight
+                            ? AppColors.textLightSecondary
+                            : AppColors.textDarkSecondary,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              // Nút đi tới chi tiết
               IconButton(
                 icon: const Icon(
                   Icons.arrow_forward_ios_rounded,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:snapspot/core/constants/colors.dart';
 
+/// Nút bấm chọn lựa chọn tùy chỉnh (Ngôn ngữ, Giao diện) chuẩn Type Scale UI/UX.
 class SettingsSelectableButton extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -16,7 +17,7 @@ class SettingsSelectableButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isLight = theme.brightness == Brightness.light;
 
     return InkWell(
       onTap: onTap,
@@ -28,12 +29,12 @@ class SettingsSelectableButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary
-              : (isDark ? AppColors.surfaceDark : Colors.grey[100]),
+              : (isLight ? Colors.grey[100] : AppColors.surfaceDark),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
-                : (isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                : (isLight ? AppColors.borderLight : AppColors.borderDark),
             width: 1.2,
           ),
           boxShadow: isSelected
@@ -53,9 +54,9 @@ class SettingsSelectableButton extends StatelessWidget {
           style: TextStyle(
             color: isSelected
                 ? Colors.white
-                : (isDark ? Colors.grey[300] : Colors.black87),
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            fontSize: 13,
+                : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            fontSize: 13.0,
           ),
         ),
       ),

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:snapspot/core/constants/colors.dart';
 
-/// Render bubble nội dung bình luận: tên người đăng [Badge Tác giả] [▶ tên người reply] [Badge Ghim], text, media.
+/// Render bubble nội dung bình luận chuẩn Type Scale & High-Contrast Light/Dark Mode:
+/// Tên người đăng [Badge Tác giả] [▶ tên người reply] [Badge Ghim], text, media.
 class CommentContent extends StatelessWidget {
   final String authorName;
   final String? replyToName;
@@ -52,8 +53,8 @@ class CommentContent extends StatelessWidget {
               Text(
                 authorName,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
                   color: textColor,
                 ),
               ),
@@ -91,8 +92,8 @@ class CommentContent extends StatelessWidget {
                 Text(
                   replyToName!,
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13.5,
                     color: textColor,
                   ),
                 ),
@@ -139,6 +140,7 @@ class CommentContent extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: 13.5,
+                height: 1.38,
                 color: textColor,
               ),
             ),

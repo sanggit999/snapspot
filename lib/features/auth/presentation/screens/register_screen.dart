@@ -7,8 +7,7 @@ import 'package:snapspot/core/widgets/buttons/app_button.dart';
 import 'package:snapspot/core/widgets/inputs/app_text_field.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
-/// Màn hình đăng ký tài khoản mới của SnapSpot.
-/// Áp dụng chuẩn BlocSelector theo skill flutter-state-management để tối ưu hiệu năng.
+/// Màn hình đăng ký tài khoản mới của SnapSpot chuẩn Type Scale & High Contrast Light/Dark Mode.
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -52,14 +51,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.tr('register')),
+        title: Text(
+          context.tr('register'),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 17.5,
+            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+            letterSpacing: -0.3,
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 19,
+            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
+        elevation: 0,
+        backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
       ),
       body: SafeArea(
         child: BlocListener<AuthCubit, AuthState>(
@@ -81,16 +95,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   Text(
                     context.tr('create_account'),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24.0,
                       color: AppColors.primary,
+                      letterSpacing: -0.5,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Đăng ký để khám phá các địa điểm check-in hấp dẫn',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.brightness == Brightness.light
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      color: isLight
                           ? AppColors.textLightSecondary
                           : AppColors.textDarkSecondary,
                     ),
@@ -118,7 +135,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               _errorMessage!,
                               style: const TextStyle(
                                 color: Colors.redAccent,
-                                fontSize: 13,
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -216,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Nút đăng ký - Tối ưu 100% bằng BlocSelector (chỉ rebuild khi isLoading đổi)
+                  // Nút đăng ký
                   BlocSelector<AuthCubit, AuthState, bool>(
                     selector: (state) => state is AuthLoading,
                     builder: (context, isLoading) {
@@ -238,7 +256,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Text(
                           context.tr('have_account'),
                           style: TextStyle(
-                            color: theme.brightness == Brightness.light
+                            fontSize: 14.0,
+                            color: isLight
                                 ? AppColors.textLightSecondary
                                 : AppColors.textDarkSecondary,
                             fontWeight: FontWeight.w600,
