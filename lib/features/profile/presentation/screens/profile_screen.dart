@@ -13,7 +13,7 @@ import 'package:snapspot/features/profile/presentation/widgets/profile_stats_sec
 import 'package:snapspot/features/profile/presentation/widgets/profile_tab_bar.dart';
 
 /// Màn hình Trang cá nhân (Profile Screen).
-/// Mã nguồn tối giản, mô-đun hóa cao theo chuẩn Clean Architecture & Reusable Widget Rules.
+/// Tự động thích ứng hiển thị giữa [Trang cá nhân CỦA TÔI] và [Trang cá nhân CỦA USER KHÁC].
 class ProfileScreen extends StatefulWidget {
   final String userId;
 
@@ -24,7 +24,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedTabIndex = 0; // 0: Bài viết của tôi, 1: Đã lưu (Bookmarked)
+  int _selectedTabIndex = 0; // 0: Bài viết, 1: Đã lưu (Tôi) / Điểm check-in (User khác)
 
   UserEntity _getDisplayedUser(BuildContext context) {
     if (widget.userId == 'me' || widget.userId.isEmpty) {
@@ -54,17 +54,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
 
-    // 1. Danh sách bài viết của người dùng
+    // 1. Danh sách bài viết của người dùng hiện tại
     final userPosts = MockData.mockPosts
         .where((p) => p.user.id == user.id)
         .toList();
 
-    // 2. Danh sách bài viết đã Bookmark
+    // 2. Danh sách bài viết đã Bookmark (Dành cho Tôi)
     final bookmarkedPosts = MockData.mockPosts
         .where((p) => p.isBookmarked)
         .toList();
 
-    final currentPosts = _selectedTabIndex == 0 ? userPosts : bookmarkedPosts;
+    // 3. Danh sách các địa điểm Check-in (Dành cho User khác)
+    final checkInPosts = userPosts
+        .where((p) => p.latitude != 0)
+        .toList();
+
+    final secondaryList = isMe ? bookmarkedPosts : checkInPosts;
+    final currentPosts = _selectedTabIndex == 0 ? userPosts : secondaryList;
 
     return Scaffold(
       body: SafeArea(
@@ -78,6 +84,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               expandedHeight: 56.0,
               elevation: 0,
               backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
+              leading: !isMe && Navigator.canPop(context)
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.arrow_back_rounded,
+                        color: isLight
+                            ? AppColors.textLightPrimary
+                            : AppColors.textDarkPrimary,
+                      ),
+                      onPressed: () => context.pop(),
+                    )
+                  : null,
               title: Text(
                 '@${user.username}',
                 style: TextStyle(
@@ -93,11 +110,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   IconButton(
                     icon: const Icon(Icons.settings_outlined),
                     onPressed: () => context.push('/settings'),
+                  )
+                else
+                  IconButton(
+                    icon: const Icon(Icons.more_vert_rounded),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Tùy chọn cho tài khoản @${user.username}'),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
                   ),
               ],
             ),
 
-            // 2. Section Header: Cover, Avatar, FullName, Bio
+            // 2. Section Header: Cover, Avatar, FullName, Bio, Nút Hành Động (Chỉnh sửa/Chia sẻ vs Theo dõi/Nhắn tin)
             SliverToBoxAdapter(
               child: ProfileHeaderSection(user: user, isMe: isMe),
             ),
@@ -117,12 +146,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            // 4. Section TabBar Chuyển đổi giữa Bài viết và Đã lưu
+            // 4. Section TabBar Chuyển đổi giữa [Bài viết] và [Đã lưu (Tôi) / Điểm check-in (User khác)]
             SliverPersistentHeader(
               pinned: true,
               delegate: ProfileTabHeaderDelegate(
                 selectedIndex: _selectedTabIndex,
-                bookmarkedCount: bookmarkedPosts.length,
+                secondaryCount: secondaryList.length,
+                isMe: isMe,
                 onTabSelected: (index) {
                   setState(() => _selectedTabIndex = index);
                 },
@@ -130,8 +160,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            // 5. Section Thư mục Bộ sưu tập (Chỉ hiển thị tại Tab Đã lưu)
-            if (_selectedTabIndex == 1)
+            // 5. Section Thư mục Bộ sưu tập (Chỉ hiển thị khi là TÔI và ở Tab Đã lưu)
+            if (isMe && _selectedTabIndex == 1)
               SliverToBoxAdapter(
                 child: ProfileCollectionsTray(
                   bookmarkedPosts: bookmarkedPosts,
@@ -144,11 +174,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               posts: currentPosts,
               isLight: isLight,
               emptyMessage: _selectedTabIndex == 0
-                  ? 'Chưa có bài đăng nào'
-                  : 'Chưa có bài viết nào được lưu',
+                  ? (isMe
+                      ? 'Bạn chưa có bài đăng nào.'
+                      : '@${user.username} chưa có bài đăng nào.')
+                  : (isMe
+                      ? 'Chưa có bài viết nào được lưu'
+                      : '@${user.username} chưa check-in địa điểm nào.'),
               emptyIcon: _selectedTabIndex == 0
                   ? Icons.photo_library_outlined
-                  : Icons.bookmark_border_rounded,
+                  : (isMe ? Icons.bookmark_border_rounded : Icons.location_off_outlined),
             ),
 
             const SliverToBoxAdapter(
