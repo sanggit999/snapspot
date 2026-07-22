@@ -13,7 +13,7 @@ import 'package:snapspot/features/profile/presentation/widgets/profile_stats_sec
 import 'package:snapspot/features/profile/presentation/widgets/profile_tab_bar.dart';
 
 /// Màn hình Trang cá nhân (Profile Screen).
-/// Tự động thích ứng hiển thị giữa [Trang cá nhân CỦA TÔI] và [Trang cá nhân CỦA USER KHÁC].
+/// Tích hợp Bộ lọc bài viết Đã lưu theo Thư mục Bộ sưu tập (Collections Filter) mượt mà.
 class ProfileScreen extends StatefulWidget {
   final String userId;
 
@@ -25,6 +25,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   int _selectedTabIndex = 0; // 0: Bài viết, 1: Đã lưu (Tôi) / Điểm check-in (User khác)
+  String _selectedCollectionName = 'Tất cả'; // Thư mục bộ sưu tập đang được chọn để lọc
 
   UserEntity _getDisplayedUser(BuildContext context) {
     if (widget.userId == 'me' || widget.userId.isEmpty) {
@@ -59,17 +60,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .where((p) => p.user.id == user.id)
         .toList();
 
-    // 2. Danh sách bài viết đã Bookmark (Dành cho Tôi)
+    // 2. Danh sách tất cả bài viết đã Bookmark (Dành cho Tôi)
     final bookmarkedPosts = MockData.mockPosts
         .where((p) => p.isBookmarked)
         .toList();
 
-    // 3. Danh sách các địa điểm Check-in (Dành cho User khác)
+    // 3. Lọc danh sách bài viết đã lưu theo Thư mục được chọn
+    final filteredBookmarkedPosts = _selectedCollectionName == 'Tất cả'
+        ? bookmarkedPosts
+        : bookmarkedPosts
+            .where((p) => p.savedCollectionName == _selectedCollectionName)
+            .toList();
+
+    // 4. Danh sách các địa điểm Check-in (Dành cho User khác)
     final checkInPosts = userPosts
         .where((p) => p.latitude != 0)
         .toList();
 
-    final secondaryList = isMe ? bookmarkedPosts : checkInPosts;
+    final secondaryList = isMe ? filteredBookmarkedPosts : checkInPosts;
     final currentPosts = _selectedTabIndex == 0 ? userPosts : secondaryList;
 
     return Scaffold(
@@ -126,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
 
-            // 2. Section Header: Cover, Avatar, FullName, Bio, Nút Hành Động (Chỉnh sửa/Chia sẻ vs Theo dõi/Nhắn tin)
+            // 2. Section Header: Cover, Avatar, FullName, Bio, Nút Hành Động
             SliverToBoxAdapter(
               child: ProfileHeaderSection(user: user, isMe: isMe),
             ),
@@ -151,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               pinned: true,
               delegate: ProfileTabHeaderDelegate(
                 selectedIndex: _selectedTabIndex,
-                secondaryCount: secondaryList.length,
+                secondaryCount: isMe ? bookmarkedPosts.length : checkInPosts.length,
                 isMe: isMe,
                 onTabSelected: (index) {
                   setState(() => _selectedTabIndex = index);
@@ -165,6 +173,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SliverToBoxAdapter(
                 child: ProfileCollectionsTray(
                   bookmarkedPosts: bookmarkedPosts,
+                  selectedCollection: _selectedCollectionName,
+                  onCollectionSelected: (colName) {
+                    setState(() {
+                      _selectedCollectionName = colName ?? 'Tất cả';
+                    });
+                  },
                   isLight: isLight,
                 ),
               ),
@@ -178,7 +192,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ? 'Bạn chưa có bài đăng nào.'
                       : '@${user.username} chưa có bài đăng nào.')
                   : (isMe
-                      ? 'Chưa có bài viết nào được lưu'
+                      ? (_selectedCollectionName == 'Tất cả'
+                          ? 'Chưa có bài viết nào được lưu'
+                          : 'Chưa có bài viết nào trong thư mục "$_selectedCollectionName"')
                       : '@${user.username} chưa check-in địa điểm nào.'),
               emptyIcon: _selectedTabIndex == 0
                   ? Icons.photo_library_outlined

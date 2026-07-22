@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
+// ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'post_model.dart';
@@ -9,7 +9,6 @@ part of 'post_model.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -67,7 +66,7 @@ class _$CommentModelCopyWithImpl<$Res>
 /// Create a copy of CommentModel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? postId = null,Object? user = null,Object? content = null,Object? mediaUrl = freezed,Object? parentId = freezed,Object? rootId = freezed,Object? replyToUser = freezed,Object? replies = null,Object? likesCount = null,Object? isLiked = null,Object? repliesCount = freezed,Object? depth = null,Object? isPinned = null,Object? createdAt = null,}) {
-  return _then(CommentModel(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,postId: null == postId ? _self.postId : postId // ignore: cast_nullable_to_non_nullable
 as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
@@ -245,7 +244,7 @@ return $default(_that.id,_that.postId,_that.user,_that.content,_that.mediaUrl,_t
 @JsonSerializable()
 
 class _CommentModel implements CommentModel {
-  const _CommentModel({required this.id, @JsonKey(name: 'post_id') required this.postId, required this.user, required this.content, @JsonKey(name: 'media_url') this.mediaUrl, @JsonKey(name: 'parent_id') this.parentId, @JsonKey(name: 'root_id') this.rootId, @JsonKey(name: 'reply_to_user') this.replyToUser,  List<CommentModel> replies = const [], @JsonKey(name: 'likes_count') this.likesCount = 0, @JsonKey(name: 'is_liked') this.isLiked = false, @JsonKey(name: 'replies_count') this.repliesCount, this.depth = 0, @JsonKey(name: 'is_pinned') this.isPinned = false, @JsonKey(name: 'created_at') required this.createdAt}): _replies = replies;
+  const _CommentModel({required this.id, @JsonKey(name: 'post_id') required this.postId, required this.user, required this.content, @JsonKey(name: 'media_url') this.mediaUrl, @JsonKey(name: 'parent_id') this.parentId, @JsonKey(name: 'root_id') this.rootId, @JsonKey(name: 'reply_to_user') this.replyToUser, final  List<CommentModel> replies = const [], @JsonKey(name: 'likes_count') this.likesCount = 0, @JsonKey(name: 'is_liked') this.isLiked = false, @JsonKey(name: 'replies_count') this.repliesCount, this.depth = 0, @JsonKey(name: 'is_pinned') this.isPinned = false, @JsonKey(name: 'created_at') required this.createdAt}): _replies = replies;
   factory _CommentModel.fromJson(Map<String, dynamic> json) => _$CommentModelFromJson(json);
 
 @override final  String id;
@@ -420,7 +419,7 @@ class _$PostModelCopyWithImpl<$Res>
 /// Create a copy of PostModel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? caption = null,Object? imageUrls = null,Object? latitude = null,Object? longitude = null,Object? locationName = null,Object? user = null,Object? hashtags = null,Object? likesCount = null,Object? commentsCount = null,Object? sharesCount = null,Object? isLiked = null,Object? userReaction = freezed,Object? isBookmarked = null,Object? savedCollectionName = freezed,Object? createdAt = null,Object? comments = null,}) {
-  return _then(PostModel(
+  return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,caption: null == caption ? _self.caption : caption // ignore: cast_nullable_to_non_nullable
 as String,imageUrls: null == imageUrls ? _self.imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
@@ -588,7 +587,7 @@ return $default(_that.id,_that.caption,_that.imageUrls,_that.latitude,_that.long
 @JsonSerializable()
 
 class _PostModel implements PostModel {
-  const _PostModel({required this.id, required this.caption, @JsonKey(name: 'image_urls') required  List<String> imageUrls, required this.latitude, required this.longitude, @JsonKey(name: 'location_name') required this.locationName, required this.user, required  List<String> hashtags, @JsonKey(name: 'likes_count') required this.likesCount, @JsonKey(name: 'comments_count') required this.commentsCount, @JsonKey(name: 'shares_count') this.sharesCount = 0, @JsonKey(name: 'is_liked') required this.isLiked, @JsonKey(name: 'user_reaction') this.userReaction, @JsonKey(name: 'is_bookmarked') this.isBookmarked = false, @JsonKey(name: 'saved_collection_name') this.savedCollectionName, @JsonKey(name: 'created_at') required this.createdAt, required  List<CommentModel> comments}): _imageUrls = imageUrls,_hashtags = hashtags,_comments = comments;
+  const _PostModel({required this.id, required this.caption, @JsonKey(name: 'image_urls') required final  List<String> imageUrls, required this.latitude, required this.longitude, @JsonKey(name: 'location_name') required this.locationName, required this.user, required final  List<String> hashtags, @JsonKey(name: 'likes_count') required this.likesCount, @JsonKey(name: 'comments_count') required this.commentsCount, @JsonKey(name: 'shares_count') this.sharesCount = 0, @JsonKey(name: 'is_liked') required this.isLiked, @JsonKey(name: 'user_reaction') this.userReaction, @JsonKey(name: 'is_bookmarked') this.isBookmarked = false, @JsonKey(name: 'saved_collection_name') this.savedCollectionName, @JsonKey(name: 'created_at') required this.createdAt, required final  List<CommentModel> comments}): _imageUrls = imageUrls,_hashtags = hashtags,_comments = comments;
   factory _PostModel.fromJson(Map<String, dynamic> json) => _$PostModelFromJson(json);
 
 @override final  String id;
