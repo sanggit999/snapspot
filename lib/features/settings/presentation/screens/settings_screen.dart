@@ -10,8 +10,7 @@ import 'package:snapspot/features/settings/presentation/widgets/settings_list_ti
 import 'package:snapspot/features/settings/presentation/widgets/settings_selectable_button.dart';
 import 'package:snapspot/features/settings/presentation/widgets/settings_user_profile_tile.dart';
 
-/// Màn hình Cài đặt (Settings Screen).
-/// Áp dụng mẫu thiết kế Widget Composition Pattern lắp ráp từ các thành phần widget nhỏ chuyên biệt.
+/// Màn hình Cài đặt (Settings Screen) chuẩn Type Scale & High Contrast Light/Dark Mode.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -26,20 +25,23 @@ class SettingsScreen extends StatelessWidget {
           ),
           title: Text(
             context.tr('logout'),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
           ),
-          content: Text(context.tr('logout_confirm')),
+          content: Text(
+            context.tr('logout_confirm'),
+            style: const TextStyle(fontSize: 14.5),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
                 context.tr('cancel'),
-                style: const TextStyle(color: Colors.grey),
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // Đóng dialog
+                Navigator.pop(context);
                 context.read<AuthCubit>().logout().then((_) {
                   if (context.mounted) {
                     context.go('/login');
@@ -54,7 +56,7 @@ class SettingsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text(context.tr('logout')),
+              child: Text(context.tr('logout'), style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ],
         );
@@ -65,18 +67,30 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthCubit>().state;
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           context.tr('settings'),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 17.5,
+            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+            letterSpacing: -0.3,
+          ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 19,
+            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+          ),
           onPressed: () => context.pop(),
         ),
         elevation: 0,
+        backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
       ),
       body: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, currentThemeMode) {
@@ -136,7 +150,7 @@ class SettingsScreen extends StatelessWidget {
                           children: [
                             Expanded(
                               child: SettingsSelectableButton(
-                                label: context.tr('light_theme').replaceAll('Chế độ ', ''),
+                                label: context.tr('light_theme'),
                                 isSelected: currentThemeMode == AppThemeMode.light,
                                 onTap: () {
                                   context
@@ -148,7 +162,7 @@ class SettingsScreen extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: SettingsSelectableButton(
-                                label: context.tr('dark_theme').replaceAll('Chế độ ', ''),
+                                label: context.tr('dark_theme'),
                                 isSelected: currentThemeMode == AppThemeMode.dark,
                                 onTap: () {
                                   context
@@ -160,7 +174,7 @@ class SettingsScreen extends StatelessWidget {
                             const SizedBox(width: 8),
                             Expanded(
                               child: SettingsSelectableButton(
-                                label: context.tr('system_theme').replaceAll('Theo ', ''),
+                                label: context.tr('system_theme'),
                                 isSelected: currentThemeMode == AppThemeMode.system,
                                 onTap: () {
                                   context
@@ -174,7 +188,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // 3. Section: Tài khoản & Bảo mật (Scale options)
+                      // 3. Section: Tài khoản & Bảo mật
                       _buildSectionTitle(context, context.tr('section_account_security')),
                       const SizedBox(height: 8),
                       SettingsListTile(
@@ -193,7 +207,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // 4. Section: Hỗ trợ & Thông tin (Scale options)
+                      // 4. Section: Hỗ trợ & Thông tin
                       _buildSectionTitle(context, context.tr('section_support_info')),
                       const SizedBox(height: 8),
                       SettingsListTile(
@@ -225,8 +239,8 @@ class SettingsScreen extends StatelessWidget {
                               context.tr('logout'),
                               style: const TextStyle(
                                 color: AppColors.error,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15.0,
                               ),
                             ),
                           ),
@@ -249,9 +263,9 @@ class SettingsScreen extends StatelessWidget {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        color: isDark ? Colors.grey[400] : Colors.grey[600],
+        fontSize: 12.0,
+        fontWeight: FontWeight.w700,
+        color: isDark ? AppColors.textDarkSecondary : AppColors.textLightSecondary,
         letterSpacing: 1.0,
       ),
     );
@@ -262,14 +276,16 @@ class SettingsScreen extends StatelessWidget {
     required String title,
     required Widget child,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: 14.5,
             fontWeight: FontWeight.w600,
+            color: isDark ? AppColors.textDarkPrimary : AppColors.textLightPrimary,
           ),
         ),
         const SizedBox(height: 8),

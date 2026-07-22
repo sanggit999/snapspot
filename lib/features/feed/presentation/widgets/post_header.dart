@@ -5,7 +5,7 @@ import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 
-/// Purpose: Clean and elegant header section for feed posts.
+/// Header bài viết chuẩn Type Scale UI/UX Light & Dark Mode 2026.
 class PostHeader extends StatelessWidget {
   final PostEntity post;
 
@@ -53,18 +53,19 @@ class PostHeader extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.5,
+                          fontWeight: isLight ? FontWeight.w700 : FontWeight.w600,
+                          fontSize: 15.0,
                           color: isLight
                               ? AppColors.textLightPrimary
                               : AppColors.textDarkPrimary,
+                          letterSpacing: -0.2,
                         ),
                       ),
                     ),
                     const SizedBox(width: 4),
                     const Icon(
                       Icons.verified,
-                      size: 14,
+                      size: 14.5,
                       color: AppColors.primary,
                     ),
                   ],
@@ -75,7 +76,8 @@ class PostHeader extends StatelessWidget {
                     Text(
                       '@${post.user.username}',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w500,
                         color: isLight
                             ? AppColors.textLightSecondary
                             : AppColors.textDarkSecondary,
@@ -97,6 +99,7 @@ class PostHeader extends StatelessWidget {
                       _formatTimeAgo(post.createdAt),
                       style: TextStyle(
                         fontSize: 11.5,
+                        fontWeight: FontWeight.w400,
                         color: isLight
                             ? AppColors.textLightSecondary
                             : AppColors.textDarkSecondary,

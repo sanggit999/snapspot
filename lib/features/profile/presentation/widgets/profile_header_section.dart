@@ -7,7 +7,7 @@ import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 
 /// Section Header hiển thị Ảnh bìa, Avatar, Tên, Bio và Nút Hành Động Chuẩn 2026.
-/// Phân biệt rõ ràng giữa Trang cá nhân CỦA TÔI và Trang cá nhân CỦA USER KHÁC.
+/// Tích hợp 100% Đa ngôn ngữ (Tiếng Việt / English) & High Contrast UI/UX.
 class ProfileHeaderSection extends StatefulWidget {
   final UserEntity user;
   final bool isMe;
@@ -75,9 +75,11 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
             children: [
               Text(
                 widget.user.fullName,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w700,
+                  color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                  letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(width: 4),
@@ -96,12 +98,16 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
             Icon(
               widget.user.isPrivate ? Icons.lock_outline : Icons.public_outlined,
               size: 14,
-              color: Colors.grey,
+              color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
             ),
             const SizedBox(width: 4),
             Text(
               widget.user.isPrivate ? context.tr('private') : context.tr('public'),
-              style: const TextStyle(color: Colors.grey, fontSize: 13),
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w400,
+                color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+              ),
             ),
           ],
         ),
@@ -113,7 +119,11 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
             child: Text(
               widget.user.bio,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13.5, height: 1.35),
+              style: TextStyle(
+                fontSize: 14.0,
+                height: 1.4,
+                color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+              ),
             ),
           ),
 
@@ -140,9 +150,9 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
                       ),
                     ),
                     icon: const Icon(Icons.edit_outlined, size: 17),
-                    label: const Text(
-                      'Chỉnh sửa',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    label: Text(
+                      context.tr('edit'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
                 ),
@@ -157,7 +167,9 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Đã sao chép liên kết trang cá nhân @${widget.user.username}!'),
+                          content: Text(
+                            context.tr('profile_link_copied', args: {'username': widget.user.username}),
+                          ),
                           duration: const Duration(seconds: 2),
                         ),
                       );
@@ -173,9 +185,9 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
                       ),
                     ),
                     icon: const Icon(Icons.share_outlined, size: 17),
-                    label: const Text(
-                      'Chia sẻ trang',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    label: Text(
+                      context.tr('share_profile'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
                 ),
@@ -192,8 +204,8 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
                         SnackBar(
                           content: Text(
                             _isFollowing
-                                ? 'Đã theo dõi @${widget.user.username}'
-                                : 'Đã bỏ theo dõi @${widget.user.username}',
+                                ? context.tr('followed_user', args: {'username': widget.user.username})
+                                : context.tr('unfollowed_user', args: {'username': widget.user.username}),
                           ),
                           duration: const Duration(seconds: 1),
                         ),
@@ -217,8 +229,8 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
                       size: 17,
                     ),
                     label: Text(
-                      _isFollowing ? 'Đang theo dõi' : 'Theo dõi',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      _isFollowing ? context.tr('following') : context.tr('follow'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
                 ),
@@ -240,9 +252,9 @@ class _ProfileHeaderSectionState extends State<ProfileHeaderSection> {
                       ),
                     ),
                     icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
-                    label: const Text(
-                      'Nhắn tin',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    label: Text(
+                      context.tr('message'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
                 ),

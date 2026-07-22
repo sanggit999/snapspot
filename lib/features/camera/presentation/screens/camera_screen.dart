@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:snapspot/core/constants/colors.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 
 /// Màn hình máy ảnh giả lập (Camera Screen).
-/// Gồm khung kính ngắm, bật tắt flash, chọn ảnh từ thư viện, và nút chụp hình.
+/// Gồm khung kính ngắm, bật tắt flash, chọn ảnh từ thư viện, và nút chụp hình chuẩn Type Scale.
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
 
@@ -48,15 +49,16 @@ class _CameraScreenState extends State<CameraScreen> {
   ];
 
   void _onCapturePressed() {
-    // Chụp ảnh giả lập -> chọn ngẫu nhiên một bức ảnh từ gallery để mô phỏng camera chụp thật
     final randomPhoto = (_mockGalleryPhotos..shuffle()).first;
     _navigateToEditor(randomPhoto);
   }
 
   void _onGalleryPressed() {
-    // Mở một bottom sheet để người dùng chọn ảnh từ thư viện giả lập
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     showModalBottomSheet(
       context: context,
+      backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -69,9 +71,11 @@ class _CameraScreenState extends State<CameraScreen> {
             children: [
               Text(
                 context.tr('gallery'),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontSize: 17.5,
+                  fontWeight: FontWeight.w700,
+                  color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                  letterSpacing: -0.3,
                 ),
               ),
               const SizedBox(height: 16),
@@ -106,7 +110,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void _navigateToEditor(Map<String, dynamic> photo) {
-    // Truyền dữ liệu ảnh và GPS qua query parameters
     final encodedUrl = Uri.encodeComponent(photo['url']);
     final encodedLocation = Uri.encodeComponent(photo['location']);
     context.push(
@@ -132,7 +135,6 @@ class _CameraScreenState extends State<CameraScreen> {
                     color: Colors.white24,
                     size: 80,
                   ),
-                  // Vẽ các đường lưới căn lề (Rule of Thirds Grid)
                   if (_showGrid)
                     Positioned.fill(
                       child: CustomPaint(painter: CameraGridPainter()),
@@ -188,7 +190,6 @@ class _CameraScreenState extends State<CameraScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Chọn từ Gallery
                 IconButton(
                   icon: const Icon(
                     Icons.photo_library_outlined,
@@ -197,8 +198,6 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                   onPressed: _onGalleryPressed,
                 ),
-
-                // Nút Chụp hình (Double circle design)
                 GestureDetector(
                   onTap: _onCapturePressed,
                   child: Container(
@@ -217,8 +216,6 @@ class _CameraScreenState extends State<CameraScreen> {
                     ),
                   ),
                 ),
-
-                // Xoay Camera trước/sau
                 IconButton(
                   icon: Icon(
                     _isFrontCamera ? Icons.camera_front : Icons.camera_rear,
@@ -247,7 +244,6 @@ class CameraGridPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.2)
       ..strokeWidth = 1.0;
 
-    // Đường thẳng đứng
     canvas.drawLine(
       Offset(size.width / 3, 0),
       Offset(size.width / 3, size.height),
@@ -259,7 +255,6 @@ class CameraGridPainter extends CustomPainter {
       paint,
     );
 
-    // Đường ngang
     canvas.drawLine(
       Offset(0, size.height / 3),
       Offset(size.width, size.height / 3),

@@ -361,16 +361,22 @@ class _HomeScreenState extends State<HomeScreen>
                           Text(
                             'Chưa có bài viết nào gắn hashtag "#$_selectedTagKey"',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.w700,
+                              color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'Hãy là người đầu tiên chụp ảnh & đính kèm hashtag này!',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                            style: TextStyle(
+                              fontSize: 13.0,
+                              color: isLight
+                                  ? AppColors.textLightSecondary
+                                  : AppColors.textDarkSecondary,
+                            ),
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton.icon(

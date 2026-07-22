@@ -4,26 +4,7 @@ import 'package:snapspot/core/constants/colors.dart';
 /// Các kiểu biến thể của nút bấm [AppButton].
 enum AppButtonVariant { primary, secondary, outline, text }
 
-/// Purpose: Reusable primary/secondary/outline button component across SnapSpot.
-///
-/// Parameters:
-/// - [label]: The text title displayed on the button.
-/// - [onPressed]: Callback function when the button is clicked. If null or [isLoading] is true, the button is disabled.
-/// - [isLoading]: Displays a circular progress indicator instead of label if true.
-/// - [variant]: Visual style variant ([AppButtonVariant.primary], secondary, outline, text).
-/// - [icon]: Optional leading icon.
-/// - [width]: Optional button width. Defaults to full width ([double.infinity]).
-/// - [height]: Height of the button. Defaults to 48.0.
-/// - [borderRadius]: Corner radius. Defaults to 12.0.
-///
-/// Usage:
-/// ```dart
-/// AppButton(
-///   label: 'Submit',
-///   onPressed: () => _handleSubmit(),
-///   isLoading: state.isSubmitting,
-/// )
-/// ```
+/// Reusable AppButton component chuẩn Type Scale UI/UX.
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -51,9 +32,9 @@ class AppButton extends StatelessWidget {
     final theme = Theme.of(context);
     final isDisabled = onPressed == null || isLoading;
 
-    Color? backgroundColor;
-    Color? foregroundColor;
-    BorderSide? borderSide;
+    Color backgroundColor = theme.colorScheme.primary;
+    Color foregroundColor = theme.colorScheme.onPrimary;
+    BorderSide borderSide = BorderSide.none;
 
     switch (variant) {
       case AppButtonVariant.primary:
@@ -83,7 +64,7 @@ class AppButton extends StatelessWidget {
         foregroundColor = isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary;
       } else {
         foregroundColor = isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary;
-        if (borderSide != null) {
+        if (variant == AppButtonVariant.outline) {
           borderSide = BorderSide(
             color: isLight ? AppColors.borderLight : AppColors.borderDark,
             width: 1.5,
@@ -100,7 +81,7 @@ class AppButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
-          side: borderSide ?? BorderSide.none,
+          side: borderSide,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
@@ -128,8 +109,8 @@ class AppButton extends StatelessWidget {
                   Text(
                     label,
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],

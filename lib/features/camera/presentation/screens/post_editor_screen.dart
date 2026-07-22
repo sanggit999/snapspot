@@ -7,8 +7,7 @@ import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:snapspot/features/camera/presentation/blocs/post_editor_cubit.dart';
 import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 
-/// Màn hình Biên tập bài viết (Post Editor Screen).
-/// Đọc dữ liệu GPS giả lập, hỗ trợ nhập caption, thêm hashtag, hiển thị bản đồ mini và upload nền.
+/// Màn hình Biên tập bài viết (Post Editor Screen) chuẩn Type Scale & High-Contrast Light/Dark Mode.
 class PostEditorScreen extends StatefulWidget {
   final String imagePath;
   const PostEditorScreen({super.key, required this.imagePath});
@@ -30,7 +29,6 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Đọc thông số GPS được truyền qua URI query parameters
     final uri = GoRouterState.of(context).uri;
     _locationName = uri.queryParameters['location'] ?? 'Vị trí chưa xác định';
     _latitude =
@@ -51,7 +49,6 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
     final authState = context.read<AuthCubit>().state;
     if (authState is! AuthSuccess) return;
 
-    // Phân tích hashtags nhập vào
     final List<String> hashtags = _hashtagController.text
         .split(' ')
         .where((tag) => tag.startsWith('#'))
@@ -72,19 +69,38 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.tr('post_editor')),
+        title: Text(
+          context.tr('post_editor'),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 17.5,
+            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+            letterSpacing: -0.3,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 19,
+            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+          ),
+          onPressed: () => context.pop(),
+        ),
+        elevation: 0,
+        backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
         actions: [
           TextButton(
             onPressed: _onSharePressed,
             child: Text(
               context.tr('share'),
               style: const TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
                 color: AppColors.primary,
-                fontSize: 16,
+                fontSize: 15.0,
               ),
             ),
           ),
@@ -93,10 +109,8 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
       body: BlocConsumer<PostEditorCubit, PostEditorState>(
         listener: (context, state) {
           if (state is PostEditorSuccess) {
-            // Đẩy bài đăng mới vào FeedCubit để hiển thị tức thì trên Home
             context.read<FeedCubit>().addNewPost(state.createdPost);
 
-            // Hiện thông báo và quay lại Trang chủ
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(context.tr('upload_completed')),
@@ -109,7 +123,7 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
         },
         builder: (context, state) {
           if (state is PostEditorUploading) {
-            return _buildUploadProgress(state.progress);
+            return _buildUploadProgress(state.progress, isLight);
           }
 
           return SingleChildScrollView(
@@ -155,7 +169,8 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
                               ? context.tr('gps_detected')
                               : context.tr('gps_not_detected'),
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13.0,
                             color: _hasGps
                                 ? AppColors.success
                                 : AppColors.warning,
@@ -172,11 +187,32 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
                   controller: _captionController,
                   maxLines: 4,
                   maxLength: 500,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                  ),
                   decoration: InputDecoration(
                     hintText: context.tr('write_caption'),
+                    hintStyle: TextStyle(
+                      fontSize: 14.0,
+                      color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+                    ),
                     alignLabelWithHint: true,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                     ),
                   ),
                 ),
@@ -185,46 +221,65 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
                 // 4. Hashtag input
                 TextField(
                   controller: _hashtagController,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                  ),
                   decoration: InputDecoration(
                     hintText: context.tr('add_hashtags'),
-                    prefixIcon: const Icon(Icons.tag, size: 20),
+                    hintStyle: TextStyle(
+                      fontSize: 14.0,
+                      color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+                    ),
+                    prefixIcon: const Icon(Icons.tag, size: 20, color: AppColors.primary),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: isLight ? AppColors.borderLight : AppColors.borderDark,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
                 // 5. Bản đồ mini hiển thị vị trí ghim
-                const Text(
-                  'Bản đồ Vị trí bài viết',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  context.tr('post_location_map'),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16.0,
+                    color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                    letterSpacing: -0.2,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   height: 150,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: theme.brightness == Brightness.light
-                          ? AppColors.borderLight
-                          : AppColors.borderDark,
+                      color: isLight ? AppColors.borderLight : AppColors.borderDark,
                     ),
-                    color: theme.brightness == Brightness.light
-                        ? Colors.grey[200]
-                        : Colors.grey[900],
+                    color: isLight ? Colors.grey[100] : AppColors.surfaceDark,
                   ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Simulated mini map grid
                       Positioned.fill(
                         child: Opacity(
                           opacity: 0.1,
                           child: GridPaper(
-                            color: theme.brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
+                            color: isLight ? Colors.black : Colors.white,
                           ),
                         ),
                       ),
@@ -241,9 +296,10 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               _locationName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14.0,
+                                color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
@@ -252,33 +308,34 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
                           ),
                           Text(
                             'GPS: ${_latitude.toStringAsFixed(4)}, ${_longitude.toStringAsFixed(4)}',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
                             ),
                           ),
                         ],
                       ),
-                      // Nút đổi vị trí thủ công
                       Positioned(
                         right: 8,
                         bottom: 8,
                         child: TextButton.icon(
-                          onPressed: () {
-                            // TODO: Chọn lại toạ độ thủ công
-                          },
+                          onPressed: () {},
                           style: TextButton.styleFrom(
-                            backgroundColor: theme.colorScheme.surface,
+                            backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 4,
                             ),
                             minimumSize: Size.zero,
                           ),
-                          icon: const Icon(Icons.map, size: 14),
+                          icon: const Icon(Icons.map, size: 14, color: AppColors.primary),
                           label: Text(
                             context.tr('choose_location'),
-                            style: const TextStyle(fontSize: 11),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                            ),
                           ),
                         ),
                       ),
@@ -294,8 +351,7 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
     );
   }
 
-  /// Giao diện phần trăm tải lên bất đồng bộ nền
-  Widget _buildUploadProgress(double progress) {
+  Widget _buildUploadProgress(double progress, bool isLight) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -310,14 +366,18 @@ class _PostEditorScreenState extends State<PostEditorScreen> {
             const SizedBox(height: 24),
             Text(
               context.tr('uploading_in_background'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.w700,
+                color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               '${(progress * 100).toInt()}%',
               style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontSize: 24.0,
+                fontWeight: FontWeight.w900,
                 color: AppColors.primary,
               ),
             ),

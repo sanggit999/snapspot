@@ -1,29 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:snapspot/core/constants/colors.dart';
 
-/// Purpose: Reusable Input Field component across SnapSpot.
-///
-/// Parameters:
-/// - [controller]: TextEditingController to manage text state.
-/// - [hintText]: Placeholder text.
-/// - [labelText]: Optional field label.
-/// - [errorText]: Direct error text override.
-/// - [obscureText]: Whether text is hidden for passwords.
-/// - [prefixIcon]: Icon widget at the start.
-/// - [suffixIcon]: Icon widget at the end.
-/// - [keyboardType]: Input keyboard type (email, number, text...).
-/// - [textInputAction]: Keyboard action button (next, done...).
-/// - [validator]: Form validation logic callback.
-/// - [maxLines]: Number of lines allowed. Defaults to 1.
-/// - [readOnly]: Whether input is disabled for typing.
-///
-/// Usage:
-/// ```dart
-/// AppTextField(
-///   controller: _emailController,
-///   hintText: 'Enter your email',
-///   keyboardType: TextInputType.emailAddress,
-/// )
-/// ```
+/// Component ô nhập liệu dùng chung trong SnapSpot chuẩn Type Scale & High Contrast Light/Dark Mode.
 class AppTextField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
@@ -73,6 +51,9 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
     return TextFormField(
       controller: widget.controller,
       obscureText: _obscureText,
@@ -83,10 +64,22 @@ class _AppTextFieldState extends State<AppTextField> {
       validator: widget.validator,
       maxLines: widget.maxLines,
       readOnly: widget.readOnly,
-      style: const TextStyle(fontSize: 15),
+      style: TextStyle(
+        fontSize: 14.5,
+        color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+      ),
       decoration: InputDecoration(
         hintText: widget.hintText,
+        hintStyle: TextStyle(
+          fontSize: 14.0,
+          color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+        ),
         labelText: widget.labelText,
+        labelStyle: TextStyle(
+          fontSize: 14.0,
+          fontWeight: FontWeight.w600,
+          color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+        ),
         errorText: widget.errorText,
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.obscureText
@@ -96,6 +89,7 @@ class _AppTextFieldState extends State<AppTextField> {
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                   size: 20,
+                  color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
                 ),
                 onPressed: () {
                   setState(() {

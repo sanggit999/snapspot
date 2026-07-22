@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:snapspot/core/constants/colors.dart';
 
 /// Lớp cấu hình Theme của ứng dụng SnapSpot.
-/// Hỗ trợ cả chế độ Sáng và Tối theo quy chuẩn thiết kế.
+/// Hỗ trợ chuẩn mực Typography Scale & Chế độ Sáng/Tối chống mỏi mắt.
 class AppTheme {
-  // Cấu hình phông chữ Outfit hoặc Inter (Nếu dùng phông mặc định, text theme sẽ tự áp dụng)
   static const String _fontFamily = 'Outfit';
 
   /// Cấu hình Light Theme
@@ -32,9 +31,10 @@ class AppTheme {
         iconTheme: IconThemeData(color: AppColors.textLightPrimary),
         titleTextStyle: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 17.5,
+          fontWeight: FontWeight.w700,
           color: AppColors.textLightPrimary,
+          letterSpacing: -0.3,
         ),
       ),
       cardTheme: CardThemeData(
@@ -51,52 +51,60 @@ class AppTheme {
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
-        labelStyle: const TextStyle(color: AppColors.textLightSecondary),
-        hintStyle: const TextStyle(color: AppColors.textLightSecondary),
+        labelStyle: const TextStyle(color: AppColors.textLightSecondary, fontSize: 14),
+        hintStyle: const TextStyle(color: AppColors.textLightSecondary, fontSize: 14),
       ),
       textTheme: const TextTheme(
         displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
           color: AppColors.textLightPrimary,
+          letterSpacing: -0.5,
         ),
         headlineMedium: TextStyle(
-          fontSize: 20,
+          fontSize: 17.5,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textLightPrimary,
+          letterSpacing: -0.3,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 15,
           fontWeight: FontWeight.w600,
           color: AppColors.textLightPrimary,
         ),
         bodyLarge: TextStyle(
-          fontSize: 16,
+          fontSize: 14.5,
           fontWeight: FontWeight.w400,
           color: AppColors.textLightPrimary,
+          height: 1.45,
         ),
         bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w500,
           color: AppColors.textLightSecondary,
         ),
         labelSmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w400,
           color: AppColors.textLightSecondary,
         ),
       ),
@@ -128,9 +136,10 @@ class AppTheme {
         iconTheme: IconThemeData(color: AppColors.textDarkPrimary),
         titleTextStyle: TextStyle(
           fontFamily: _fontFamily,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 17.5,
+          fontWeight: FontWeight.w700,
           color: AppColors.textDarkPrimary,
+          letterSpacing: -0.3,
         ),
       ),
       cardTheme: CardThemeData(
@@ -146,52 +155,60 @@ class AppTheme {
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.borderDark),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.borderDark),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
-        labelStyle: const TextStyle(color: AppColors.textDarkSecondary),
-        hintStyle: const TextStyle(color: AppColors.textDarkSecondary),
+        labelStyle: const TextStyle(color: AppColors.textDarkSecondary, fontSize: 14),
+        hintStyle: const TextStyle(color: AppColors.textDarkSecondary, fontSize: 14),
       ),
       textTheme: const TextTheme(
         displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
+          fontSize: 24,
+          fontWeight: FontWeight.w900,
           color: AppColors.textDarkPrimary,
+          letterSpacing: -0.5,
         ),
         headlineMedium: TextStyle(
-          fontSize: 20,
+          fontSize: 17.5,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textDarkPrimary,
+          letterSpacing: -0.3,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 15,
           fontWeight: FontWeight.w600,
           color: AppColors.textDarkPrimary,
         ),
         bodyLarge: TextStyle(
-          fontSize: 16,
+          fontSize: 14.5,
           fontWeight: FontWeight.w400,
           color: AppColors.textDarkPrimary,
+          height: 1.45,
         ),
         bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontSize: 12.5,
+          fontWeight: FontWeight.w500,
           color: AppColors.textDarkSecondary,
         ),
         labelSmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w400,
           color: AppColors.textDarkSecondary,
         ),
       ),

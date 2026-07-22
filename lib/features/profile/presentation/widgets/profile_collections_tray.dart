@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:snapspot/core/constants/colors.dart';
+import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 
 /// Widget hiển thị danh sách các thư mục Bộ sưu tập theo chủ đề (Collections Tray).
-/// Hỗ trợ lọc (filter) hiển thị danh sách bài viết theo Bộ sưu tập được chọn.
+/// Hỗ trợ lọc (filter) hiển thị danh sách bài viết theo Bộ sưu tập được chọn chuẩn Type Scale & Multi-Language.
 class ProfileCollectionsTray extends StatelessWidget {
   final List<PostEntity> bookmarkedPosts;
   final String? selectedCollection;
@@ -22,14 +23,14 @@ class ProfileCollectionsTray extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final collections = [
-      {'name': 'Tất cả', 'icon': Icons.collections_bookmark_rounded, 'color': AppColors.primary},
-      {'name': 'Địa điểm muốn đến', 'icon': Icons.map_outlined, 'color': AppColors.primary},
-      {'name': 'Quán cà phê đẹp', 'icon': Icons.local_cafe_outlined, 'color': Colors.amber.shade700},
-      {'name': 'Ảnh chụp đẹp', 'icon': Icons.photo_camera_outlined, 'color': Colors.purple},
-      {'name': 'Kinh nghiệm du lịch', 'icon': Icons.explore_outlined, 'color': Colors.teal},
+      {'key': 'ALL', 'name': context.tr('all'), 'icon': Icons.collections_bookmark_rounded, 'color': AppColors.primary},
+      {'key': 'Địa điểm muốn đến', 'name': 'Địa điểm muốn đến', 'icon': Icons.map_outlined, 'color': AppColors.primary},
+      {'key': 'Quán cà phê đẹp', 'name': 'Quán cà phê đẹp', 'icon': Icons.local_cafe_outlined, 'color': Colors.amber.shade700},
+      {'key': 'Ảnh chụp đẹp', 'name': 'Ảnh chụp đẹp', 'icon': Icons.photo_camera_outlined, 'color': Colors.purple},
+      {'key': 'Kinh nghiệm du lịch', 'name': 'Kinh nghiệm du lịch', 'icon': Icons.explore_outlined, 'color': Colors.teal},
     ];
 
-    final activeCollection = selectedCollection ?? 'Tất cả';
+    final activeCollectionKey = selectedCollection ?? 'ALL';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,20 +39,26 @@ class ProfileCollectionsTray extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
           child: Row(
             children: [
-              const Text(
-                'Bộ sưu tập của bạn',
+              Text(
+                context.tr('your_collections'),
                 style: TextStyle(
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w700,
+                  color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                  letterSpacing: -0.3,
                 ),
               ),
               const Spacer(),
               Text(
-                activeCollection == 'Tất cả' ? 'Tất cả thư mục' : 'Đang lọc: $activeCollection',
+                (activeCollectionKey == 'ALL' || activeCollectionKey == 'Tất cả')
+                    ? context.tr('all_folders')
+                    : context.tr('filtering_by', args: {'name': activeCollectionKey}),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.0,
                   fontWeight: FontWeight.w600,
-                  color: activeCollection == 'Tất cả' ? Colors.grey : AppColors.primary,
+                  color: (activeCollectionKey == 'ALL' || activeCollectionKey == 'Tất cả')
+                      ? (isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary)
+                      : AppColors.primary,
                 ),
               ),
             ],
@@ -65,15 +72,16 @@ class ProfileCollectionsTray extends StatelessWidget {
             itemCount: collections.length,
             itemBuilder: (context, index) {
               final col = collections[index];
+              final colKey = col['key'] as String;
               final colName = col['name'] as String;
               final colIcon = col['icon'] as IconData;
               final colColor = col['color'] as Color;
-              final isSelected = activeCollection == colName;
+              final isSelected = activeCollectionKey == colKey || (colKey == 'ALL' && activeCollectionKey == 'Tất cả');
 
-              final matchingCount = colName == 'Tất cả'
+              final matchingCount = (colKey == 'ALL' || colKey == 'Tất cả')
                   ? bookmarkedPosts.length
                   : bookmarkedPosts
-                      .where((p) => p.savedCollectionName == colName)
+                      .where((p) => p.savedCollectionName == colKey)
                       .length;
 
               return Padding(
@@ -81,10 +89,10 @@ class ProfileCollectionsTray extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    if (isSelected && colName != 'Tất cả') {
-                      onCollectionSelected('Tất cả');
+                    if (isSelected && colKey != 'ALL') {
+                      onCollectionSelected('ALL');
                     } else {
-                      onCollectionSelected(colName);
+                      onCollectionSelected(colKey);
                     }
                   },
                   child: AnimatedContainer(
@@ -125,8 +133,8 @@ class ProfileCollectionsTray extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                            fontSize: 12.5,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                             color: isSelected
                                 ? AppColors.primary
                                 : (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary),
@@ -134,11 +142,13 @@ class ProfileCollectionsTray extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '$matchingCount bài lưu',
+                          context.tr('saved_posts_count', args: {'count': '$matchingCount'}),
                           style: TextStyle(
-                            fontSize: 10.5,
-                            color: isSelected ? AppColors.primary : Colors.grey,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            fontSize: 11.0,
+                            color: isSelected
+                                ? AppColors.primary
+                                : (isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary),
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                           ),
                         ),
                       ],

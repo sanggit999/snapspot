@@ -7,7 +7,7 @@ import 'package:snapspot/core/widgets/images/app_avatar.dart';
 import 'package:snapspot/features/chat/presentation/blocs/chat_cubit.dart';
 import 'package:intl/intl.dart';
 
-/// Màn hình Danh sách hội thoại chat.
+/// Màn hình Danh sách hội thoại chat chuẩn Type Scale UI/UX.
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
 
@@ -15,7 +15,7 @@ class ChatListScreen extends StatefulWidget {
   State<ChatListScreen> createState() => _ChatListScreenState();
 }
 
-class _HomeScreenChatState extends State<ChatListScreen> {
+class _ChatListScreenState extends State<ChatListScreen> {
   @override
   void initState() {
     super.initState();
@@ -25,9 +25,22 @@ class _HomeScreenChatState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.tr('chat_list')), elevation: 0),
+      appBar: AppBar(
+        title: Text(
+          context.tr('chat_list'),
+          style: TextStyle(
+            fontSize: 17.5,
+            fontWeight: FontWeight.w700,
+            color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+            letterSpacing: -0.3,
+          ),
+        ),
+        elevation: 0,
+        backgroundColor: isLight ? Colors.white : AppColors.surfaceDark,
+      ),
       body: BlocBuilder<ChatCubit, ChatState>(
         builder: (context, state) {
           if (state.isLoading && state.rooms.isEmpty) {
@@ -42,22 +55,31 @@ class _HomeScreenChatState extends State<ChatListScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    Icons.chat_bubble_outline,
-                    size: 64,
+                    Icons.chat_bubble_outline_rounded,
+                    size: 56,
                     color: Colors.grey,
                   ),
                   const SizedBox(height: 16),
-                  Text(context.tr('no_conversations')),
+                  Text(
+                    context.tr('no_conversations'),
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+                    ),
+                  ),
                 ],
               ),
             );
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: state.rooms.length,
-            separatorBuilder: (context, index) =>
-                const Divider(height: 1, indent: 76),
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              indent: 76,
+              color: isLight ? AppColors.borderLight : AppColors.borderDark,
+            ),
             itemBuilder: (context, index) {
               final room = state.rooms[index];
               final hasUnread = room.unreadCount > 0;
@@ -75,8 +97,10 @@ class _HomeScreenChatState extends State<ChatListScreen> {
                 title: Text(
                   room.partner.fullName,
                   style: TextStyle(
-                    fontWeight: hasUnread ? FontWeight.bold : FontWeight.w600,
-                    fontSize: 16,
+                    fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w600,
+                    fontSize: 15.0,
+                    color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+                    letterSpacing: -0.2,
                   ),
                 ),
                 subtitle: Text(
@@ -84,12 +108,12 @@ class _HomeScreenChatState extends State<ChatListScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
+                    fontSize: 13.0,
+                    height: 1.35,
                     color: hasUnread
-                        ? (theme.brightness == Brightness.light
-                              ? Colors.black87
-                              : Colors.white70)
-                        : Colors.grey,
-                    fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
+                        ? (isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary)
+                        : (isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary),
+                    fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w400,
                   ),
                 ),
                 trailing: Column(
@@ -98,15 +122,15 @@ class _HomeScreenChatState extends State<ChatListScreen> {
                   children: [
                     Text(
                       formattedTime,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     if (hasUnread)
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
+                        padding: const EdgeInsets.all(6),
                         decoration: const BoxDecoration(
                           color: AppColors.primary,
                           shape: BoxShape.circle,
@@ -116,7 +140,7 @@ class _HomeScreenChatState extends State<ChatListScreen> {
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -131,19 +155,5 @@ class _HomeScreenChatState extends State<ChatListScreen> {
         },
       ),
     );
-  }
-}
-
-// Bọc class lại để Flutter không báo lỗi do trùng tên
-class _ChatListScreenState extends State<ChatListScreen> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<ChatCubit>().fetchRooms();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _HomeScreenChatState().build(context);
   }
 }

@@ -984,14 +984,14 @@ class _SpotCardState extends State<SpotCard>
                   child: RichText(
                     text: TextSpan(
                       style: TextStyle(
-                        fontSize: 13.5,
-                        height: 1.35,
+                        fontSize: 14.5,
+                        height: 1.42,
                         color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
                       ),
                       children: [
                         TextSpan(
                           text: '${widget.post.user.username} ',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         TextSpan(text: widget.post.caption),
                       ],

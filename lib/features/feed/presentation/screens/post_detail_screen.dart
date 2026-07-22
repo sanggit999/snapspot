@@ -10,9 +10,7 @@ import 'package:snapspot/features/feed/presentation/widgets/post_comment_section
 import 'package:snapspot/features/feed/presentation/widgets/spot_card.dart';
 
 /// Màn hình Chi tiết bài viết (Post Detail Screen).
-/// Tự động phân biệt Tiêu đề cá nhân hóa:
-/// - Khi TÔI xem bài viết CỦA CHÍNH TÔI -> Tiêu đề: "Bài viết của bạn"
-/// - Khi TÔI xem bài viết CỦA TÁC GIẢ KHÁC (Nguyễn Văn Sang, Trần Lan Anh...) -> Tiêu đề: "Bài viết của [Tên tác giả]"
+/// Tự động phân biệt Tiêu đề cá nhân hóa đa ngôn ngữ (Tiếng Việt / English) chuẩn 2026.
 class PostDetailScreen extends StatefulWidget {
   final String postId;
   final bool focusComment;
@@ -61,21 +59,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     final post = _post!;
 
-    // Kiểm tra chính xác xem tác giả bài viết có phải là người dùng đang đăng nhập hay không
     final authState = context.read<AuthCubit>().state;
     final currentUserId = authState is AuthSuccess ? authState.currentUser.id : MockData.mockUsers[0].id;
     final isMyPost = post.user.id == currentUserId;
 
-    final titleText = isMyPost ? 'Bài viết của bạn' : 'Bài viết của ${post.user.fullName}';
+    final titleText = isMyPost
+        ? context.tr('my_posts')
+        : context.tr('posts_of_author', args: {'name': post.user.fullName});
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           titleText,
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             fontSize: 16.5,
             color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+            letterSpacing: -0.3,
           ),
         ),
         leading: IconButton(

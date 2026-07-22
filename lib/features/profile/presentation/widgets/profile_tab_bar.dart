@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:snapspot/core/constants/colors.dart';
 
-/// Delegate dựng TabBar ghim cố định trên CustomScrollView của ProfileScreen.
+/// Delegate dựng TabBar ghim cố định trên CustomScrollView của ProfileScreen chuẩn Type Scale.
 /// Phân biệt rõ ràng giữa Tab Đã lưu (của Tôi) và Tab Điểm check-in (của User khác).
 class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
   final int selectedIndex;
@@ -43,7 +43,9 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
                 children: [
                   Icon(
                     Icons.grid_on_rounded,
-                    color: selectedIndex == 0 ? AppColors.primary : Colors.grey,
+                    color: selectedIndex == 0
+                        ? AppColors.primary
+                        : (isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary),
                     size: 22,
                   ),
                   const SizedBox(height: 4),
@@ -68,7 +70,9 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
                     children: [
                       Icon(
                         isMe ? Icons.bookmark_rounded : Icons.location_on_rounded,
-                        color: selectedIndex == 1 ? AppColors.primary : Colors.grey,
+                        color: selectedIndex == 1
+                            ? AppColors.primary
+                            : (isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary),
                         size: 22,
                       ),
                       if (secondaryCount > 0) ...[
@@ -85,9 +89,9 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
                           child: Text(
                             '$secondaryCount',
                             style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: 10.5,
                               color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:snapspot/core/constants/colors.dart';
 
+/// Item ListTile danh mục cài đặt chuẩn Type Scale UI/UX Light & Dark Mode.
 class SettingsListTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -14,21 +16,28 @@ class SettingsListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(
         icon,
-        color: isDark ? Colors.grey[400] : Colors.grey[700],
+        size: 22,
+        color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
       ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 14.5,
+          fontWeight: FontWeight.w600,
+          color: isLight ? AppColors.textLightPrimary : AppColors.textDarkPrimary,
+        ),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.chevron_right_rounded,
-        color: Colors.grey,
+        size: 20,
+        color: isLight ? AppColors.textLightSecondary : AppColors.textDarkSecondary,
       ),
       onTap: onTap ?? () {
         ScaffoldMessenger.of(context).showSnackBar(
