@@ -13,6 +13,8 @@ import 'package:snapspot/features/map/presentation/blocs/map_cubit.dart';
 import 'package:snapspot/features/camera/presentation/blocs/post_editor_cubit.dart';
 import 'package:snapspot/features/chat/presentation/blocs/chat_cubit.dart';
 
+import 'package:snapspot/features/profile/presentation/blocs/collections_cubit.dart';
+
 /// File cấu hình chính chứa MaterialApp và tiêm tất cả các Cubits của hệ thống.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider<ThemeCubit>(create: (context) => getIt<ThemeCubit>()),
         BlocProvider<LanguageCubit>(create: (context) => getIt<LanguageCubit>()),
+        BlocProvider<CollectionsCubit>(create: (context) => getIt<CollectionsCubit>()),
         BlocProvider<AuthCubit>(create: (context) => getIt<AuthCubit>()),
         BlocProvider<FeedCubit>(create: (context) => getIt<FeedCubit>()),
         BlocProvider<MapCubit>(create: (context) => getIt<MapCubit>()),

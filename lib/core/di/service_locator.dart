@@ -15,6 +15,8 @@ import 'package:snapspot/features/map/presentation/blocs/map_cubit.dart';
 import 'package:snapspot/features/chat/presentation/blocs/chat_cubit.dart';
 import 'package:snapspot/features/camera/presentation/blocs/post_editor_cubit.dart';
 
+import 'package:snapspot/features/profile/presentation/blocs/collections_cubit.dart';
+
 /// Khai báo Service Locator toàn cục của ứng dụng.
 final GetIt getIt = GetIt.instance;
 
@@ -29,6 +31,7 @@ void setupServiceLocator() {
   // 2. Đăng ký các Cubits
   getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
   getIt.registerLazySingleton<LanguageCubit>(() => LanguageCubit());
+  getIt.registerLazySingleton<CollectionsCubit>(() => CollectionsCubit()..fetchCollections());
   getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepository>()));
   getIt.registerFactory<FeedCubit>(() => FeedCubit(getIt<FeedRepository>()));
   getIt.registerFactory<MapCubit>(() => MapCubit(getIt<MapRepository>()));

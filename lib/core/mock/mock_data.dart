@@ -1,10 +1,15 @@
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 import 'package:snapspot/features/feed/domain/entities/post_entity.dart';
 import 'package:snapspot/features/chat/domain/entities/chat_entity.dart';
+import 'package:snapspot/features/profile/domain/entities/collection_entity.dart';
 
 /// Dữ liệu giả lập chất lượng cao phục vụ cho phát triển Frontend của SnapSpot.
 /// Đặt tại thư mục chuyên biệt lib/core/mock/mock_data.dart chuẩn Clean Architecture & mock-data-rules.
 class MockData {
+  // 0. Danh sách Bộ sưu tập cá nhân hóa của người dùng (Dynamic Collections)
+  // Đã loại bỏ 100% tất cả các bộ sưu tập mặc định. Mảng rỗng 100% để người dùng tự tạo tùy biến.
+  static final List<CollectionEntity> mockCollections = [];
+
   // 1. Danh sách Users giả lập
   static final List<UserEntity> mockUsers = [
     const UserEntity(
@@ -98,7 +103,7 @@ class MockData {
       isLiked: true,
       userReaction: '🔥',
       isBookmarked: true,
-      savedCollectionName: 'Địa điểm muốn đến',
+      savedCollectionName: null,
       createdAt: DateTime.now().subtract(const Duration(hours: 3)),
       comments: [
         CommentEntity(
@@ -211,7 +216,7 @@ class MockData {
       isLiked: true,
       userReaction: '😍',
       isBookmarked: true,
-      savedCollectionName: 'Quán cà phê đẹp',
+      savedCollectionName: null,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       comments: [
         CommentEntity(
@@ -250,7 +255,7 @@ class MockData {
       sharesCount: 45,
       isLiked: false,
       isBookmarked: true,
-      savedCollectionName: 'Địa điểm muốn đến',
+      savedCollectionName: null,
       createdAt: DateTime.now().subtract(const Duration(days: 2)),
       comments: [
         CommentEntity(
@@ -283,7 +288,7 @@ class MockData {
       isLiked: true,
       userReaction: '📍',
       isBookmarked: true,
-      savedCollectionName: 'Ảnh chụp đẹp',
+      savedCollectionName: null,
       createdAt: DateTime.now().subtract(const Duration(days: 3)),
       comments: [
         CommentEntity(
@@ -323,7 +328,7 @@ class MockData {
       sharesCount: 520000, // 520K Shares
       isLiked: false,
       isBookmarked: true,
-      savedCollectionName: 'Kinh nghiệm du lịch',
+      savedCollectionName: null,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       comments: const [],
     ),
