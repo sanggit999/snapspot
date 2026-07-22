@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:snapspot/core/constants/colors.dart';
 
 /// Delegate dựng TabBar ghim cố định trên CustomScrollView của ProfileScreen.
+/// Phân biệt rõ ràng giữa Tab Đã lưu (của Tôi) và Tab Điểm check-in (của User khác).
 class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
   final int selectedIndex;
-  final int bookmarkedCount;
+  final int secondaryCount;
+  final bool isMe;
   final ValueChanged<int> onTabSelected;
   final bool isLight;
 
   const ProfileTabHeaderDelegate({
     required this.selectedIndex,
-    required this.bookmarkedCount,
+    required this.secondaryCount,
+    required this.isMe,
     required this.onTabSelected,
     required this.isLight,
   });
@@ -31,7 +34,7 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
       color: isLight ? Colors.white : AppColors.surfaceDark,
       child: Row(
         children: [
-          // Tab 1: Bài viết của tôi
+          // Tab 1: Bài viết
           Expanded(
             child: InkWell(
               onTap: () => onTabSelected(0),
@@ -53,7 +56,7 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
             ),
           ),
 
-          // Tab 2: Đã lưu (Bookmarked)
+          // Tab 2: Đã lưu (của Tôi) hoặc Điểm check-in (của User khác)
           Expanded(
             child: InkWell(
               onTap: () => onTabSelected(1),
@@ -64,11 +67,11 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.bookmark_rounded,
+                        isMe ? Icons.bookmark_rounded : Icons.location_on_rounded,
                         color: selectedIndex == 1 ? AppColors.primary : Colors.grey,
                         size: 22,
                       ),
-                      if (bookmarkedCount > 0) ...[
+                      if (secondaryCount > 0) ...[
                         const SizedBox(width: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -80,7 +83,7 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '$bookmarkedCount',
+                            '$secondaryCount',
                             style: const TextStyle(
                               fontSize: 10,
                               color: Colors.white,
@@ -108,7 +111,8 @@ class ProfileTabHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(ProfileTabHeaderDelegate oldDelegate) {
     return oldDelegate.selectedIndex != selectedIndex ||
-        oldDelegate.bookmarkedCount != bookmarkedCount ||
+        oldDelegate.secondaryCount != secondaryCount ||
+        oldDelegate.isMe != isMe ||
         oldDelegate.isLight != isLight;
   }
 }
