@@ -56,9 +56,9 @@ class AuthRepositoryImpl implements AuthRepository {
     return result.fold(
       (failure) => Left(failure),
       (dataMap) async {
-        final accessToken = dataMap['access_token'] as String;
-        final refreshToken = dataMap['refresh_token'] as String;
-        final userJson = dataMap['user'] as Map<String, dynamic>;
+        final accessToken = dataMap['access_token'] as String? ?? '';
+        final refreshToken = dataMap['refresh_token'] as String? ?? '';
+        final userJson = dataMap['user'] as Map<String, dynamic>? ?? {};
 
         final userModel = UserModel.fromJson(userJson);
         final userEntity = userModel.toEntity();

@@ -17,6 +17,8 @@ class AppLocalizations {
       // Auth
       'login': 'Đăng nhập',
       'register': 'Đăng ký',
+      'create_account': 'Tạo tài khoản mới',
+      'register_subtitle': 'Đăng ký để khám phá các địa điểm check-in hấp dẫn',
       'email': 'Email',
       'password': 'Mật khẩu',
       'username': 'Tên người dùng',
@@ -33,8 +35,14 @@ class AppLocalizations {
       'password_too_short': 'Mật khẩu phải từ 6 ký tự trở lên',
       'passwords_do_not_match': 'Mật khẩu nhập lại không khớp',
       'username_required': 'Vui lòng nhập tên người dùng',
+      'app_slogan': 'Ghim khoảnh khắc, chia sẻ bản đồ',
+      'email_or_username': 'Email hoặc Tên người dùng',
+      'enter_email_or_username': 'Nhập Email hoặc Tên người dùng...',
+      'email_or_username_required': 'Vui lòng nhập Email hoặc Tên người dùng',
       'check_email_to_verify':
           'Vui lòng kiểm tra hộp thư để xác thực tài khoản!',
+      'no_internet_connection': 'Không có kết nối Internet',
+      'back_online': 'Đã kết nối lại Internet',
 
       // Common & Navigation
       'home': 'Trang chủ',
@@ -246,6 +254,8 @@ class AppLocalizations {
       // Auth
       'login': 'Login',
       'register': 'Register',
+      'create_account': 'Create New Account',
+      'register_subtitle': 'Register to discover amazing check-in spots',
       'email': 'Email',
       'password': 'Password',
       'username': 'Username',
@@ -262,8 +272,14 @@ class AppLocalizations {
       'password_too_short': 'Password must be at least 6 characters',
       'passwords_do_not_match': 'Passwords do not match',
       'username_required': 'Username is required',
+      'app_slogan': 'Pin your moments, share the map',
+      'email_or_username': 'Email or Username',
+      'enter_email_or_username': 'Enter Email or Username...',
+      'email_or_username_required': 'Please enter Email or Username',
       'check_email_to_verify':
           'Please check your inbox to verify your account!',
+      'no_internet_connection': 'No Internet connection',
+      'back_online': 'Back online',
 
       // Common & Navigation
       'home': 'Home',

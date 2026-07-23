@@ -7,7 +7,7 @@ import 'package:snapspot/core/widgets/buttons/app_button.dart';
 import 'package:snapspot/core/widgets/inputs/app_text_field.dart';
 import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 
-/// Màn hình Đăng nhập SnapSpot chuẩn Type Scale & High Contrast Light/Dark Mode.
+/// Màn hình Đăng nhập SnapSpot hỗ trợ Email HOẶC Username chuẩn Light/Dark Mode.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -18,9 +18,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController(
-    text: 'lananh@example.com',
+    text: 'admin@snapspot.com',
   );
-  final _passwordController = TextEditingController(text: 'password123');
+  final _passwordController = TextEditingController(text: 'AdminPassword123!');
   String? _errorMessage;
 
   @override
@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().login(
-            _emailController.text,
+            _emailController.text.trim(),
             _passwordController.text,
           );
     }
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       Center(
                         child: Text(
-                          'Pin your moments, share the map',
+                          context.tr('app_slogan'),
                           style: TextStyle(
                             color: isLight
                                 ? AppColors.textLightSecondary
@@ -149,20 +149,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
-                  // 3. Email Input
+                  // 3. Email HOẶC Username Input
                   AppTextField(
                     controller: _emailController,
-                    hintText: context.tr('enter_email'),
-                    labelText: context.tr('email'),
+                    hintText: context.tr('enter_email_or_username'),
+                    labelText: context.tr('email_or_username'),
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.email_outlined),
+                    prefixIcon: const Icon(Icons.person_outline),
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return context.tr('email_required');
-                      }
-                      if (!value.contains('@')) {
-                        return context.tr('email_invalid');
+                      if (value == null || value.trim().isEmpty) {
+                        return context.tr('email_or_username_required');
                       }
                       return null;
                     },
@@ -245,8 +242,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             context.read<AuthCubit>().login(
-                                  'lananh@example.com',
-                                  'password123',
+                                  'admin@snapspot.com',
+                                  'AdminPassword123!',
                                 );
                           },
                           icon: const Icon(Icons.g_mobiledata, size: 28),
@@ -270,8 +267,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             context.read<AuthCubit>().login(
-                                  'minhquan@example.com',
-                                  'password123',
+                                  'admin',
+                                  'AdminPassword123!',
                                 );
                           },
                           icon: const Icon(Icons.apple, size: 22),

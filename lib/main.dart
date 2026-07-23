@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:snapspot/app.dart';
+import 'package:snapspot/core/config/app_config.dart';
 import 'package:snapspot/core/di/service_locator.dart';
 
 void main() async {
   // Đảm bảo các thành phần Flutter binding được khởi tạo trước khi gọi async
   WidgetsFlutterBinding.ensureInitialized();
+
+  // In Log kiểm tra Môi Trường (DEV / PROD) và Base API URL ngay khi khởi chạy App
+  AppConfig.logConfig();
 
   // Khởi tạo Service Locator (GetIt)
   setupServiceLocator();

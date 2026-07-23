@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Thực thể nghiệp vụ đại diện cho một người dùng (User) trong hệ thống SnapSpot.
-/// Kết hợp [Equatable] cho Value Equality (tránh rebuild UI lãng phí)
-/// và phương thức [copyWith] cho Immutability State Updates.
+/// Đã được đồng bộ 100% các trường với Backend Django User Model.
 class UserEntity extends Equatable {
   final String id;
   final String email;
@@ -10,10 +9,20 @@ class UserEntity extends Equatable {
   final String fullName;
   final String avatarUrl;
   final String bio;
+  final String authProvider;
+  final String status;
+  final bool emailVerified;
+  final bool phoneVerified;
+  final bool is2faEnabled;
   final bool isPrivate;
+  final bool hideExactLocation;
   final int postsCount;
   final int followersCount;
   final int followingCount;
+  final String? lastActiveAt;
+  final String language;
+  final String themeMode;
+  final String? createdAt;
   final String coverUrl;
   final String websiteUrl;
   final String locationName;
@@ -30,10 +39,20 @@ class UserEntity extends Equatable {
     required this.fullName,
     required this.avatarUrl,
     required this.bio,
+    this.authProvider = 'LOCAL',
+    this.status = 'ACTIVE',
+    this.emailVerified = false,
+    this.phoneVerified = false,
+    this.is2faEnabled = false,
     required this.isPrivate,
+    this.hideExactLocation = false,
     required this.postsCount,
     required this.followersCount,
     required this.followingCount,
+    this.lastActiveAt,
+    this.language = 'vi',
+    this.themeMode = 'system',
+    this.createdAt,
     this.coverUrl = '',
     this.websiteUrl = '',
     this.locationName = '',
@@ -52,10 +71,20 @@ class UserEntity extends Equatable {
     String? fullName,
     String? avatarUrl,
     String? bio,
+    String? authProvider,
+    String? status,
+    bool? emailVerified,
+    bool? phoneVerified,
+    bool? is2faEnabled,
     bool? isPrivate,
+    bool? hideExactLocation,
     int? postsCount,
     int? followersCount,
     int? followingCount,
+    String? lastActiveAt,
+    String? language,
+    String? themeMode,
+    String? createdAt,
     String? coverUrl,
     String? websiteUrl,
     String? locationName,
@@ -72,10 +101,20 @@ class UserEntity extends Equatable {
       fullName: fullName ?? this.fullName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       bio: bio ?? this.bio,
+      authProvider: authProvider ?? this.authProvider,
+      status: status ?? this.status,
+      emailVerified: emailVerified ?? this.emailVerified,
+      phoneVerified: phoneVerified ?? this.phoneVerified,
+      is2faEnabled: is2faEnabled ?? this.is2faEnabled,
       isPrivate: isPrivate ?? this.isPrivate,
+      hideExactLocation: hideExactLocation ?? this.hideExactLocation,
       postsCount: postsCount ?? this.postsCount,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
+      lastActiveAt: lastActiveAt ?? this.lastActiveAt,
+      language: language ?? this.language,
+      themeMode: themeMode ?? this.themeMode,
+      createdAt: createdAt ?? this.createdAt,
       coverUrl: coverUrl ?? this.coverUrl,
       websiteUrl: websiteUrl ?? this.websiteUrl,
       locationName: locationName ?? this.locationName,
@@ -95,10 +134,20 @@ class UserEntity extends Equatable {
         fullName,
         avatarUrl,
         bio,
+        authProvider,
+        status,
+        emailVerified,
+        phoneVerified,
+        is2faEnabled,
         isPrivate,
+        hideExactLocation,
         postsCount,
         followersCount,
         followingCount,
+        lastActiveAt,
+        language,
+        themeMode,
+        createdAt,
         coverUrl,
         websiteUrl,
         locationName,

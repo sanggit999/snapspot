@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:snapspot/core/di/service_locator.dart';
 import 'package:snapspot/core/localization/app_localizations.dart';
 import 'package:snapspot/core/localization/language_cubit.dart';
+import 'package:snapspot/core/network/services/connectivity_service.dart';
 import 'package:snapspot/core/theme/app_theme.dart';
 import 'package:snapspot/core/theme/theme_cubit.dart';
 import 'package:snapspot/core/router/app_router.dart';
@@ -12,10 +13,9 @@ import 'package:snapspot/features/feed/presentation/blocs/feed_cubit.dart';
 import 'package:snapspot/features/map/presentation/blocs/map_cubit.dart';
 import 'package:snapspot/features/camera/presentation/blocs/post_editor_cubit.dart';
 import 'package:snapspot/features/chat/presentation/blocs/chat_cubit.dart';
-
 import 'package:snapspot/features/profile/presentation/blocs/collections_cubit.dart';
 
-/// File cấu hình chính chứa MaterialApp và tiêm tất cả các Cubits của hệ thống.
+/// File cấu hình chính chứa MaterialApp và tiêm các Cubits qua Service Locator (GetIt).
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -67,11 +67,39 @@ class MyApp extends StatelessWidget {
                 themeMode: _convertThemeMode(themeMode),
                 // Điều hướng bằng GoRouter
                 routerConfig: goRouter,
+                // Lắng nghe kết nối mạng toàn cục
+                builder: (context, child) {
+                  return _AppConnectivityListener(child: child);
+                },
               );
             },
           );
         },
       ),
     );
+  }
+}
+
+class _AppConnectivityListener extends StatefulWidget {
+  final Widget? child;
+  const _AppConnectivityListener({this.child});
+
+  @override
+  State<_AppConnectivityListener> createState() =>
+      _AppConnectivityListenerState();
+}
+
+class _AppConnectivityListenerState extends State<_AppConnectivityListener> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getIt<ConnectivityService>().initialize(context);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child ?? const SizedBox.shrink();
   }
 }

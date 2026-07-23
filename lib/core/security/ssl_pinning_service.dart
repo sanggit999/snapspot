@@ -87,7 +87,10 @@ class SslPinningService {
     client.badCertificateCallback =
         (X509Certificate cert, String host, int port) {
       if (kDebugMode) {
-        if (host == 'localhost' || host == '127.0.0.1' || host == '10.0.2.2') {
+        if (host == 'localhost' ||
+            host == '127.0.0.1' ||
+            host == '10.0.2.2' ||
+            host.startsWith('192.168.')) {
           return true;
         }
       }
