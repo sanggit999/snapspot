@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:snapspot/core/constants/colors.dart';
+import 'package:snapspot/core/di/service_locator.dart';
 import 'package:snapspot/core/router/app_routes.dart';
 import 'package:snapspot/core/router/routes/auth_routes.dart';
 import 'package:snapspot/core/router/routes/camera_routes.dart';
@@ -16,19 +16,14 @@ import 'package:snapspot/features/auth/presentation/blocs/auth_cubit.dart';
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Cấu hình cây định tuyến (Route Tree) của GoRouter cho toàn bộ ứng dụng SnapSpot.
-///
-/// Refactored theo chuẩn Senior Architecture:
-/// - Phân tách các tập tuyến đường (Routes) theo từng domain tính năng chuyên biệt (`lib/core/router/routes/`).
-/// - Quản lý hằng số tên đường dẫn tập trung tại `AppRoutes`.
-/// - Hỗ trợ Redirect Guard xác thực tự động và Trang 404 thân thiện.
 final goRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: AppRoutes.home,
-  
+
   // ── 1. Route Guards & Auth Redirect ─────────────────────────────────────────
   redirect: (context, state) {
-    final authCubit = context.read<AuthCubit>();
-    final isLoggedIn = authCubit.state is AuthSuccess;
+    final authState = getIt<AuthCubit>().state;
+    final isLoggedIn = authState is AuthSuccess;
     final isLoggingIn = state.matchedLocation == AppRoutes.login;
     final isRegistering = state.matchedLocation == AppRoutes.register;
 
@@ -37,7 +32,7 @@ final goRouter = GoRouter(
       return AppRoutes.login;
     }
 
-    // Đã đăng nhập nhưng truy cập Login / Register -> Chuyển về Home
+    // Đã đăng nhập nhưng truy cập màn hình Login / Register -> Chuyển về Home
     if (isLoggedIn && (isLoggingIn || isRegistering)) {
       return AppRoutes.home;
     }

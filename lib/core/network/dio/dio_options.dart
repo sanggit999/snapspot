@@ -1,16 +1,10 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:snapspot/core/config/app_config.dart';
 
+/// Class cấu hình Dio Options tự động đọc Base URL từ AppConfig (DEV / PROD)
 class DioOptionsConfig {
-  static String get defaultBaseUrl {
-    if (kIsWeb) return 'http://localhost:8000/api/v1';
-    if (Platform.isAndroid) {
-      // Android Emulator kết nối host machine qua IP 10.0.2.2
-      return 'http://10.0.2.2:8000/api/v1';
-    }
-    return 'http://localhost:8000/api/v1';
-  }
+  /// Đọc URL Base mặc định từ AppConfig
+  static String get defaultBaseUrl => AppConfig.baseUrl;
 
   static BaseOptions getOptions({String? baseUrl}) {
     return BaseOptions(

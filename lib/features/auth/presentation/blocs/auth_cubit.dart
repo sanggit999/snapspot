@@ -1,6 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:snapspot/core/usecase/usecase.dart';
 import 'package:snapspot/features/auth/domain/entities/user_entity.dart';
 import 'package:snapspot/features/auth/domain/repositories/auth_repository.dart';
+import 'package:snapspot/features/auth/domain/usecases/check_auth_status_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/login_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/register_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/update_profile_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/change_password_usecase.dart';
 
 // --- STATES ---
 abstract class AuthState {
@@ -31,15 +38,39 @@ class AuthFailure extends AuthState {
 
 // --- CUBIT ---
 class AuthCubit extends Cubit<AuthState> {
-  final AuthRepository _authRepository;
+  final LoginUseCase loginUseCase;
+  final RegisterUseCase registerUseCase;
+  final CheckAuthStatusUseCase checkAuthStatusUseCase;
+  final LogoutUseCase logoutUseCase;
+  final UpdateProfileUseCase updateProfileUseCase;
+  final ChangePasswordUseCase changePasswordUseCase;
 
-  AuthCubit(this._authRepository) : super(const AuthInitial()) {
+  AuthCubit({
+    required this.loginUseCase,
+    required this.registerUseCase,
+    required this.checkAuthStatusUseCase,
+    required this.logoutUseCase,
+    required this.updateProfileUseCase,
+    required this.changePasswordUseCase,
+  }) : super(const AuthInitial()) {
     checkAuthStatus();
+  }
+
+  /// Constructor phụ hỗ trợ khởi tạo trực tiếp từ AuthRepository nếu cần
+  factory AuthCubit.fromRepository(AuthRepository repository) {
+    return AuthCubit(
+      loginUseCase: LoginUseCase(repository),
+      registerUseCase: RegisterUseCase(repository),
+      checkAuthStatusUseCase: CheckAuthStatusUseCase(repository),
+      logoutUseCase: LogoutUseCase(repository),
+      updateProfileUseCase: UpdateProfileUseCase(repository),
+      changePasswordUseCase: ChangePasswordUseCase(repository),
+    );
   }
 
   /// Kiểm tra xem người dùng đã đăng nhập trước đó chưa
   void checkAuthStatus() async {
-    final result = await _authRepository.checkAuthStatus();
+    final result = await checkAuthStatusUseCase(const NoParams());
     result.fold(
       (failure) => emit(const AuthInitial()),
       (user) {
@@ -52,10 +83,12 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  /// Xử lý đăng nhập bằng email và mật khẩu
-  Future<void> login(String email, String password) async {
+  /// Xử lý đăng nhập bằng email/username và mật khẩu
+  Future<void> login(String emailOrUsername, String password) async {
     emit(const AuthLoading());
-    final result = await _authRepository.login(email, password);
+    final result = await loginUseCase(
+      LoginParams(emailOrUsername: emailOrUsername, password: password),
+    );
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
       (user) => emit(AuthSuccess(user)),
@@ -65,7 +98,9 @@ class AuthCubit extends Cubit<AuthState> {
   /// Xử lý đăng ký tài khoản mới
   Future<void> register(String username, String email, String password) async {
     emit(const AuthLoading());
-    final result = await _authRepository.register(username, email, password);
+    final result = await registerUseCase(
+      RegisterParams(username: username, email: email, password: password),
+    );
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
       (user) => emit(AuthSuccess(user)),
@@ -75,7 +110,7 @@ class AuthCubit extends Cubit<AuthState> {
   /// Đăng xuất khỏi hệ thống
   Future<void> logout() async {
     emit(const AuthLoading());
-    final result = await _authRepository.logout();
+    final result = await logoutUseCase(const NoParams());
     result.fold(
       (failure) => emit(const AuthInitial()),
       (_) => emit(const AuthInitial()),
@@ -92,22 +127,21 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     final currentState = state;
     if (currentState is AuthSuccess) {
-      final result = await _authRepository.updateProfile(
-        userId: currentState.currentUser.id,
-        fullName: fullName,
-        username: username,
-        bio: bio,
-        isPrivate: isPrivate,
-        avatarUrl: avatarUrl,
+      final result = await updateProfileUseCase(
+        UpdateProfileParams(
+          userId: currentState.currentUser.id,
+          fullName: fullName,
+          username: username,
+          bio: bio,
+          isPrivate: isPrivate,
+          avatarUrl: avatarUrl,
+        ),
       );
 
       return result.fold(
-        (failure) {
-          // Vẫn giữ lại trạng thái cũ
-          return false;
-        },
+        (failure) => false,
         (updatedUser) {
-          emit(AuthSuccess(updatedUser)); // Phát trạng thái mới chứa user mới cập nhật
+          emit(AuthSuccess(updatedUser));
           return true;
         },
       );
@@ -116,17 +150,18 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Đổi mật khẩu của người dùng đang đăng nhập
-  /// Trả về null nếu thành công, hoặc trả về thông báo lỗi nếu thất bại.
   Future<String?> changeUserPassword({
     required String oldPassword,
     required String newPassword,
   }) async {
     final currentState = state;
     if (currentState is AuthSuccess) {
-      final result = await _authRepository.changePassword(
-        userId: currentState.currentUser.id,
-        oldPassword: oldPassword,
-        newPassword: newPassword,
+      final result = await changePasswordUseCase(
+        ChangePasswordParams(
+          userId: currentState.currentUser.id,
+          oldPassword: oldPassword,
+          newPassword: newPassword,
+        ),
       );
 
       return result.fold(

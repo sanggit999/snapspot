@@ -104,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Đăng ký để khám phá các địa điểm check-in hấp dẫn',
+                    context.tr('register_subtitle'),
                     style: TextStyle(
                       fontSize: 14.5,
                       color: isLight

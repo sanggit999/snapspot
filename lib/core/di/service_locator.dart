@@ -1,10 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:snapspot/core/network/services/storage_service.dart';
+import 'package:snapspot/core/network/services/connectivity_service.dart';
 import 'package:snapspot/core/network/dio/dio_factory.dart';
 import 'package:snapspot/core/network/dio/dio_client.dart';
 import 'package:snapspot/features/auth/domain/repositories/auth_repository.dart';
 import 'package:snapspot/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:snapspot/features/auth/domain/usecases/login_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/register_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/check_auth_status_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/update_profile_usecase.dart';
+import 'package:snapspot/features/auth/domain/usecases/change_password_usecase.dart';
 import 'package:snapspot/features/feed/domain/repositories/feed_repository.dart';
 import 'package:snapspot/features/feed/data/repositories/feed_repository_impl.dart';
 import 'package:snapspot/features/map/domain/repositories/map_repository.dart';
@@ -27,6 +34,7 @@ final GetIt getIt = GetIt.instance;
 void setupServiceLocator() {
   // 1. Core Network & Storage Services (Singletons)
   getIt.registerLazySingleton<StorageService>(() => StorageService());
+  getIt.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
   getIt.registerLazySingleton<DioFactory>(() => DioFactory(getIt<StorageService>()));
   getIt.registerLazySingleton<Dio>(() => getIt<DioFactory>().createDio());
   getIt.registerLazySingleton<DioClient>(() => DioClient(getIt<Dio>()));
@@ -43,11 +51,30 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<MapRepository>(() => MapRepositoryImpl());
   getIt.registerLazySingleton<ChatRepository>(() => ChatRepositoryImpl());
 
-  // 3. Đăng ký các Cubits
+  // 3. Đăng ký các UseCases (Lazy Singletons)
+  getIt.registerLazySingleton<LoginUseCase>(() => LoginUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<RegisterUseCase>(() => RegisterUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<CheckAuthStatusUseCase>(() => CheckAuthStatusUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<LogoutUseCase>(() => LogoutUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<UpdateProfileUseCase>(() => UpdateProfileUseCase(getIt<AuthRepository>()));
+  getIt.registerLazySingleton<ChangePasswordUseCase>(() => ChangePasswordUseCase(getIt<AuthRepository>()));
+
+  // 4. Đăng ký các Cubits (AuthCubit là LazySingleton duy nhất quản lý trạng thái Auth toàn app)
   getIt.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
   getIt.registerLazySingleton<LanguageCubit>(() => LanguageCubit());
   getIt.registerLazySingleton<CollectionsCubit>(() => CollectionsCubit()..fetchCollections());
-  getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepository>()));
+
+  getIt.registerLazySingleton<AuthCubit>(
+    () => AuthCubit(
+      loginUseCase: getIt<LoginUseCase>(),
+      registerUseCase: getIt<RegisterUseCase>(),
+      checkAuthStatusUseCase: getIt<CheckAuthStatusUseCase>(),
+      logoutUseCase: getIt<LogoutUseCase>(),
+      updateProfileUseCase: getIt<UpdateProfileUseCase>(),
+      changePasswordUseCase: getIt<ChangePasswordUseCase>(),
+    ),
+  );
+
   getIt.registerFactory<FeedCubit>(() => FeedCubit(getIt<FeedRepository>()));
   getIt.registerFactory<MapCubit>(() => MapCubit(getIt<MapRepository>()));
   getIt.registerFactory<ChatCubit>(() => ChatCubit(getIt<ChatRepository>()));
